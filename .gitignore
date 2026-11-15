@@ -1,0 +1,8 @@
+/dist/
+/.tmp-*/
+/data/
+/config.json
+/literouter
+/literouter.exe
+/*.log
+.env
