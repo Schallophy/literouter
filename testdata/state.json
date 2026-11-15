@@ -1,0 +1,5692 @@
+{
+  "version": 2,
+  "models": {
+    "qianwenai/deepseek-v4.1-flash-1017": {
+      "code": "qianwenai/deepseek-v4.1-flash-1017",
+      "family": "Other",
+      "health": "alive",
+      "reason": null,
+      "lastErrorCode": null,
+      "lastStatusCode": null,
+      "lastErrorMessage": null,
+      "checkedAt": "2026-11-12T14:18:54.470Z",
+      "lastUsedAt": "2026-11-12T14:18:54.470Z",
+      "promptTokens": 445617557,
+      "cachedPromptTokens": 437118976,
+      "cacheTrackedPromptTokens": 445617557,
+      "completionTokens": 1838170,
+      "cost": 105.08026720000014,
+      "costBreakdown": {
+        "input": 15.69763082048988,
+        "cachedInput": 76.10256587784787,
+        "output": 13.280070501662351,
+        "cacheSaved": 684.9230929006267,
+        "estimated": true
+      },
+      "requests": 3163,
+      "failures": 23,
+      "throttledUntil": null
+    },
+    "opencode-console/deepseek-v4.1-flash-free": {
+      "code": "opencode-console/deepseek-v4.1-flash-free",
+      "family": "Other",
+      "health": "unknown",
+      "reason": null,
+      "lastErrorCode": "FreeUsageLimitError",
+      "lastStatusCode": 429,
+      "lastErrorMessage": "Free usage limit reached. Free models work in OpenCode (https://opencode.ai); subscribe to OpenCode Go to keep going: https://opencode.ai/go",
+      "checkedAt": null,
+      "lastUsedAt": null,
+      "promptTokens": 0,
+      "cachedPromptTokens": 0,
+      "cacheTrackedPromptTokens": 0,
+      "completionTokens": 0,
+      "cost": 0,
+      "costBreakdown": {
+        "input": 0,
+        "cachedInput": 0,
+        "output": 0,
+        "cacheSaved": 0,
+        "estimated": false
+      },
+      "requests": 0,
+      "failures": 186,
+      "throttledUntil": "2026-11-12T14:20:51.284Z"
+    },
+    "openrouter/nvidia/nemotron-3.5-super-vl:free": {
+      "code": "openrouter/nvidia/nemotron-3.5-super-vl:free",
+      "family": "Other",
+      "health": "alive",
+      "reason": null,
+      "lastErrorCode": null,
+      "lastStatusCode": null,
+      "lastErrorMessage": null,
+      "checkedAt": "2026-11-12T13:21:21.972Z",
+      "lastUsedAt": "2026-11-12T13:21:21.972Z",
+      "promptTokens": 9669020,
+      "cachedPromptTokens": 8667664,
+      "cacheTrackedPromptTokens": 9669020,
+      "completionTokens": 87442,
+      "cost": 0,
+      "costBreakdown": {
+        "input": 0,
+        "cachedInput": 0,
+        "output": 0,
+        "cacheSaved": 0,
+        "estimated": false
+      },
+      "requests": 90,
+      "failures": 135,
+      "throttledUntil": null
+    }
+  },
+  "callers": {
+    "354370a4796c0ba4": {
+      "id": "354370a4796c0ba4",
+      "label": "opencode",
+      "requests": 2146,
+      "failures": 13,
+      "failovers": 318,
+      "promptTokens": 356967359,
+      "cachedPromptTokens": 352067248,
+      "cacheTrackedPromptTokens": 356967359,
+      "completionTokens": 1140339,
+      "cost": 72.88845600000009,
+      "costBreakdown": {
+        "input": 7.568294820489882,
+        "cachedInput": 57.866866677847895,
+        "output": 7.4532945016623415,
+        "cacheSaved": 520.8018001006311,
+        "estimated": true
+      },
+      "firstSeenAt": "2026-11-10T18:03:05.161Z",
+      "lastSeenAt": "2026-11-12T14:18:54.470Z",
+      "lastModel": "qianwenai/deepseek-v4.1-flash-1017",
+      "lastApi": "chat",
+      "models": {
+        "qianwenai/deepseek-v4.1-flash-1017": {
+          "model": "qianwenai/deepseek-v4.1-flash-1017",
+          "attempts": 2058,
+          "requests": 2050,
+          "failures": 8,
+          "promptTokens": 350374393,
+          "cachedPromptTokens": 345940480,
+          "cacheTrackedPromptTokens": 350374393,
+          "completionTokens": 1109823,
+          "cost": 72.88845600000009,
+          "costBreakdown": {
+            "input": 7.568294820489882,
+            "cachedInput": 57.866866677847895,
+            "output": 7.4532945016623415,
+            "cacheSaved": 520.8018001006311,
+            "estimated": true
+          },
+          "firstSeenAt": "2026-11-11T07:48:33.278Z",
+          "lastSeenAt": "2026-11-12T14:18:54.470Z",
+          "lastApi": "chat"
+        },
+        "openrouter/nvidia/nemotron-3.5-super-vl:free": {
+          "model": "openrouter/nvidia/nemotron-3.5-super-vl:free",
+          "attempts": 176,
+          "requests": 43,
+          "failures": 133,
+          "promptTokens": 6592966,
+          "cachedPromptTokens": 6126768,
+          "cacheTrackedPromptTokens": 6592966,
+          "completionTokens": 30516,
+          "cost": 0,
+          "costBreakdown": {
+            "input": 0,
+            "cachedInput": 0,
+            "output": 0,
+            "cacheSaved": 0,
+            "estimated": false
+          },
+          "firstSeenAt": "2026-11-11T03:38:14.260Z",
+          "lastSeenAt": "2026-11-12T08:23:13.183Z",
+          "lastApi": "chat"
+        }
+      }
+    },
+    "a9065894702e67a2": {
+      "id": "a9065894702e67a2",
+      "label": "qoder",
+      "requests": 1170,
+      "failures": 8,
+      "failovers": 12,
+      "promptTokens": 98319218,
+      "cachedPromptTokens": 93719392,
+      "cacheTrackedPromptTokens": 98319218,
+      "completionTokens": 785273,
+      "cost": 32.19181120000003,
+      "costBreakdown": {
+        "input": 8.129336000000011,
+        "cachedInput": 18.235699199999996,
+        "output": 5.826775999999995,
+        "cacheSaved": 164.1212928000004,
+        "estimated": false
+      },
+      "firstSeenAt": "2026-11-12T08:03:05.661Z",
+      "lastSeenAt": "2026-11-12T13:23:54.286Z",
+      "lastModel": "qianwenai/deepseek-v4.1-flash-1017",
+      "lastApi": "chat",
+      "models": {
+        "opencode-console/deepseek-v4.1-flash-free": {
+          "model": "opencode-console/deepseek-v4.1-flash-free",
+          "attempts": 5,
+          "requests": 0,
+          "failures": 5,
+          "promptTokens": 0,
+          "cachedPromptTokens": 0,
+          "cacheTrackedPromptTokens": 0,
+          "completionTokens": 0,
+          "cost": 0,
+          "costBreakdown": {
+            "input": 0,
+            "cachedInput": 0,
+            "output": 0,
+            "cacheSaved": 0,
+            "estimated": false
+          },
+          "firstSeenAt": "2026-11-12T08:03:05.661Z",
+          "lastSeenAt": "2026-11-12T13:20:55.856Z",
+          "lastApi": "chat"
+        },
+        "openrouter/nvidia/nemotron-3.5-super-vl:free": {
+          "model": "openrouter/nvidia/nemotron-3.5-super-vl:free",
+          "attempts": 49,
+          "requests": 47,
+          "failures": 2,
+          "promptTokens": 3076054,
+          "cachedPromptTokens": 2540896,
+          "cacheTrackedPromptTokens": 3076054,
+          "completionTokens": 56926,
+          "cost": 0,
+          "costBreakdown": {
+            "input": 0,
+            "cachedInput": 0,
+            "output": 0,
+            "cacheSaved": 0,
+            "estimated": false
+          },
+          "firstSeenAt": "2026-11-12T08:04:05.679Z",
+          "lastSeenAt": "2026-11-12T13:21:21.972Z",
+          "lastApi": "chat"
+        },
+        "qianwenai/deepseek-v4.1-flash-1017": {
+          "model": "qianwenai/deepseek-v4.1-flash-1017",
+          "attempts": 1126,
+          "requests": 1113,
+          "failures": 13,
+          "promptTokens": 95243164,
+          "cachedPromptTokens": 91178496,
+          "cacheTrackedPromptTokens": 95243164,
+          "completionTokens": 728347,
+          "cost": 32.19181120000003,
+          "costBreakdown": {
+            "input": 8.129336000000011,
+            "cachedInput": 18.235699199999996,
+            "output": 5.826775999999995,
+            "cacheSaved": 164.1212928000004,
+            "estimated": false
+          },
+          "firstSeenAt": "2026-11-12T08:20:34.993Z",
+          "lastSeenAt": "2026-11-12T13:23:54.286Z",
+          "lastApi": "chat"
+        }
+      }
+    },
+    "console": {
+      "id": "console",
+      "label": "看板自测",
+      "requests": 2,
+      "failures": 2,
+      "failovers": 0,
+      "promptTokens": 0,
+      "cachedPromptTokens": 0,
+      "cacheTrackedPromptTokens": 0,
+      "completionTokens": 0,
+      "cost": 0,
+      "costBreakdown": {
+        "input": 0,
+        "cachedInput": 0,
+        "output": 0,
+        "cacheSaved": 0,
+        "estimated": false
+      },
+      "firstSeenAt": "2026-11-12T08:23:41.980Z",
+      "lastSeenAt": "2026-11-12T08:23:58.839Z",
+      "lastModel": null,
+      "lastApi": "chat",
+      "models": {
+        "qianwenai/deepseek-v4.1-flash-1017": {
+          "model": "qianwenai/deepseek-v4.1-flash-1017",
+          "attempts": 2,
+          "requests": 0,
+          "failures": 2,
+          "promptTokens": 0,
+          "cachedPromptTokens": 0,
+          "cacheTrackedPromptTokens": 0,
+          "completionTokens": 0,
+          "cost": 0,
+          "costBreakdown": {
+            "input": 0,
+            "cachedInput": 0,
+            "output": 0,
+            "cacheSaved": 0,
+            "estimated": false
+          },
+          "firstSeenAt": "2026-11-12T08:23:41.980Z",
+          "lastSeenAt": "2026-11-12T08:23:58.839Z",
+          "lastApi": "chat"
+        }
+      }
+    }
+  },
+  "calibration": {
+    "qianwenai/deepseek-v4.1-flash-1017": {
+      "plain": {
+        "ratio": 0.9380836679749529,
+        "samples": 343
+      },
+      "tools": {
+        "ratio": 1.2785046268921776,
+        "samples": 2546
+      }
+    },
+    "openrouter/nvidia/nemotron-3.5-super-vl:free": {
+      "plain": {
+        "ratio": 1.0646719103443751,
+        "samples": 17
+      },
+      "tools": {
+        "ratio": 1.2640202386404438,
+        "samples": 70
+      }
+    }
+  },
+  "catalog": {
+    "fetchedAt": "2026-11-11T01:51:05.090Z",
+    "models": [
+      {
+        "code": "opencode-console/claude-fable-5",
+        "upstream": "claude-fable-5",
+        "family": "Claude",
+        "provider": "opencode-console"
+      },
+      {
+        "code": "opencode-console/claude-fable-5-1",
+        "upstream": "claude-fable-5-1",
+        "family": "Claude",
+        "provider": "opencode-console"
+      },
+      {
+        "code": "opencode-console/claude-fable-5-2",
+        "upstream": "claude-fable-5-2",
+        "family": "Claude",
+        "provider": "opencode-console"
+      },
+      {
+        "code": "opencode-console/claude-haiku-4-5",
+        "upstream": "claude-haiku-4-5",
+        "family": "Claude",
+        "provider": "opencode-console"
+      },
+      {
+        "code": "opencode-console/claude-haiku-5-5",
+        "upstream": "claude-haiku-5-5",
+        "family": "Claude",
+        "provider": "opencode-console"
+      },
+      {
+        "code": "opencode-console/claude-opus-4-5",
+        "upstream": "claude-opus-4-5",
+        "family": "Claude",
+        "provider": "opencode-console"
+      },
+      {
+        "code": "opencode-console/claude-opus-4-6",
+        "upstream": "claude-opus-4-6",
+        "family": "Claude",
+        "provider": "opencode-console"
+      },
+      {
+        "code": "opencode-console/claude-opus-4-7",
+        "upstream": "claude-opus-4-7",
+        "family": "Claude",
+        "provider": "opencode-console"
+      },
+      {
+        "code": "opencode-console/claude-opus-4-8",
+        "upstream": "claude-opus-4-8",
+        "family": "Claude",
+        "provider": "opencode-console"
+      },
+      {
+        "code": "opencode-console/claude-opus-5",
+        "upstream": "claude-opus-5",
+        "family": "Claude",
+        "provider": "opencode-console"
+      },
+      {
+        "code": "opencode-console/claude-opus-5-5",
+        "upstream": "claude-opus-5-5",
+        "family": "Claude",
+        "provider": "opencode-console"
+      },
+      {
+        "code": "opencode-console/claude-sonnet-4-5",
+        "upstream": "claude-sonnet-4-5",
+        "family": "Claude",
+        "provider": "opencode-console"
+      },
+      {
+        "code": "opencode-console/claude-sonnet-4-6",
+        "upstream": "claude-sonnet-4-6",
+        "family": "Claude",
+        "provider": "opencode-console"
+      },
+      {
+        "code": "opencode-console/claude-sonnet-5",
+        "upstream": "claude-sonnet-5",
+        "family": "Claude",
+        "provider": "opencode-console"
+      },
+      {
+        "code": "opencode-console/claude-sonnet-5-5",
+        "upstream": "claude-sonnet-5-5",
+        "family": "Claude",
+        "provider": "opencode-console"
+      },
+      {
+        "code": "dashscope/deepseek-r1-distill-llama-70b",
+        "upstream": "deepseek-r1-distill-llama-70b",
+        "family": "DeepSeek",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/deepseek-r1-distill-qwen-1.5b",
+        "upstream": "deepseek-r1-distill-qwen-1.5b",
+        "family": "DeepSeek",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/deepseek-v4-flash-0731",
+        "upstream": "deepseek-v4-flash-0731",
+        "family": "DeepSeek",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/deepseek-v4-pro",
+        "upstream": "deepseek-v4-pro",
+        "family": "DeepSeek",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/deepseek-v4-pro-0813",
+        "upstream": "deepseek-v4-pro-0813",
+        "family": "DeepSeek",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/deepseek-v4.1-flash",
+        "upstream": "deepseek-v4.1-flash",
+        "family": "DeepSeek",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/deepseek-v4.1-flash-1017",
+        "upstream": "deepseek-v4.1-flash-1017",
+        "family": "DeepSeek",
+        "provider": "dashscope"
+      },
+      {
+        "code": "opencode-console/deepseek-v4-pro",
+        "upstream": "deepseek-v4-pro",
+        "family": "DeepSeek",
+        "provider": "opencode-console"
+      },
+      {
+        "code": "opencode-console/deepseek-v4.1-flash",
+        "upstream": "deepseek-v4.1-flash",
+        "family": "DeepSeek",
+        "provider": "opencode-console"
+      },
+      {
+        "code": "opencode-console/deepseek-v4.1-flash-free",
+        "upstream": "deepseek-v4.1-flash-free",
+        "family": "DeepSeek",
+        "provider": "opencode-console"
+      },
+      {
+        "code": "openrouter/deepseek/deepseek-chat",
+        "upstream": "deepseek/deepseek-chat",
+        "family": "DeepSeek",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/deepseek/deepseek-chat-v3-0324",
+        "upstream": "deepseek/deepseek-chat-v3-0324",
+        "family": "DeepSeek",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/deepseek/deepseek-chat-v3.1",
+        "upstream": "deepseek/deepseek-chat-v3.1",
+        "family": "DeepSeek",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/deepseek/deepseek-r1-0528",
+        "upstream": "deepseek/deepseek-r1-0528",
+        "family": "DeepSeek",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/deepseek/deepseek-v3.1-terminus",
+        "upstream": "deepseek/deepseek-v3.1-terminus",
+        "family": "DeepSeek",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/deepseek/deepseek-v3.2",
+        "upstream": "deepseek/deepseek-v3.2",
+        "family": "DeepSeek",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/deepseek/deepseek-v3.2-exp",
+        "upstream": "deepseek/deepseek-v3.2-exp",
+        "family": "DeepSeek",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/deepseek/deepseek-v4-flash",
+        "upstream": "deepseek/deepseek-v4-flash",
+        "family": "DeepSeek",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/deepseek/deepseek-v4-flash-0731",
+        "upstream": "deepseek/deepseek-v4-flash-0731",
+        "family": "DeepSeek",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/deepseek/deepseek-v4-flash-0731:batch",
+        "upstream": "deepseek/deepseek-v4-flash-0731:batch",
+        "family": "DeepSeek",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/deepseek/deepseek-v4-flash-vision-exp",
+        "upstream": "deepseek/deepseek-v4-flash-vision-exp",
+        "family": "DeepSeek",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/deepseek/deepseek-v4-pro",
+        "upstream": "deepseek/deepseek-v4-pro",
+        "family": "DeepSeek",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/deepseek/deepseek-v4-pro-0813",
+        "upstream": "deepseek/deepseek-v4-pro-0813",
+        "family": "DeepSeek",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/deepseek/deepseek-v4.1-flash",
+        "upstream": "deepseek/deepseek-v4.1-flash",
+        "family": "DeepSeek",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/deepseek/deepseek-v4.1-flash-1017",
+        "upstream": "deepseek/deepseek-v4.1-flash-1017",
+        "family": "DeepSeek",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/deepseek/deepseek-v4.1-flash-1017:batch",
+        "upstream": "deepseek/deepseek-v4.1-flash-1017:batch",
+        "family": "DeepSeek",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/deepseek/deepseek-v4.1-flash:batch",
+        "upstream": "deepseek/deepseek-v4.1-flash:batch",
+        "family": "DeepSeek",
+        "provider": "openrouter"
+      },
+      {
+        "code": "qianwenai/deepseek-r1-distill-llama-70b",
+        "upstream": "deepseek-r1-distill-llama-70b",
+        "family": "DeepSeek",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/deepseek-r1-distill-qwen-1.5b",
+        "upstream": "deepseek-r1-distill-qwen-1.5b",
+        "family": "DeepSeek",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/deepseek-v4-flash-0731",
+        "upstream": "deepseek-v4-flash-0731",
+        "family": "DeepSeek",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/deepseek-v4-pro",
+        "upstream": "deepseek-v4-pro",
+        "family": "DeepSeek",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/deepseek-v4-pro-0813",
+        "upstream": "deepseek-v4-pro-0813",
+        "family": "DeepSeek",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/deepseek-v4.1-flash",
+        "upstream": "deepseek-v4.1-flash",
+        "family": "DeepSeek",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/deepseek-v4.1-flash-1017",
+        "upstream": "deepseek-v4.1-flash-1017",
+        "family": "DeepSeek",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "opencode-console/gemini-3.5-flash",
+        "upstream": "gemini-3.5-flash",
+        "family": "Gemini",
+        "provider": "opencode-console"
+      },
+      {
+        "code": "opencode-console/gemini-3.5-flash-lite",
+        "upstream": "gemini-3.5-flash-lite",
+        "family": "Gemini",
+        "provider": "opencode-console"
+      },
+      {
+        "code": "opencode-console/gemini-3.6-flash",
+        "upstream": "gemini-3.6-flash",
+        "family": "Gemini",
+        "provider": "opencode-console"
+      },
+      {
+        "code": "opencode-console/gemini-3.7-flash",
+        "upstream": "gemini-3.7-flash",
+        "family": "Gemini",
+        "provider": "opencode-console"
+      },
+      {
+        "code": "opencode-console/gemini-3.8-flash",
+        "upstream": "gemini-3.8-flash",
+        "family": "Gemini",
+        "provider": "opencode-console"
+      },
+      {
+        "code": "opencode-console/gemini-4-argon",
+        "upstream": "gemini-4-argon",
+        "family": "Gemini",
+        "provider": "opencode-console"
+      },
+      {
+        "code": "opencode-console/gemini-4-carbon",
+        "upstream": "gemini-4-carbon",
+        "family": "Gemini",
+        "provider": "opencode-console"
+      },
+      {
+        "code": "dashscope/glm-5",
+        "upstream": "glm-5",
+        "family": "GLM",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/glm-5.1",
+        "upstream": "glm-5.1",
+        "family": "GLM",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/glm-5.2",
+        "upstream": "glm-5.2",
+        "family": "GLM",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/glm-5.2-fast-preview",
+        "upstream": "glm-5.2-fast-preview",
+        "family": "GLM",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/glm-5.3",
+        "upstream": "glm-5.3",
+        "family": "GLM",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/glm-5.3-prime",
+        "upstream": "glm-5.3-prime",
+        "family": "GLM",
+        "provider": "dashscope"
+      },
+      {
+        "code": "opencode-console/glm-5",
+        "upstream": "glm-5",
+        "family": "GLM",
+        "provider": "opencode-console"
+      },
+      {
+        "code": "opencode-console/glm-5.1",
+        "upstream": "glm-5.1",
+        "family": "GLM",
+        "provider": "opencode-console"
+      },
+      {
+        "code": "opencode-console/glm-5.2",
+        "upstream": "glm-5.2",
+        "family": "GLM",
+        "provider": "opencode-console"
+      },
+      {
+        "code": "opencode-console/glm-5.3",
+        "upstream": "glm-5.3",
+        "family": "GLM",
+        "provider": "opencode-console"
+      },
+      {
+        "code": "opencode-console/glm-5.3-flash",
+        "upstream": "glm-5.3-flash",
+        "family": "GLM",
+        "provider": "opencode-console"
+      },
+      {
+        "code": "opencode-console/glm-5.3-flash-free",
+        "upstream": "glm-5.3-flash-free",
+        "family": "GLM",
+        "provider": "opencode-console"
+      },
+      {
+        "code": "qianwenai/glm-5",
+        "upstream": "glm-5",
+        "family": "GLM",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/glm-5.1",
+        "upstream": "glm-5.1",
+        "family": "GLM",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/glm-5.2",
+        "upstream": "glm-5.2",
+        "family": "GLM",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/glm-5.2-fast-preview",
+        "upstream": "glm-5.2-fast-preview",
+        "family": "GLM",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/glm-5.3",
+        "upstream": "glm-5.3",
+        "family": "GLM",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/glm-5.3-prime",
+        "upstream": "glm-5.3-prime",
+        "family": "GLM",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "opencode-console/gpt-5",
+        "upstream": "gpt-5",
+        "family": "GPT",
+        "provider": "opencode-console"
+      },
+      {
+        "code": "opencode-console/gpt-5-codex",
+        "upstream": "gpt-5-codex",
+        "family": "GPT",
+        "provider": "opencode-console"
+      },
+      {
+        "code": "opencode-console/gpt-5-nano",
+        "upstream": "gpt-5-nano",
+        "family": "GPT",
+        "provider": "opencode-console"
+      },
+      {
+        "code": "opencode-console/gpt-5.1",
+        "upstream": "gpt-5.1",
+        "family": "GPT",
+        "provider": "opencode-console"
+      },
+      {
+        "code": "opencode-console/gpt-5.1-codex",
+        "upstream": "gpt-5.1-codex",
+        "family": "GPT",
+        "provider": "opencode-console"
+      },
+      {
+        "code": "opencode-console/gpt-5.1-codex-max",
+        "upstream": "gpt-5.1-codex-max",
+        "family": "GPT",
+        "provider": "opencode-console"
+      },
+      {
+        "code": "opencode-console/gpt-5.1-codex-mini",
+        "upstream": "gpt-5.1-codex-mini",
+        "family": "GPT",
+        "provider": "opencode-console"
+      },
+      {
+        "code": "opencode-console/gpt-5.2",
+        "upstream": "gpt-5.2",
+        "family": "GPT",
+        "provider": "opencode-console"
+      },
+      {
+        "code": "opencode-console/gpt-5.2-codex",
+        "upstream": "gpt-5.2-codex",
+        "family": "GPT",
+        "provider": "opencode-console"
+      },
+      {
+        "code": "opencode-console/gpt-5.3-codex",
+        "upstream": "gpt-5.3-codex",
+        "family": "GPT",
+        "provider": "opencode-console"
+      },
+      {
+        "code": "opencode-console/gpt-5.3-codex-spark",
+        "upstream": "gpt-5.3-codex-spark",
+        "family": "GPT",
+        "provider": "opencode-console"
+      },
+      {
+        "code": "opencode-console/gpt-5.4",
+        "upstream": "gpt-5.4",
+        "family": "GPT",
+        "provider": "opencode-console"
+      },
+      {
+        "code": "opencode-console/gpt-5.4-mini",
+        "upstream": "gpt-5.4-mini",
+        "family": "GPT",
+        "provider": "opencode-console"
+      },
+      {
+        "code": "opencode-console/gpt-5.4-nano",
+        "upstream": "gpt-5.4-nano",
+        "family": "GPT",
+        "provider": "opencode-console"
+      },
+      {
+        "code": "opencode-console/gpt-5.4-pro",
+        "upstream": "gpt-5.4-pro",
+        "family": "GPT",
+        "provider": "opencode-console"
+      },
+      {
+        "code": "opencode-console/gpt-5.5",
+        "upstream": "gpt-5.5",
+        "family": "GPT",
+        "provider": "opencode-console"
+      },
+      {
+        "code": "opencode-console/gpt-5.5-pro",
+        "upstream": "gpt-5.5-pro",
+        "family": "GPT",
+        "provider": "opencode-console"
+      },
+      {
+        "code": "opencode-console/gpt-5.6-luna",
+        "upstream": "gpt-5.6-luna",
+        "family": "GPT",
+        "provider": "opencode-console"
+      },
+      {
+        "code": "opencode-console/gpt-5.6-sol",
+        "upstream": "gpt-5.6-sol",
+        "family": "GPT",
+        "provider": "opencode-console"
+      },
+      {
+        "code": "opencode-console/gpt-5.6-terra",
+        "upstream": "gpt-5.6-terra",
+        "family": "GPT",
+        "provider": "opencode-console"
+      },
+      {
+        "code": "opencode-console/gpt-6-astra",
+        "upstream": "gpt-6-astra",
+        "family": "GPT",
+        "provider": "opencode-console"
+      },
+      {
+        "code": "opencode-console/gpt-6-luna",
+        "upstream": "gpt-6-luna",
+        "family": "GPT",
+        "provider": "opencode-console"
+      },
+      {
+        "code": "opencode-console/gpt-6-sol",
+        "upstream": "gpt-6-sol",
+        "family": "GPT",
+        "provider": "opencode-console"
+      },
+      {
+        "code": "opencode-console/gpt-6.1-sol",
+        "upstream": "gpt-6.1-sol",
+        "family": "GPT",
+        "provider": "opencode-console"
+      },
+      {
+        "code": "dashscope/kimi-k2.5",
+        "upstream": "kimi-k2.5",
+        "family": "Kimi",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/kimi-k2.6",
+        "upstream": "kimi-k2.6",
+        "family": "Kimi",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/kimi-k2.7-code",
+        "upstream": "kimi-k2.7-code",
+        "family": "Kimi",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/kimi-k3",
+        "upstream": "kimi-k3",
+        "family": "Kimi",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/kimi-k3.1-pro",
+        "upstream": "kimi-k3.1-pro",
+        "family": "Kimi",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/kimi/kimi-k2.6",
+        "upstream": "kimi/kimi-k2.6",
+        "family": "Kimi",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/kimi/kimi-k2.7-code",
+        "upstream": "kimi/kimi-k2.7-code",
+        "family": "Kimi",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/kimi/kimi-k2.7-code-highspeed",
+        "upstream": "kimi/kimi-k2.7-code-highspeed",
+        "family": "Kimi",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/kimi/kimi-k2.8-preview",
+        "upstream": "kimi/kimi-k2.8-preview",
+        "family": "Kimi",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/kimi/kimi-k3",
+        "upstream": "kimi/kimi-k3",
+        "family": "Kimi",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/kimi/kimi-k3.1-pro",
+        "upstream": "kimi/kimi-k3.1-pro",
+        "family": "Kimi",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/kimi/kimi-k3.1-pro-highspeed",
+        "upstream": "kimi/kimi-k3.1-pro-highspeed",
+        "family": "Kimi",
+        "provider": "dashscope"
+      },
+      {
+        "code": "opencode-console/kimi-k2.5",
+        "upstream": "kimi-k2.5",
+        "family": "Kimi",
+        "provider": "opencode-console"
+      },
+      {
+        "code": "opencode-console/kimi-k2.6",
+        "upstream": "kimi-k2.6",
+        "family": "Kimi",
+        "provider": "opencode-console"
+      },
+      {
+        "code": "opencode-console/kimi-k2.7-code",
+        "upstream": "kimi-k2.7-code",
+        "family": "Kimi",
+        "provider": "opencode-console"
+      },
+      {
+        "code": "opencode-console/kimi-k3",
+        "upstream": "kimi-k3",
+        "family": "Kimi",
+        "provider": "opencode-console"
+      },
+      {
+        "code": "qianwenai/kimi-k2.5",
+        "upstream": "kimi-k2.5",
+        "family": "Kimi",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/kimi-k2.6",
+        "upstream": "kimi-k2.6",
+        "family": "Kimi",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/kimi-k2.7-code",
+        "upstream": "kimi-k2.7-code",
+        "family": "Kimi",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/kimi-k3",
+        "upstream": "kimi-k3",
+        "family": "Kimi",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/kimi-k3.1-pro",
+        "upstream": "kimi-k3.1-pro",
+        "family": "Kimi",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/kimi/kimi-k2.6",
+        "upstream": "kimi/kimi-k2.6",
+        "family": "Kimi",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/kimi/kimi-k2.7-code",
+        "upstream": "kimi/kimi-k2.7-code",
+        "family": "Kimi",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/kimi/kimi-k2.7-code-highspeed",
+        "upstream": "kimi/kimi-k2.7-code-highspeed",
+        "family": "Kimi",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/kimi/kimi-k2.8-preview",
+        "upstream": "kimi/kimi-k2.8-preview",
+        "family": "Kimi",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/kimi/kimi-k3",
+        "upstream": "kimi/kimi-k3",
+        "family": "Kimi",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/kimi/kimi-k3.1-pro",
+        "upstream": "kimi/kimi-k3.1-pro",
+        "family": "Kimi",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/kimi/kimi-k3.1-pro-highspeed",
+        "upstream": "kimi/kimi-k3.1-pro-highspeed",
+        "family": "Kimi",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "dashscope/MiniMax-M2.5",
+        "upstream": "MiniMax-M2.5",
+        "family": "MiniMax",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/MiniMax/MiniMax-M2.1",
+        "upstream": "MiniMax/MiniMax-M2.1",
+        "family": "MiniMax",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/MiniMax/MiniMax-M2.5",
+        "upstream": "MiniMax/MiniMax-M2.5",
+        "family": "MiniMax",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/MiniMax/MiniMax-M2.7",
+        "upstream": "MiniMax/MiniMax-M2.7",
+        "family": "MiniMax",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/MiniMax/MiniMax-M3",
+        "upstream": "MiniMax/MiniMax-M3",
+        "family": "MiniMax",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/MiniMax/MiniMax-M3.1-Flash",
+        "upstream": "MiniMax/MiniMax-M3.1-Flash",
+        "family": "MiniMax",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/MiniMax/speech-02-hd",
+        "upstream": "MiniMax/speech-02-hd",
+        "family": "MiniMax",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/MiniMax/speech-02-turbo",
+        "upstream": "MiniMax/speech-02-turbo",
+        "family": "MiniMax",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/MiniMax/speech-2.8-hd",
+        "upstream": "MiniMax/speech-2.8-hd",
+        "family": "MiniMax",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/MiniMax/speech-2.8-turbo",
+        "upstream": "MiniMax/speech-2.8-turbo",
+        "family": "MiniMax",
+        "provider": "dashscope"
+      },
+      {
+        "code": "opencode-console/minimax-m2.5",
+        "upstream": "minimax-m2.5",
+        "family": "MiniMax",
+        "provider": "opencode-console"
+      },
+      {
+        "code": "opencode-console/minimax-m2.7",
+        "upstream": "minimax-m2.7",
+        "family": "MiniMax",
+        "provider": "opencode-console"
+      },
+      {
+        "code": "opencode-console/minimax-m3",
+        "upstream": "minimax-m3",
+        "family": "MiniMax",
+        "provider": "opencode-console"
+      },
+      {
+        "code": "opencode-console/minimax-m3.1-flash-free",
+        "upstream": "minimax-m3.1-flash-free",
+        "family": "MiniMax",
+        "provider": "opencode-console"
+      },
+      {
+        "code": "openrouter/minimax/minimax-m2.5",
+        "upstream": "minimax/minimax-m2.5",
+        "family": "MiniMax",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/minimax/minimax-m2.7",
+        "upstream": "minimax/minimax-m2.7",
+        "family": "MiniMax",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/minimax/minimax-m3",
+        "upstream": "minimax/minimax-m3",
+        "family": "MiniMax",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/minimax/minimax-m3:batch",
+        "upstream": "minimax/minimax-m3:batch",
+        "family": "MiniMax",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/minimax/minimax-m3.1-flash",
+        "upstream": "minimax/minimax-m3.1-flash",
+        "family": "MiniMax",
+        "provider": "openrouter"
+      },
+      {
+        "code": "qianwenai/MiniMax-M2.5",
+        "upstream": "MiniMax-M2.5",
+        "family": "MiniMax",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/MiniMax/MiniMax-M2.1",
+        "upstream": "MiniMax/MiniMax-M2.1",
+        "family": "MiniMax",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/MiniMax/MiniMax-M2.5",
+        "upstream": "MiniMax/MiniMax-M2.5",
+        "family": "MiniMax",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/MiniMax/MiniMax-M2.7",
+        "upstream": "MiniMax/MiniMax-M2.7",
+        "family": "MiniMax",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/MiniMax/MiniMax-M3",
+        "upstream": "MiniMax/MiniMax-M3",
+        "family": "MiniMax",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/MiniMax/MiniMax-M3.1-Flash",
+        "upstream": "MiniMax/MiniMax-M3.1-Flash",
+        "family": "MiniMax",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/MiniMax/speech-02-hd",
+        "upstream": "MiniMax/speech-02-hd",
+        "family": "MiniMax",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/MiniMax/speech-02-turbo",
+        "upstream": "MiniMax/speech-02-turbo",
+        "family": "MiniMax",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/MiniMax/speech-2.8-hd",
+        "upstream": "MiniMax/speech-2.8-hd",
+        "family": "MiniMax",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/MiniMax/speech-2.8-turbo",
+        "upstream": "MiniMax/speech-2.8-turbo",
+        "family": "MiniMax",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "opencode-console/mistral-large-4",
+        "upstream": "mistral-large-4",
+        "family": "Mistral",
+        "provider": "opencode-console"
+      },
+      {
+        "code": "openrouter/mistralai/codestral-2508",
+        "upstream": "mistralai/codestral-2508",
+        "family": "Mistral",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/mistralai/devstral-2512",
+        "upstream": "mistralai/devstral-2512",
+        "family": "Mistral",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/mistralai/ministral-14b-2512",
+        "upstream": "mistralai/ministral-14b-2512",
+        "family": "Mistral",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/mistralai/ministral-3b-2512",
+        "upstream": "mistralai/ministral-3b-2512",
+        "family": "Mistral",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/mistralai/ministral-8b-2512",
+        "upstream": "mistralai/ministral-8b-2512",
+        "family": "Mistral",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/mistralai/mistral-large",
+        "upstream": "mistralai/mistral-large",
+        "family": "Mistral",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/mistralai/mistral-large-2407",
+        "upstream": "mistralai/mistral-large-2407",
+        "family": "Mistral",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/mistralai/mistral-large-2512",
+        "upstream": "mistralai/mistral-large-2512",
+        "family": "Mistral",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/mistralai/mistral-large-4-0",
+        "upstream": "mistralai/mistral-large-4-0",
+        "family": "Mistral",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/mistralai/mistral-medium-3",
+        "upstream": "mistralai/mistral-medium-3",
+        "family": "Mistral",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/mistralai/mistral-medium-3-5",
+        "upstream": "mistralai/mistral-medium-3-5",
+        "family": "Mistral",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/mistralai/mistral-medium-3-5:batch",
+        "upstream": "mistralai/mistral-medium-3-5:batch",
+        "family": "Mistral",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/mistralai/mistral-medium-3.1",
+        "upstream": "mistralai/mistral-medium-3.1",
+        "family": "Mistral",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/mistralai/mistral-nemo",
+        "upstream": "mistralai/mistral-nemo",
+        "family": "Mistral",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/mistralai/mistral-saba",
+        "upstream": "mistralai/mistral-saba",
+        "family": "Mistral",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/mistralai/mistral-small-24b-instruct-2501",
+        "upstream": "mistralai/mistral-small-24b-instruct-2501",
+        "family": "Mistral",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/mistralai/mistral-small-2603",
+        "upstream": "mistralai/mistral-small-2603",
+        "family": "Mistral",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/mistralai/mistral-small-3.1-24b-instruct",
+        "upstream": "mistralai/mistral-small-3.1-24b-instruct",
+        "family": "Mistral",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/mistralai/mistral-small-3.2-24b-instruct",
+        "upstream": "mistralai/mistral-small-3.2-24b-instruct",
+        "family": "Mistral",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/mistralai/mixtral-8x22b-instruct",
+        "upstream": "mistralai/mixtral-8x22b-instruct",
+        "family": "Mistral",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/mistralai/voxtral-small-24b-2507",
+        "upstream": "mistralai/voxtral-small-24b-2507",
+        "family": "Mistral",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/moonshotai/kimi-k2",
+        "upstream": "moonshotai/kimi-k2",
+        "family": "Moonshot",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/moonshotai/kimi-k2-0905",
+        "upstream": "moonshotai/kimi-k2-0905",
+        "family": "Moonshot",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/moonshotai/kimi-k2-thinking",
+        "upstream": "moonshotai/kimi-k2-thinking",
+        "family": "Moonshot",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/moonshotai/kimi-k2.5",
+        "upstream": "moonshotai/kimi-k2.5",
+        "family": "Moonshot",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/moonshotai/kimi-k2.6",
+        "upstream": "moonshotai/kimi-k2.6",
+        "family": "Moonshot",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/moonshotai/kimi-k2.7-code",
+        "upstream": "moonshotai/kimi-k2.7-code",
+        "family": "Moonshot",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/moonshotai/kimi-k3",
+        "upstream": "moonshotai/kimi-k3",
+        "family": "Moonshot",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/moonshotai/kimi-k3:batch",
+        "upstream": "moonshotai/kimi-k3:batch",
+        "family": "Moonshot",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/moonshotai/kimi-k3.1-pro",
+        "upstream": "moonshotai/kimi-k3.1-pro",
+        "family": "Moonshot",
+        "provider": "openrouter"
+      },
+      {
+        "code": "dashscope/antdigital/Ling-3.1-flash",
+        "upstream": "antdigital/Ling-3.1-flash",
+        "family": "Other",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/cmaas-glm-5.3",
+        "upstream": "cmaas-glm-5.3",
+        "family": "Other",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/cmaas-qwen3.8-flash",
+        "upstream": "cmaas-qwen3.8-flash",
+        "family": "Other",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/fun-asr-flash-2026-06-15",
+        "upstream": "fun-asr-flash-2026-06-15",
+        "family": "Other",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/gui-plus",
+        "upstream": "gui-plus",
+        "family": "Other",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/siliconflow/deepseek-r1-0528",
+        "upstream": "siliconflow/deepseek-r1-0528",
+        "family": "Other",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/siliconflow/deepseek-v3-0324",
+        "upstream": "siliconflow/deepseek-v3-0324",
+        "family": "Other",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/siliconflow/deepseek-v3.1-terminus",
+        "upstream": "siliconflow/deepseek-v3.1-terminus",
+        "family": "Other",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/siliconflow/deepseek-v3.2",
+        "upstream": "siliconflow/deepseek-v3.2",
+        "family": "Other",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/stepfun/step-3.7-flash",
+        "upstream": "stepfun/step-3.7-flash",
+        "family": "Other",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/stepfun/step-5-preview",
+        "upstream": "stepfun/step-5-preview",
+        "family": "Other",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/tongyi-xiaomi-analysis-flash",
+        "upstream": "tongyi-xiaomi-analysis-flash",
+        "family": "Other",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/tongyi-xiaomi-analysis-pro",
+        "upstream": "tongyi-xiaomi-analysis-pro",
+        "family": "Other",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/unisound/unisound-u2",
+        "upstream": "unisound/unisound-u2",
+        "family": "Other",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/vanchin/deepseek-ocr",
+        "upstream": "vanchin/deepseek-ocr",
+        "family": "Other",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/vanchin/deepseek-r1",
+        "upstream": "vanchin/deepseek-r1",
+        "family": "Other",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/vanchin/deepseek-v3",
+        "upstream": "vanchin/deepseek-v3",
+        "family": "Other",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/vanchin/deepseek-v3.1-terminus",
+        "upstream": "vanchin/deepseek-v3.1-terminus",
+        "family": "Other",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/vanchin/deepseek-v3.2-think",
+        "upstream": "vanchin/deepseek-v3.2-think",
+        "family": "Other",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/vanchin/deepseek-v4-pro",
+        "upstream": "vanchin/deepseek-v4-pro",
+        "family": "Other",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/vanchin/deepseek-v4-pro-0813",
+        "upstream": "vanchin/deepseek-v4-pro-0813",
+        "family": "Other",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/vanchin/deepseek-v4.1-flash",
+        "upstream": "vanchin/deepseek-v4.1-flash",
+        "family": "Other",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/vanchin/deepseek-v4.1-flash-1017",
+        "upstream": "vanchin/deepseek-v4.1-flash-1017",
+        "family": "Other",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/wan2.7-image",
+        "upstream": "wan2.7-image",
+        "family": "Other",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/wan2.7-image-pro",
+        "upstream": "wan2.7-image-pro",
+        "family": "Other",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/xiaomi/mimo-v2.6-pro-ultraspeed",
+        "upstream": "xiaomi/mimo-v2.6-pro-ultraspeed",
+        "family": "Other",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/z-image-turbo",
+        "upstream": "z-image-turbo",
+        "family": "Other",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/ZHIPU/GLM-5",
+        "upstream": "ZHIPU/GLM-5",
+        "family": "Other",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/ZHIPU/GLM-5.1",
+        "upstream": "ZHIPU/GLM-5.1",
+        "family": "Other",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/ZHIPU/GLM-5.2",
+        "upstream": "ZHIPU/GLM-5.2",
+        "family": "Other",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/ZHIPU/GLM-5.3",
+        "upstream": "ZHIPU/GLM-5.3",
+        "family": "Other",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/ZHIPU/GLM-5.3-Flash",
+        "upstream": "ZHIPU/GLM-5.3-Flash",
+        "family": "Other",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/ZHIPU/GLM-5.3-FlashX",
+        "upstream": "ZHIPU/GLM-5.3-FlashX",
+        "family": "Other",
+        "provider": "dashscope"
+      },
+      {
+        "code": "opencode-console/beam-free",
+        "upstream": "beam-free",
+        "family": "Other",
+        "provider": "opencode-console"
+      },
+      {
+        "code": "opencode-console/big-pickle",
+        "upstream": "big-pickle",
+        "family": "Other",
+        "provider": "opencode-console"
+      },
+      {
+        "code": "opencode-console/flint-40b-free",
+        "upstream": "flint-40b-free",
+        "family": "Other",
+        "provider": "opencode-console"
+      },
+      {
+        "code": "opencode-console/grok-4.5",
+        "upstream": "grok-4.5",
+        "family": "Other",
+        "provider": "opencode-console"
+      },
+      {
+        "code": "opencode-console/grok-4.6",
+        "upstream": "grok-4.6",
+        "family": "Other",
+        "provider": "opencode-console"
+      },
+      {
+        "code": "opencode-console/grok-4.7",
+        "upstream": "grok-4.7",
+        "family": "Other",
+        "provider": "opencode-console"
+      },
+      {
+        "code": "opencode-console/grok-build-0.1",
+        "upstream": "grok-build-0.1",
+        "family": "Other",
+        "provider": "opencode-console"
+      },
+      {
+        "code": "opencode-console/iceman-free",
+        "upstream": "iceman-free",
+        "family": "Other",
+        "provider": "opencode-console"
+      },
+      {
+        "code": "opencode-console/inkling-2-small-free",
+        "upstream": "inkling-2-small-free",
+        "family": "Other",
+        "provider": "opencode-console"
+      },
+      {
+        "code": "opencode-console/longcat-2.5-free",
+        "upstream": "longcat-2.5-free",
+        "family": "Other",
+        "provider": "opencode-console"
+      },
+      {
+        "code": "opencode-console/mimo-v2.6-flash-free",
+        "upstream": "mimo-v2.6-flash-free",
+        "family": "Other",
+        "provider": "opencode-console"
+      },
+      {
+        "code": "opencode-console/muse-ember-1.0",
+        "upstream": "muse-ember-1.0",
+        "family": "Other",
+        "provider": "opencode-console"
+      },
+      {
+        "code": "opencode-console/muse-spark-1.2",
+        "upstream": "muse-spark-1.2",
+        "family": "Other",
+        "provider": "opencode-console"
+      },
+      {
+        "code": "opencode-console/muse-spark-1.3",
+        "upstream": "muse-spark-1.3",
+        "family": "Other",
+        "provider": "opencode-console"
+      },
+      {
+        "code": "opencode-console/muse-wonder-1.0",
+        "upstream": "muse-wonder-1.0",
+        "family": "Other",
+        "provider": "opencode-console"
+      },
+      {
+        "code": "opencode-console/nemotron-3.5-lightning-free",
+        "upstream": "nemotron-3.5-lightning-free",
+        "family": "Other",
+        "provider": "opencode-console"
+      },
+      {
+        "code": "opencode-console/nemotron-3.5-super-vl-free",
+        "upstream": "nemotron-3.5-super-vl-free",
+        "family": "Other",
+        "provider": "opencode-console"
+      },
+      {
+        "code": "openrouter/~anthropic/claude-fable-latest",
+        "upstream": "~anthropic/claude-fable-latest",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/~anthropic/claude-haiku-latest",
+        "upstream": "~anthropic/claude-haiku-latest",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/~anthropic/claude-opus-latest",
+        "upstream": "~anthropic/claude-opus-latest",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/~anthropic/claude-sonnet-latest",
+        "upstream": "~anthropic/claude-sonnet-latest",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/~deepseek/deepseek-flash-latest",
+        "upstream": "~deepseek/deepseek-flash-latest",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/~deepseek/deepseek-pro-latest",
+        "upstream": "~deepseek/deepseek-pro-latest",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/~deepseek/deepseek-v4-flash-latest",
+        "upstream": "~deepseek/deepseek-v4-flash-latest",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/~google/gemini-flash-latest",
+        "upstream": "~google/gemini-flash-latest",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/~google/gemini-pro-latest",
+        "upstream": "~google/gemini-pro-latest",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/~moonshotai/kimi-latest",
+        "upstream": "~moonshotai/kimi-latest",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/~openai/gpt-astra-latest",
+        "upstream": "~openai/gpt-astra-latest",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/~openai/gpt-luna-latest",
+        "upstream": "~openai/gpt-luna-latest",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/~openai/gpt-mini-latest",
+        "upstream": "~openai/gpt-mini-latest",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/~openai/gpt-sol-latest",
+        "upstream": "~openai/gpt-sol-latest",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/~openai/gpt-terra-latest",
+        "upstream": "~openai/gpt-terra-latest",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/~unbiased/pareto-latest",
+        "upstream": "~unbiased/pareto-latest",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/~x-ai/grok-latest",
+        "upstream": "~x-ai/grok-latest",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/~z-ai/glm-flash-latest",
+        "upstream": "~z-ai/glm-flash-latest",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/~z-ai/glm-latest",
+        "upstream": "~z-ai/glm-latest",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/aion-labs/aion-2.0",
+        "upstream": "aion-labs/aion-2.0",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/aion-labs/aion-3.0",
+        "upstream": "aion-labs/aion-3.0",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/aion-labs/aion-3.0-mini",
+        "upstream": "aion-labs/aion-3.0-mini",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/aion-labs/aion-3.5",
+        "upstream": "aion-labs/aion-3.5",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/aion-labs/aion-3.5-mini",
+        "upstream": "aion-labs/aion-3.5-mini",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/aion-labs/aion-rp-llama-3.1-8b",
+        "upstream": "aion-labs/aion-rp-llama-3.1-8b",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/amazon/nova-2-lite-v1",
+        "upstream": "amazon/nova-2-lite-v1",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/amazon/nova-lite-v1",
+        "upstream": "amazon/nova-lite-v1",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/amazon/nova-micro-v1",
+        "upstream": "amazon/nova-micro-v1",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/amazon/nova-premier-v1",
+        "upstream": "amazon/nova-premier-v1",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/amazon/nova-pro-v1",
+        "upstream": "amazon/nova-pro-v1",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/anthracite-org/magnum-v4-72b",
+        "upstream": "anthracite-org/magnum-v4-72b",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/anthropic/claude-fable-5",
+        "upstream": "anthropic/claude-fable-5",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/anthropic/claude-fable-5.1",
+        "upstream": "anthropic/claude-fable-5.1",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/anthropic/claude-fable-5.1:batch",
+        "upstream": "anthropic/claude-fable-5.1:batch",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/anthropic/claude-fable-5.2",
+        "upstream": "anthropic/claude-fable-5.2",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/anthropic/claude-fable-5.2:batch",
+        "upstream": "anthropic/claude-fable-5.2:batch",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/anthropic/claude-haiku-4.5",
+        "upstream": "anthropic/claude-haiku-4.5",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/anthropic/claude-haiku-5.5",
+        "upstream": "anthropic/claude-haiku-5.5",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/anthropic/claude-haiku-5.5:batch",
+        "upstream": "anthropic/claude-haiku-5.5:batch",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/anthropic/claude-opus-4.1",
+        "upstream": "anthropic/claude-opus-4.1",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/anthropic/claude-opus-4.5",
+        "upstream": "anthropic/claude-opus-4.5",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/anthropic/claude-opus-4.6",
+        "upstream": "anthropic/claude-opus-4.6",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/anthropic/claude-opus-4.7",
+        "upstream": "anthropic/claude-opus-4.7",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/anthropic/claude-opus-4.8",
+        "upstream": "anthropic/claude-opus-4.8",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/anthropic/claude-opus-5",
+        "upstream": "anthropic/claude-opus-5",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/anthropic/claude-opus-5:batch",
+        "upstream": "anthropic/claude-opus-5:batch",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/anthropic/claude-opus-5.5",
+        "upstream": "anthropic/claude-opus-5.5",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/anthropic/claude-opus-5.5:batch",
+        "upstream": "anthropic/claude-opus-5.5:batch",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/anthropic/claude-sonnet-4.5",
+        "upstream": "anthropic/claude-sonnet-4.5",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/anthropic/claude-sonnet-4.6",
+        "upstream": "anthropic/claude-sonnet-4.6",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/anthropic/claude-sonnet-5",
+        "upstream": "anthropic/claude-sonnet-5",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/anthropic/claude-sonnet-5.5",
+        "upstream": "anthropic/claude-sonnet-5.5",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/anthropic/claude-sonnet-5.5:batch",
+        "upstream": "anthropic/claude-sonnet-5.5:batch",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/baidu/ernie-5.5-flash-preview",
+        "upstream": "baidu/ernie-5.5-flash-preview",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/baidu/ernie-light-dt-1.0-intl",
+        "upstream": "baidu/ernie-light-dt-1.0-intl",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/bytedance-seed/seed-1.6",
+        "upstream": "bytedance-seed/seed-1.6",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/bytedance-seed/seed-1.6-flash",
+        "upstream": "bytedance-seed/seed-1.6-flash",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/bytedance-seed/seed-2-1-turbo",
+        "upstream": "bytedance-seed/seed-2-1-turbo",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/bytedance-seed/seed-2.0-code",
+        "upstream": "bytedance-seed/seed-2.0-code",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/bytedance-seed/seed-2.0-lite",
+        "upstream": "bytedance-seed/seed-2.0-lite",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/bytedance-seed/seed-2.0-mini",
+        "upstream": "bytedance-seed/seed-2.0-mini",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/bytedance/ui-tars-1.5-7b",
+        "upstream": "bytedance/ui-tars-1.5-7b",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/cognitivecomputations/dolphin-mistral-24b-venice-edition",
+        "upstream": "cognitivecomputations/dolphin-mistral-24b-venice-edition",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/cohere/command-a",
+        "upstream": "cohere/command-a",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/cohere/command-a-plus",
+        "upstream": "cohere/command-a-plus",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/cohere/command-r-08-2024",
+        "upstream": "cohere/command-r-08-2024",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/cohere/command-r-plus-08-2024",
+        "upstream": "cohere/command-r-plus-08-2024",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/cohere/command-r7b-12-2024",
+        "upstream": "cohere/command-r7b-12-2024",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/cohere/north-mini-code:free",
+        "upstream": "cohere/north-mini-code:free",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/dots-studio/dots-3-note-preview:free",
+        "upstream": "dots-studio/dots-3-note-preview:free",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/elorian/glimpse",
+        "upstream": "elorian/glimpse",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/fireworks/ember-1",
+        "upstream": "fireworks/ember-1",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/google/gemini-2.5-flash",
+        "upstream": "google/gemini-2.5-flash",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/google/gemini-2.5-flash-image",
+        "upstream": "google/gemini-2.5-flash-image",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/google/gemini-2.5-flash-lite",
+        "upstream": "google/gemini-2.5-flash-lite",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/google/gemini-2.5-pro",
+        "upstream": "google/gemini-2.5-pro",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/google/gemini-2.5-pro-preview",
+        "upstream": "google/gemini-2.5-pro-preview",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/google/gemini-3-flash-preview",
+        "upstream": "google/gemini-3-flash-preview",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/google/gemini-3-flash-preview:batch",
+        "upstream": "google/gemini-3-flash-preview:batch",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/google/gemini-3-pro-image",
+        "upstream": "google/gemini-3-pro-image",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/google/gemini-3-pro-image-preview",
+        "upstream": "google/gemini-3-pro-image-preview",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/google/gemini-3.1-flash-image",
+        "upstream": "google/gemini-3.1-flash-image",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/google/gemini-3.1-flash-image-preview",
+        "upstream": "google/gemini-3.1-flash-image-preview",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/google/gemini-3.1-flash-lite",
+        "upstream": "google/gemini-3.1-flash-lite",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/google/gemini-3.1-flash-lite-image",
+        "upstream": "google/gemini-3.1-flash-lite-image",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/google/gemini-3.1-flash-lite-preview",
+        "upstream": "google/gemini-3.1-flash-lite-preview",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/google/gemini-3.1-flash-lite:batch",
+        "upstream": "google/gemini-3.1-flash-lite:batch",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/google/gemini-3.1-pro-preview",
+        "upstream": "google/gemini-3.1-pro-preview",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/google/gemini-3.1-pro-preview-customtools",
+        "upstream": "google/gemini-3.1-pro-preview-customtools",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/google/gemini-3.1-pro-preview:batch",
+        "upstream": "google/gemini-3.1-pro-preview:batch",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/google/gemini-3.5-flash",
+        "upstream": "google/gemini-3.5-flash",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/google/gemini-3.5-flash-lite",
+        "upstream": "google/gemini-3.5-flash-lite",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/google/gemini-3.5-flash-lite:batch",
+        "upstream": "google/gemini-3.5-flash-lite:batch",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/google/gemini-3.5-flash:batch",
+        "upstream": "google/gemini-3.5-flash:batch",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/google/gemini-3.6-flash",
+        "upstream": "google/gemini-3.6-flash",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/google/gemini-3.6-flash:batch",
+        "upstream": "google/gemini-3.6-flash:batch",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/google/gemini-3.7-flash",
+        "upstream": "google/gemini-3.7-flash",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/google/gemini-3.7-flash:batch",
+        "upstream": "google/gemini-3.7-flash:batch",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/google/gemini-3.8-flash",
+        "upstream": "google/gemini-3.8-flash",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/google/gemini-3.8-flash:batch",
+        "upstream": "google/gemini-3.8-flash:batch",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/google/gemini-4-argon",
+        "upstream": "google/gemini-4-argon",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/google/gemini-4-argon:batch",
+        "upstream": "google/gemini-4-argon:batch",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/google/gemini-4-carbon",
+        "upstream": "google/gemini-4-carbon",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/google/gemini-4-carbon:batch",
+        "upstream": "google/gemini-4-carbon:batch",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/google/gemini-nano-banana-2.1",
+        "upstream": "google/gemini-nano-banana-2.1",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/google/gemini-omni-1.1-flash",
+        "upstream": "google/gemini-omni-1.1-flash",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/google/gemini-omni-1.2-flash",
+        "upstream": "google/gemini-omni-1.2-flash",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/google/gemma-2-27b-it",
+        "upstream": "google/gemma-2-27b-it",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/google/gemma-3-12b-it",
+        "upstream": "google/gemma-3-12b-it",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/google/gemma-3-27b-it",
+        "upstream": "google/gemma-3-27b-it",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/google/gemma-3-4b-it",
+        "upstream": "google/gemma-3-4b-it",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/google/gemma-4-26b-a4b-it",
+        "upstream": "google/gemma-4-26b-a4b-it",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/google/gemma-4-26b-a4b-it:free",
+        "upstream": "google/gemma-4-26b-a4b-it:free",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/google/gemma-4-31b-it",
+        "upstream": "google/gemma-4-31b-it",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/google/gemma-4-31b-it:free",
+        "upstream": "google/gemma-4-31b-it:free",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/google/lyria-3-clip-preview",
+        "upstream": "google/lyria-3-clip-preview",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/google/lyria-3-pro-preview",
+        "upstream": "google/lyria-3-pro-preview",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/gryphe/mythomax-l2-13b",
+        "upstream": "gryphe/mythomax-l2-13b",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/ibm-granite/granite-4.2-8b",
+        "upstream": "ibm-granite/granite-4.2-8b",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/inclusionai/ling-3.0-flash",
+        "upstream": "inclusionai/ling-3.0-flash",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/inclusionai/ling-3.0-flash-vl",
+        "upstream": "inclusionai/ling-3.0-flash-vl",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/inclusionai/ling-3.0-tiny",
+        "upstream": "inclusionai/ling-3.0-tiny",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/inclusionai/ling-3.1-flash",
+        "upstream": "inclusionai/ling-3.1-flash",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/inference-net/schematron-v2-small",
+        "upstream": "inference-net/schematron-v2-small",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/inference-net/schematron-v2-turbo",
+        "upstream": "inference-net/schematron-v2-turbo",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/kt/midm-k-3.0-pro",
+        "upstream": "kt/midm-k-3.0-pro",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/liquid/lfm-2.5-2.6b:free",
+        "upstream": "liquid/lfm-2.5-2.6b:free",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/liquid/lfm-2.5-24b-a2b",
+        "upstream": "liquid/lfm-2.5-24b-a2b",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/liquid/lfm-3-1.7b",
+        "upstream": "liquid/lfm-3-1.7b",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/liquid/lfm-3-1.7b:free",
+        "upstream": "liquid/lfm-3-1.7b:free",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/mancer/weaver",
+        "upstream": "mancer/weaver",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/meituan/longcat-2.0",
+        "upstream": "meituan/longcat-2.0",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/meta-llama/llama-3.1-70b-instruct",
+        "upstream": "meta-llama/llama-3.1-70b-instruct",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/meta-llama/llama-3.1-8b-instruct",
+        "upstream": "meta-llama/llama-3.1-8b-instruct",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/meta-llama/llama-3.2-1b-instruct",
+        "upstream": "meta-llama/llama-3.2-1b-instruct",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/meta-llama/llama-3.2-3b-instruct",
+        "upstream": "meta-llama/llama-3.2-3b-instruct",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/meta-llama/llama-3.3-70b-instruct",
+        "upstream": "meta-llama/llama-3.3-70b-instruct",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/meta-llama/llama-4-maverick",
+        "upstream": "meta-llama/llama-4-maverick",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/meta-llama/llama-4-scout",
+        "upstream": "meta-llama/llama-4-scout",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/meta-llama/llama-guard-4-12b",
+        "upstream": "meta-llama/llama-guard-4-12b",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/meta/muse-ember",
+        "upstream": "meta/muse-ember",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/meta/muse-glimmer-30b",
+        "upstream": "meta/muse-glimmer-30b",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/meta/muse-glimmer-30b:batch",
+        "upstream": "meta/muse-glimmer-30b:batch",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/meta/muse-spark-1.1",
+        "upstream": "meta/muse-spark-1.1",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/meta/muse-spark-1.2",
+        "upstream": "meta/muse-spark-1.2",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/meta/muse-spark-1.3",
+        "upstream": "meta/muse-spark-1.3",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/meta/muse-spark-open",
+        "upstream": "meta/muse-spark-open",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/meta/muse-wonder",
+        "upstream": "meta/muse-wonder",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/microsoft/phi-4",
+        "upstream": "microsoft/phi-4",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/moondream/moondream3-preview",
+        "upstream": "moondream/moondream3-preview",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/moondream/moondream3.1-9b-a2b",
+        "upstream": "moondream/moondream3.1-9b-a2b",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/morph/morph-v3-fast",
+        "upstream": "morph/morph-v3-fast",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/morph/morph-v3-fast:batch",
+        "upstream": "morph/morph-v3-fast:batch",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/morph/morph-v3-large",
+        "upstream": "morph/morph-v3-large",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/morph/morph-v3-large:batch",
+        "upstream": "morph/morph-v3-large:batch",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/motif-technologies/motif-3",
+        "upstream": "motif-technologies/motif-3",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/nex-agi/nex-n2.5-mini",
+        "upstream": "nex-agi/nex-n2.5-mini",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/nex-agi/nex-n2.5-pro",
+        "upstream": "nex-agi/nex-n2.5-pro",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/nex-agi/nex-n2.6",
+        "upstream": "nex-agi/nex-n2.6",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/nousresearch/hermes-4-405b",
+        "upstream": "nousresearch/hermes-4-405b",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/nvidia/nemotron-3-nano-30b-a3b",
+        "upstream": "nvidia/nemotron-3-nano-30b-a3b",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free",
+        "upstream": "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/nvidia/nemotron-3-super-120b-a12b",
+        "upstream": "nvidia/nemotron-3-super-120b-a12b",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/nvidia/nemotron-3-ultra-550b-a55b",
+        "upstream": "nvidia/nemotron-3-ultra-550b-a55b",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/nvidia/nemotron-3-ultra-550b-a55b:free",
+        "upstream": "nvidia/nemotron-3-ultra-550b-a55b:free",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/nvidia/nemotron-3.5-content-safety",
+        "upstream": "nvidia/nemotron-3.5-content-safety",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/nvidia/nemotron-3.5-lightning",
+        "upstream": "nvidia/nemotron-3.5-lightning",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/nvidia/nemotron-3.5-lightning:free",
+        "upstream": "nvidia/nemotron-3.5-lightning:free",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/nvidia/nemotron-3.5-super-vl",
+        "upstream": "nvidia/nemotron-3.5-super-vl",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/nvidia/nemotron-3.5-super-vl:free",
+        "upstream": "nvidia/nemotron-3.5-super-vl:free",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/nvidia/switchyard",
+        "upstream": "nvidia/switchyard",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/openai/gpt-3.5-turbo-0613",
+        "upstream": "openai/gpt-3.5-turbo-0613",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/openai/gpt-3.5-turbo-16k",
+        "upstream": "openai/gpt-3.5-turbo-16k",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/openai/gpt-4",
+        "upstream": "openai/gpt-4",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/openai/gpt-4.1",
+        "upstream": "openai/gpt-4.1",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/openai/gpt-4.1-mini",
+        "upstream": "openai/gpt-4.1-mini",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/openai/gpt-4.1-nano",
+        "upstream": "openai/gpt-4.1-nano",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/openai/gpt-4o",
+        "upstream": "openai/gpt-4o",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/openai/gpt-4o-2024-05-13",
+        "upstream": "openai/gpt-4o-2024-05-13",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/openai/gpt-4o-2024-08-06",
+        "upstream": "openai/gpt-4o-2024-08-06",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/openai/gpt-4o-2024-11-20",
+        "upstream": "openai/gpt-4o-2024-11-20",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/openai/gpt-4o-mini",
+        "upstream": "openai/gpt-4o-mini",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/openai/gpt-4o-mini-2024-07-18",
+        "upstream": "openai/gpt-4o-mini-2024-07-18",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/openai/gpt-5",
+        "upstream": "openai/gpt-5",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/openai/gpt-5-image",
+        "upstream": "openai/gpt-5-image",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/openai/gpt-5-image-mini",
+        "upstream": "openai/gpt-5-image-mini",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/openai/gpt-5-mini",
+        "upstream": "openai/gpt-5-mini",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/openai/gpt-5-nano",
+        "upstream": "openai/gpt-5-nano",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/openai/gpt-5-nano:batch",
+        "upstream": "openai/gpt-5-nano:batch",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/openai/gpt-5-pro",
+        "upstream": "openai/gpt-5-pro",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/openai/gpt-5.1",
+        "upstream": "openai/gpt-5.1",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/openai/gpt-5.1-codex",
+        "upstream": "openai/gpt-5.1-codex",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/openai/gpt-5.1-codex-max",
+        "upstream": "openai/gpt-5.1-codex-max",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/openai/gpt-5.1-codex-mini",
+        "upstream": "openai/gpt-5.1-codex-mini",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/openai/gpt-5.2",
+        "upstream": "openai/gpt-5.2",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/openai/gpt-5.2-codex",
+        "upstream": "openai/gpt-5.2-codex",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/openai/gpt-5.2-pro",
+        "upstream": "openai/gpt-5.2-pro",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/openai/gpt-5.3-codex",
+        "upstream": "openai/gpt-5.3-codex",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/openai/gpt-5.4",
+        "upstream": "openai/gpt-5.4",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/openai/gpt-5.4-image-2",
+        "upstream": "openai/gpt-5.4-image-2",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/openai/gpt-5.4-mini",
+        "upstream": "openai/gpt-5.4-mini",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/openai/gpt-5.4-nano",
+        "upstream": "openai/gpt-5.4-nano",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/openai/gpt-5.4-pro",
+        "upstream": "openai/gpt-5.4-pro",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/openai/gpt-5.5",
+        "upstream": "openai/gpt-5.5",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/openai/gpt-5.5-pro",
+        "upstream": "openai/gpt-5.5-pro",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/openai/gpt-5.6-luna",
+        "upstream": "openai/gpt-5.6-luna",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/openai/gpt-5.6-luna-pro",
+        "upstream": "openai/gpt-5.6-luna-pro",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/openai/gpt-5.6-luna-pro:batch",
+        "upstream": "openai/gpt-5.6-luna-pro:batch",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/openai/gpt-5.6-luna:batch",
+        "upstream": "openai/gpt-5.6-luna:batch",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/openai/gpt-5.6-sol",
+        "upstream": "openai/gpt-5.6-sol",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/openai/gpt-5.6-sol-pro",
+        "upstream": "openai/gpt-5.6-sol-pro",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/openai/gpt-5.6-sol-pro:batch",
+        "upstream": "openai/gpt-5.6-sol-pro:batch",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/openai/gpt-5.6-sol:batch",
+        "upstream": "openai/gpt-5.6-sol:batch",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/openai/gpt-5.6-terra",
+        "upstream": "openai/gpt-5.6-terra",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/openai/gpt-5.6-terra-pro",
+        "upstream": "openai/gpt-5.6-terra-pro",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/openai/gpt-5.6-terra-pro:batch",
+        "upstream": "openai/gpt-5.6-terra-pro:batch",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/openai/gpt-5.6-terra:batch",
+        "upstream": "openai/gpt-5.6-terra:batch",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/openai/gpt-6-astra",
+        "upstream": "openai/gpt-6-astra",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/openai/gpt-6-astra-pro",
+        "upstream": "openai/gpt-6-astra-pro",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/openai/gpt-6-astra-pro:batch",
+        "upstream": "openai/gpt-6-astra-pro:batch",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/openai/gpt-6-astra:batch",
+        "upstream": "openai/gpt-6-astra:batch",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/openai/gpt-6-luna",
+        "upstream": "openai/gpt-6-luna",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/openai/gpt-6-luna-pro",
+        "upstream": "openai/gpt-6-luna-pro",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/openai/gpt-6-luna-pro:batch",
+        "upstream": "openai/gpt-6-luna-pro:batch",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/openai/gpt-6-luna:batch",
+        "upstream": "openai/gpt-6-luna:batch",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/openai/gpt-6-sol",
+        "upstream": "openai/gpt-6-sol",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/openai/gpt-6-sol-pro",
+        "upstream": "openai/gpt-6-sol-pro",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/openai/gpt-6-sol-pro:batch",
+        "upstream": "openai/gpt-6-sol-pro:batch",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/openai/gpt-6-sol:batch",
+        "upstream": "openai/gpt-6-sol:batch",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/openai/gpt-6.1-sol",
+        "upstream": "openai/gpt-6.1-sol",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/openai/gpt-6.1-sol-pro",
+        "upstream": "openai/gpt-6.1-sol-pro",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/openai/gpt-6.1-sol-pro:batch",
+        "upstream": "openai/gpt-6.1-sol-pro:batch",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/openai/gpt-6.1-sol:batch",
+        "upstream": "openai/gpt-6.1-sol:batch",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/openai/gpt-6.1-terra",
+        "upstream": "openai/gpt-6.1-terra",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/openai/gpt-6.1-terra-pro",
+        "upstream": "openai/gpt-6.1-terra-pro",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/openai/gpt-6.1-terra-pro:batch",
+        "upstream": "openai/gpt-6.1-terra-pro:batch",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/openai/gpt-6.1-terra:batch",
+        "upstream": "openai/gpt-6.1-terra:batch",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/openai/gpt-audio",
+        "upstream": "openai/gpt-audio",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/openai/gpt-audio-mini",
+        "upstream": "openai/gpt-audio-mini",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/openai/gpt-chat-latest",
+        "upstream": "openai/gpt-chat-latest",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/openai/gpt-oss-120b",
+        "upstream": "openai/gpt-oss-120b",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/openai/gpt-oss-120b:batch",
+        "upstream": "openai/gpt-oss-120b:batch",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/openai/gpt-oss-20b",
+        "upstream": "openai/gpt-oss-20b",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/openai/gpt-oss-20b:batch",
+        "upstream": "openai/gpt-oss-20b:batch",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/openai/gpt-oss-safeguard-20b",
+        "upstream": "openai/gpt-oss-safeguard-20b",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/openai/o3",
+        "upstream": "openai/o3",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/openai/o3-pro",
+        "upstream": "openai/o3-pro",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/openrouter/auto",
+        "upstream": "openrouter/auto",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/openrouter/auto-beta",
+        "upstream": "openrouter/auto-beta",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/openrouter/auto-code",
+        "upstream": "openrouter/auto-code",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/openrouter/bodybuilder",
+        "upstream": "openrouter/bodybuilder",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/openrouter/free",
+        "upstream": "openrouter/free",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/openrouter/fusion",
+        "upstream": "openrouter/fusion",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/openrouter/pareto-code",
+        "upstream": "openrouter/pareto-code",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/particle-ai/particle-1",
+        "upstream": "particle-ai/particle-1",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/perceptron/perceptron-mk1",
+        "upstream": "perceptron/perceptron-mk1",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/perceptron/perceptron-mk1.5",
+        "upstream": "perceptron/perceptron-mk1.5",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/perplexity/sonar",
+        "upstream": "perplexity/sonar",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/perplexity/sonar-deep-research",
+        "upstream": "perplexity/sonar-deep-research",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/perplexity/sonar-pro",
+        "upstream": "perplexity/sonar-pro",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/perplexity/sonar-pro-search",
+        "upstream": "perplexity/sonar-pro-search",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/perplexity/sonar-reasoning-pro",
+        "upstream": "perplexity/sonar-reasoning-pro",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/prism-ml/ternary-bonsai-2-27b",
+        "upstream": "prism-ml/ternary-bonsai-2-27b",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/prism-ml/ternary-bonsai-2-9b",
+        "upstream": "prism-ml/ternary-bonsai-2-9b",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/recursive/flint-v1.0:free",
+        "upstream": "recursive/flint-v1.0:free",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/reflection/beam-1.0-501b-a23b",
+        "upstream": "reflection/beam-1.0-501b-a23b",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/rekaai/reka-edge",
+        "upstream": "rekaai/reka-edge",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/rekaai/reka-flash-3",
+        "upstream": "rekaai/reka-flash-3",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/relace/relace-apply-3",
+        "upstream": "relace/relace-apply-3",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/relace/relace-search",
+        "upstream": "relace/relace-search",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/ricursiveai/ripple-65b-preview",
+        "upstream": "ricursiveai/ripple-65b-preview",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/sakana/fugu-max",
+        "upstream": "sakana/fugu-max",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/sakana/fugu-ultra",
+        "upstream": "sakana/fugu-ultra",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/sakana/fugu-ultra-v2",
+        "upstream": "sakana/fugu-ultra-v2",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/sao10k/l3-lunaris-8b",
+        "upstream": "sao10k/l3-lunaris-8b",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/sao10k/l3.1-euryale-70b",
+        "upstream": "sao10k/l3.1-euryale-70b",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/scaledown/extract",
+        "upstream": "scaledown/extract",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/scaledown/summarize",
+        "upstream": "scaledown/summarize",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/stepfun/step-3.5-flash",
+        "upstream": "stepfun/step-3.5-flash",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/stepfun/step-3.7-flash",
+        "upstream": "stepfun/step-3.7-flash",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/stepfun/step-5-preview",
+        "upstream": "stepfun/step-5-preview",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/tencent/hunyuan-a13b-instruct",
+        "upstream": "tencent/hunyuan-a13b-instruct",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/tencent/hy-mt2-1.8b",
+        "upstream": "tencent/hy-mt2-1.8b",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/tencent/hy-mt2-30b-a3b",
+        "upstream": "tencent/hy-mt2-30b-a3b",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/tencent/hy-mt2-7b",
+        "upstream": "tencent/hy-mt2-7b",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/tencent/hy3",
+        "upstream": "tencent/hy3",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/tencent/hy3-preview",
+        "upstream": "tencent/hy3-preview",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/tencent/hy4",
+        "upstream": "tencent/hy4",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/tencent/hy4-preview",
+        "upstream": "tencent/hy4-preview",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/thedrummer/cydonia-24b-v4.1",
+        "upstream": "thedrummer/cydonia-24b-v4.1",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/thedrummer/skyfall-36b-v2",
+        "upstream": "thedrummer/skyfall-36b-v2",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/thedrummer/unslopnemo-12b",
+        "upstream": "thedrummer/unslopnemo-12b",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/thinkingmachines/inkling",
+        "upstream": "thinkingmachines/inkling",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/thinkingmachines/inkling-2-small:free",
+        "upstream": "thinkingmachines/inkling-2-small:free",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/thinkingmachines/inkling-small",
+        "upstream": "thinkingmachines/inkling-small",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/thinkingmachines/inkling-small:batch",
+        "upstream": "thinkingmachines/inkling-small:batch",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/typesafe/jev-router",
+        "upstream": "typesafe/jev-router",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/unbiased/pareto-26.10",
+        "upstream": "unbiased/pareto-26.10",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/unbiased/pareto-26.9",
+        "upstream": "unbiased/pareto-26.9",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/undi95/remm-slerp-l2-13b",
+        "upstream": "undi95/remm-slerp-l2-13b",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/upstage/solar-mini4",
+        "upstream": "upstage/solar-mini4",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/upstage/solar-pro4",
+        "upstream": "upstage/solar-pro4",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/writer/palmyra-x5",
+        "upstream": "writer/palmyra-x5",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/x-ai/grok-4.20",
+        "upstream": "x-ai/grok-4.20",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/x-ai/grok-4.20-multi-agent",
+        "upstream": "x-ai/grok-4.20-multi-agent",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/x-ai/grok-4.3",
+        "upstream": "x-ai/grok-4.3",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/x-ai/grok-4.3:batch",
+        "upstream": "x-ai/grok-4.3:batch",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/x-ai/grok-4.5",
+        "upstream": "x-ai/grok-4.5",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/x-ai/grok-4.6",
+        "upstream": "x-ai/grok-4.6",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/x-ai/grok-4.6:batch",
+        "upstream": "x-ai/grok-4.6:batch",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/x-ai/grok-4.7",
+        "upstream": "x-ai/grok-4.7",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/x-ai/grok-4.7:batch",
+        "upstream": "x-ai/grok-4.7:batch",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/x-ai/grok-build-0.1",
+        "upstream": "x-ai/grok-build-0.1",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/xiaomi/mimo-v2.5",
+        "upstream": "xiaomi/mimo-v2.5",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/xiaomi/mimo-v2.5-pro",
+        "upstream": "xiaomi/mimo-v2.5-pro",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/xiaomi/mimo-v2.6-flash",
+        "upstream": "xiaomi/mimo-v2.6-flash",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/xiaomi/mimo-v2.6-pro",
+        "upstream": "xiaomi/mimo-v2.6-pro",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/xiaomi/mimo-v2.6-pro-ultraspeed",
+        "upstream": "xiaomi/mimo-v2.6-pro-ultraspeed",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/z-ai/glm-4.5",
+        "upstream": "z-ai/glm-4.5",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/z-ai/glm-4.5-air",
+        "upstream": "z-ai/glm-4.5-air",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/z-ai/glm-4.5v",
+        "upstream": "z-ai/glm-4.5v",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/z-ai/glm-4.6",
+        "upstream": "z-ai/glm-4.6",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/z-ai/glm-4.6v",
+        "upstream": "z-ai/glm-4.6v",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/z-ai/glm-4.7",
+        "upstream": "z-ai/glm-4.7",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/z-ai/glm-4.7-flash",
+        "upstream": "z-ai/glm-4.7-flash",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/z-ai/glm-5",
+        "upstream": "z-ai/glm-5",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/z-ai/glm-5-turbo",
+        "upstream": "z-ai/glm-5-turbo",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/z-ai/glm-5.1",
+        "upstream": "z-ai/glm-5.1",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/z-ai/glm-5.2",
+        "upstream": "z-ai/glm-5.2",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/z-ai/glm-5.2:batch",
+        "upstream": "z-ai/glm-5.2:batch",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/z-ai/glm-5.3",
+        "upstream": "z-ai/glm-5.3",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/z-ai/glm-5.3-flash",
+        "upstream": "z-ai/glm-5.3-flash",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/z-ai/glm-5.3-flash:batch",
+        "upstream": "z-ai/glm-5.3-flash:batch",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/z-ai/glm-5.3-flashx",
+        "upstream": "z-ai/glm-5.3-flashx",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/z-ai/glm-5.3-flashx-legal",
+        "upstream": "z-ai/glm-5.3-flashx-legal",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/z-ai/glm-5.3-prime",
+        "upstream": "z-ai/glm-5.3-prime",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/z-ai/glm-5.3:batch",
+        "upstream": "z-ai/glm-5.3:batch",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/z-ai/glm-5v-turbo",
+        "upstream": "z-ai/glm-5v-turbo",
+        "family": "Other",
+        "provider": "openrouter"
+      },
+      {
+        "code": "qianwenai/antdigital/Ling-3.1-flash",
+        "upstream": "antdigital/Ling-3.1-flash",
+        "family": "Other",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/cmaas-glm-5.3",
+        "upstream": "cmaas-glm-5.3",
+        "family": "Other",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/cmaas-qwen3.8-flash",
+        "upstream": "cmaas-qwen3.8-flash",
+        "family": "Other",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/fun-asr-flash-2026-06-15",
+        "upstream": "fun-asr-flash-2026-06-15",
+        "family": "Other",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/gui-plus",
+        "upstream": "gui-plus",
+        "family": "Other",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/siliconflow/deepseek-r1-0528",
+        "upstream": "siliconflow/deepseek-r1-0528",
+        "family": "Other",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/siliconflow/deepseek-v3-0324",
+        "upstream": "siliconflow/deepseek-v3-0324",
+        "family": "Other",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/siliconflow/deepseek-v3.1-terminus",
+        "upstream": "siliconflow/deepseek-v3.1-terminus",
+        "family": "Other",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/siliconflow/deepseek-v3.2",
+        "upstream": "siliconflow/deepseek-v3.2",
+        "family": "Other",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/stepfun/step-3.7-flash",
+        "upstream": "stepfun/step-3.7-flash",
+        "family": "Other",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/stepfun/step-5-preview",
+        "upstream": "stepfun/step-5-preview",
+        "family": "Other",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/tongyi-xiaomi-analysis-flash",
+        "upstream": "tongyi-xiaomi-analysis-flash",
+        "family": "Other",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/tongyi-xiaomi-analysis-pro",
+        "upstream": "tongyi-xiaomi-analysis-pro",
+        "family": "Other",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/unisound/unisound-u2",
+        "upstream": "unisound/unisound-u2",
+        "family": "Other",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/vanchin/deepseek-ocr",
+        "upstream": "vanchin/deepseek-ocr",
+        "family": "Other",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/vanchin/deepseek-r1",
+        "upstream": "vanchin/deepseek-r1",
+        "family": "Other",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/vanchin/deepseek-v3",
+        "upstream": "vanchin/deepseek-v3",
+        "family": "Other",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/vanchin/deepseek-v3.1-terminus",
+        "upstream": "vanchin/deepseek-v3.1-terminus",
+        "family": "Other",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/vanchin/deepseek-v3.2-think",
+        "upstream": "vanchin/deepseek-v3.2-think",
+        "family": "Other",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/vanchin/deepseek-v4-pro",
+        "upstream": "vanchin/deepseek-v4-pro",
+        "family": "Other",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/vanchin/deepseek-v4-pro-0813",
+        "upstream": "vanchin/deepseek-v4-pro-0813",
+        "family": "Other",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/vanchin/deepseek-v4.1-flash",
+        "upstream": "vanchin/deepseek-v4.1-flash",
+        "family": "Other",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/vanchin/deepseek-v4.1-flash-1017",
+        "upstream": "vanchin/deepseek-v4.1-flash-1017",
+        "family": "Other",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/wan2.7-image",
+        "upstream": "wan2.7-image",
+        "family": "Other",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/wan2.7-image-pro",
+        "upstream": "wan2.7-image-pro",
+        "family": "Other",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/xiaomi/mimo-v2.6-pro-ultraspeed",
+        "upstream": "xiaomi/mimo-v2.6-pro-ultraspeed",
+        "family": "Other",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/z-image-turbo",
+        "upstream": "z-image-turbo",
+        "family": "Other",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/ZHIPU/GLM-5",
+        "upstream": "ZHIPU/GLM-5",
+        "family": "Other",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/ZHIPU/GLM-5.1",
+        "upstream": "ZHIPU/GLM-5.1",
+        "family": "Other",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/ZHIPU/GLM-5.2",
+        "upstream": "ZHIPU/GLM-5.2",
+        "family": "Other",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/ZHIPU/GLM-5.3",
+        "upstream": "ZHIPU/GLM-5.3",
+        "family": "Other",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/ZHIPU/GLM-5.3-Flash",
+        "upstream": "ZHIPU/GLM-5.3-Flash",
+        "family": "Other",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/ZHIPU/GLM-5.3-FlashX",
+        "upstream": "ZHIPU/GLM-5.3-FlashX",
+        "family": "Other",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "dashscope/qwen-1.8b-chat",
+        "upstream": "qwen-1.8b-chat",
+        "family": "Qwen",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/qwen-1.8b-longcontext-chat",
+        "upstream": "qwen-1.8b-longcontext-chat",
+        "family": "Qwen",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/qwen-14b-chat",
+        "upstream": "qwen-14b-chat",
+        "family": "Qwen",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/qwen-72b-chat",
+        "upstream": "qwen-72b-chat",
+        "family": "Qwen",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/qwen-7b-chat",
+        "upstream": "qwen-7b-chat",
+        "family": "Qwen",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/qwen-audio-3.0-asr-flash",
+        "upstream": "qwen-audio-3.0-asr-flash",
+        "family": "Qwen",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/qwen-audio-3.0-realtime-flash",
+        "upstream": "qwen-audio-3.0-realtime-flash",
+        "family": "Qwen",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/qwen-audio-3.0-realtime-plus",
+        "upstream": "qwen-audio-3.0-realtime-plus",
+        "family": "Qwen",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/qwen-audio-3.1-realtime-flash",
+        "upstream": "qwen-audio-3.1-realtime-flash",
+        "family": "Qwen",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/qwen-audio-3.1-realtime-plus",
+        "upstream": "qwen-audio-3.1-realtime-plus",
+        "family": "Qwen",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/qwen-deep-research-2025-12-15",
+        "upstream": "qwen-deep-research-2025-12-15",
+        "family": "Qwen",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/qwen-deep-search-planning",
+        "upstream": "qwen-deep-search-planning",
+        "family": "Qwen",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/qwen-flash",
+        "upstream": "qwen-flash",
+        "family": "Qwen",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/qwen-flash-character",
+        "upstream": "qwen-flash-character",
+        "family": "Qwen",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/qwen-flash-character-2026-02-26",
+        "upstream": "qwen-flash-character-2026-02-26",
+        "family": "Qwen",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/qwen-image-2.0",
+        "upstream": "qwen-image-2.0",
+        "family": "Qwen",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/qwen-image-2.0-2026-03-03",
+        "upstream": "qwen-image-2.0-2026-03-03",
+        "family": "Qwen",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/qwen-image-2.0-pro",
+        "upstream": "qwen-image-2.0-pro",
+        "family": "Qwen",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/qwen-image-2.0-pro-2026-03-03",
+        "upstream": "qwen-image-2.0-pro-2026-03-03",
+        "family": "Qwen",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/qwen-image-2.0-pro-2026-04-22",
+        "upstream": "qwen-image-2.0-pro-2026-04-22",
+        "family": "Qwen",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/qwen-image-2.0-pro-2026-06-22",
+        "upstream": "qwen-image-2.0-pro-2026-06-22",
+        "family": "Qwen",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/qwen-image-2.1-pro",
+        "upstream": "qwen-image-2.1-pro",
+        "family": "Qwen",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/qwen-image-3.0",
+        "upstream": "qwen-image-3.0",
+        "family": "Qwen",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/qwen-image-3.0-pro",
+        "upstream": "qwen-image-3.0-pro",
+        "family": "Qwen",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/qwen-long",
+        "upstream": "qwen-long",
+        "family": "Qwen",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/qwen-max",
+        "upstream": "qwen-max",
+        "family": "Qwen",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/qwen-max-0107",
+        "upstream": "qwen-max-0107",
+        "family": "Qwen",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/qwen-max-1201",
+        "upstream": "qwen-max-1201",
+        "family": "Qwen",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/qwen-max-longcontext",
+        "upstream": "qwen-max-longcontext",
+        "family": "Qwen",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/qwen-mt-flash",
+        "upstream": "qwen-mt-flash",
+        "family": "Qwen",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/qwen-mt-lite",
+        "upstream": "qwen-mt-lite",
+        "family": "Qwen",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/qwen-mt-plus",
+        "upstream": "qwen-mt-plus",
+        "family": "Qwen",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/qwen-mt-uni",
+        "upstream": "qwen-mt-uni",
+        "family": "Qwen",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/qwen-plus",
+        "upstream": "qwen-plus",
+        "family": "Qwen",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/qwen-plus-2025-01-25",
+        "upstream": "qwen-plus-2025-01-25",
+        "family": "Qwen",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/qwen-plus-2025-04-28",
+        "upstream": "qwen-plus-2025-04-28",
+        "family": "Qwen",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/qwen-plus-2025-07-14",
+        "upstream": "qwen-plus-2025-07-14",
+        "family": "Qwen",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/qwen-plus-2025-11-05",
+        "upstream": "qwen-plus-2025-11-05",
+        "family": "Qwen",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/qwen-plus-2025-12-01",
+        "upstream": "qwen-plus-2025-12-01",
+        "family": "Qwen",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/qwen-plus-latest",
+        "upstream": "qwen-plus-latest",
+        "family": "Qwen",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/qwen-turbo-0919",
+        "upstream": "qwen-turbo-0919",
+        "family": "Qwen",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/qwen-turbo-2024-11-01",
+        "upstream": "qwen-turbo-2024-11-01",
+        "family": "Qwen",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/qwen-vl-ocr",
+        "upstream": "qwen-vl-ocr",
+        "family": "Qwen",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/qwen-vl-ocr-2025-11-20",
+        "upstream": "qwen-vl-ocr-2025-11-20",
+        "family": "Qwen",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/qwen1.5-0.5b-chat",
+        "upstream": "qwen1.5-0.5b-chat",
+        "family": "Qwen",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/qwen1.5-1.8b-chat",
+        "upstream": "qwen1.5-1.8b-chat",
+        "family": "Qwen",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/qwen1.5-110b-chat",
+        "upstream": "qwen1.5-110b-chat",
+        "family": "Qwen",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/qwen1.5-14b-chat",
+        "upstream": "qwen1.5-14b-chat",
+        "family": "Qwen",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/qwen1.5-32b-chat",
+        "upstream": "qwen1.5-32b-chat",
+        "family": "Qwen",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/qwen1.5-72b-chat",
+        "upstream": "qwen1.5-72b-chat",
+        "family": "Qwen",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/qwen1.5-7b-chat",
+        "upstream": "qwen1.5-7b-chat",
+        "family": "Qwen",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/qwen2-0.5b-instruct",
+        "upstream": "qwen2-0.5b-instruct",
+        "family": "Qwen",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/qwen2-1.5b-instruct",
+        "upstream": "qwen2-1.5b-instruct",
+        "family": "Qwen",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/qwen2-57b-a14b-instruct",
+        "upstream": "qwen2-57b-a14b-instruct",
+        "family": "Qwen",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/qwen2-7b-instruct",
+        "upstream": "qwen2-7b-instruct",
+        "family": "Qwen",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/qwen2.5-0.5b-instruct",
+        "upstream": "qwen2.5-0.5b-instruct",
+        "family": "Qwen",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/qwen2.5-1.5b-instruct",
+        "upstream": "qwen2.5-1.5b-instruct",
+        "family": "Qwen",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/qwen2.5-math-1.5b-instruct",
+        "upstream": "qwen2.5-math-1.5b-instruct",
+        "family": "Qwen",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/qwen3-asr-flash-realtime",
+        "upstream": "qwen3-asr-flash-realtime",
+        "family": "Qwen",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/qwen3-coder-flash",
+        "upstream": "qwen3-coder-flash",
+        "family": "Qwen",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/qwen3-livetranslate-flash",
+        "upstream": "qwen3-livetranslate-flash",
+        "family": "Qwen",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/qwen3-livetranslate-flash-2025-12-01",
+        "upstream": "qwen3-livetranslate-flash-2025-12-01",
+        "family": "Qwen",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/qwen3-omni-flash",
+        "upstream": "qwen3-omni-flash",
+        "family": "Qwen",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/qwen3-omni-flash-realtime-2025-09-15",
+        "upstream": "qwen3-omni-flash-realtime-2025-09-15",
+        "family": "Qwen",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/qwen3-s2s-flash-realtime-2025-09-22",
+        "upstream": "qwen3-s2s-flash-realtime-2025-09-22",
+        "family": "Qwen",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/qwen3-tts-flash",
+        "upstream": "qwen3-tts-flash",
+        "family": "Qwen",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/qwen3-tts-flash-realtime",
+        "upstream": "qwen3-tts-flash-realtime",
+        "family": "Qwen",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/qwen3-vl-plus",
+        "upstream": "qwen3-vl-plus",
+        "family": "Qwen",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/qwen3.5-122b-a10b",
+        "upstream": "qwen3.5-122b-a10b",
+        "family": "Qwen",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/qwen3.5-27b",
+        "upstream": "qwen3.5-27b",
+        "family": "Qwen",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/qwen3.5-35b-a3b",
+        "upstream": "qwen3.5-35b-a3b",
+        "family": "Qwen",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/qwen3.5-397b-a17b",
+        "upstream": "qwen3.5-397b-a17b",
+        "family": "Qwen",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/qwen3.5-flash",
+        "upstream": "qwen3.5-flash",
+        "family": "Qwen",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/qwen3.5-flash-2026-02-23",
+        "upstream": "qwen3.5-flash-2026-02-23",
+        "family": "Qwen",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/qwen3.5-livetranslate-flash-realtime",
+        "upstream": "qwen3.5-livetranslate-flash-realtime",
+        "family": "Qwen",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/qwen3.5-livetranslate-flash-realtime-2026-05-19",
+        "upstream": "qwen3.5-livetranslate-flash-realtime-2026-05-19",
+        "family": "Qwen",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/qwen3.5-ocr",
+        "upstream": "qwen3.5-ocr",
+        "family": "Qwen",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/qwen3.5-omni-flash",
+        "upstream": "qwen3.5-omni-flash",
+        "family": "Qwen",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/qwen3.5-omni-flash-2026-03-15",
+        "upstream": "qwen3.5-omni-flash-2026-03-15",
+        "family": "Qwen",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/qwen3.5-omni-flash-realtime",
+        "upstream": "qwen3.5-omni-flash-realtime",
+        "family": "Qwen",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/qwen3.5-omni-flash-realtime-2026-03-15",
+        "upstream": "qwen3.5-omni-flash-realtime-2026-03-15",
+        "family": "Qwen",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/qwen3.5-omni-plus",
+        "upstream": "qwen3.5-omni-plus",
+        "family": "Qwen",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/qwen3.5-omni-plus-2026-03-15",
+        "upstream": "qwen3.5-omni-plus-2026-03-15",
+        "family": "Qwen",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/qwen3.5-omni-plus-realtime",
+        "upstream": "qwen3.5-omni-plus-realtime",
+        "family": "Qwen",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/qwen3.5-omni-plus-realtime-2026-03-15",
+        "upstream": "qwen3.5-omni-plus-realtime-2026-03-15",
+        "family": "Qwen",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/qwen3.5-plus",
+        "upstream": "qwen3.5-plus",
+        "family": "Qwen",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/qwen3.5-plus-2026-02-15",
+        "upstream": "qwen3.5-plus-2026-02-15",
+        "family": "Qwen",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/qwen3.5-plus-2026-04-20",
+        "upstream": "qwen3.5-plus-2026-04-20",
+        "family": "Qwen",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/qwen3.6-27b",
+        "upstream": "qwen3.6-27b",
+        "family": "Qwen",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/qwen3.6-35b-a3b",
+        "upstream": "qwen3.6-35b-a3b",
+        "family": "Qwen",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/qwen3.6-flash",
+        "upstream": "qwen3.6-flash",
+        "family": "Qwen",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/qwen3.6-flash-2026-04-16",
+        "upstream": "qwen3.6-flash-2026-04-16",
+        "family": "Qwen",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/qwen3.6-plus",
+        "upstream": "qwen3.6-plus",
+        "family": "Qwen",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/qwen3.6-plus-2026-04-02",
+        "upstream": "qwen3.6-plus-2026-04-02",
+        "family": "Qwen",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/qwen3.7-flash",
+        "upstream": "qwen3.7-flash",
+        "family": "Qwen",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/qwen3.7-flash-2026-07-15",
+        "upstream": "qwen3.7-flash-2026-07-15",
+        "family": "Qwen",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/qwen3.7-max",
+        "upstream": "qwen3.7-max",
+        "family": "Qwen",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/qwen3.7-max-2026-05-17",
+        "upstream": "qwen3.7-max-2026-05-17",
+        "family": "Qwen",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/qwen3.7-max-2026-05-20",
+        "upstream": "qwen3.7-max-2026-05-20",
+        "family": "Qwen",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/qwen3.7-max-2026-06-08",
+        "upstream": "qwen3.7-max-2026-06-08",
+        "family": "Qwen",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/qwen3.7-max-preview",
+        "upstream": "qwen3.7-max-preview",
+        "family": "Qwen",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/qwen3.7-plus",
+        "upstream": "qwen3.7-plus",
+        "family": "Qwen",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/qwen3.7-plus-2026-05-26",
+        "upstream": "qwen3.7-plus-2026-05-26",
+        "family": "Qwen",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/qwen3.7-text-embedding",
+        "upstream": "qwen3.7-text-embedding",
+        "family": "Qwen",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/qwen3.7-text-embedding-flash",
+        "upstream": "qwen3.7-text-embedding-flash",
+        "family": "Qwen",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/qwen3.7-text-rerank",
+        "upstream": "qwen3.7-text-rerank",
+        "family": "Qwen",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/qwen3.8-2.4t-a95b",
+        "upstream": "qwen3.8-2.4t-a95b",
+        "family": "Qwen",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/qwen3.8-27b",
+        "upstream": "qwen3.8-27b",
+        "family": "Qwen",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/qwen3.8-flash",
+        "upstream": "qwen3.8-flash",
+        "family": "Qwen",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/qwen3.8-livetranslate-flash-realtime",
+        "upstream": "qwen3.8-livetranslate-flash-realtime",
+        "family": "Qwen",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/qwen3.8-max",
+        "upstream": "qwen3.8-max",
+        "family": "Qwen",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/qwen3.8-max-0902",
+        "upstream": "qwen3.8-max-0902",
+        "family": "Qwen",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/qwen3.8-omni-flash",
+        "upstream": "qwen3.8-omni-flash",
+        "family": "Qwen",
+        "provider": "dashscope"
+      },
+      {
+        "code": "dashscope/qwen3.8-omni-flash-realtime",
+        "upstream": "qwen3.8-omni-flash-realtime",
+        "family": "Qwen",
+        "provider": "dashscope"
+      },
+      {
+        "code": "opencode-console/qwen3.5-plus",
+        "upstream": "qwen3.5-plus",
+        "family": "Qwen",
+        "provider": "opencode-console"
+      },
+      {
+        "code": "opencode-console/qwen3.6-plus",
+        "upstream": "qwen3.6-plus",
+        "family": "Qwen",
+        "provider": "opencode-console"
+      },
+      {
+        "code": "opencode-console/qwen3.8-flash",
+        "upstream": "qwen3.8-flash",
+        "family": "Qwen",
+        "provider": "opencode-console"
+      },
+      {
+        "code": "opencode-console/qwen3.8-max",
+        "upstream": "qwen3.8-max",
+        "family": "Qwen",
+        "provider": "opencode-console"
+      },
+      {
+        "code": "openrouter/qwen/qwen-2.5-72b-instruct",
+        "upstream": "qwen/qwen-2.5-72b-instruct",
+        "family": "Qwen",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/qwen/qwen-2.5-coder-32b-instruct",
+        "upstream": "qwen/qwen-2.5-coder-32b-instruct",
+        "family": "Qwen",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/qwen/qwen-plus",
+        "upstream": "qwen/qwen-plus",
+        "family": "Qwen",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/qwen/qwen2.5-vl-72b-instruct",
+        "upstream": "qwen/qwen2.5-vl-72b-instruct",
+        "family": "Qwen",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/qwen/qwen3-14b",
+        "upstream": "qwen/qwen3-14b",
+        "family": "Qwen",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/qwen/qwen3-235b-a22b-2507",
+        "upstream": "qwen/qwen3-235b-a22b-2507",
+        "family": "Qwen",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/qwen/qwen3-235b-a22b-thinking-2507",
+        "upstream": "qwen/qwen3-235b-a22b-thinking-2507",
+        "family": "Qwen",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/qwen/qwen3-30b-a3b",
+        "upstream": "qwen/qwen3-30b-a3b",
+        "family": "Qwen",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/qwen/qwen3-30b-a3b-instruct-2507",
+        "upstream": "qwen/qwen3-30b-a3b-instruct-2507",
+        "family": "Qwen",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/qwen/qwen3-32b",
+        "upstream": "qwen/qwen3-32b",
+        "family": "Qwen",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/qwen/qwen3-coder",
+        "upstream": "qwen/qwen3-coder",
+        "family": "Qwen",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/qwen/qwen3-coder-30b-a3b-instruct",
+        "upstream": "qwen/qwen3-coder-30b-a3b-instruct",
+        "family": "Qwen",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/qwen/qwen3-coder-flash",
+        "upstream": "qwen/qwen3-coder-flash",
+        "family": "Qwen",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/qwen/qwen3-coder-next",
+        "upstream": "qwen/qwen3-coder-next",
+        "family": "Qwen",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/qwen/qwen3-next-80b-a3b-instruct",
+        "upstream": "qwen/qwen3-next-80b-a3b-instruct",
+        "family": "Qwen",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/qwen/qwen3-vl-235b-a22b-instruct",
+        "upstream": "qwen/qwen3-vl-235b-a22b-instruct",
+        "family": "Qwen",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/qwen/qwen3-vl-30b-a3b-instruct",
+        "upstream": "qwen/qwen3-vl-30b-a3b-instruct",
+        "family": "Qwen",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/qwen/qwen3-vl-30b-a3b-thinking",
+        "upstream": "qwen/qwen3-vl-30b-a3b-thinking",
+        "family": "Qwen",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/qwen/qwen3-vl-8b-instruct",
+        "upstream": "qwen/qwen3-vl-8b-instruct",
+        "family": "Qwen",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/qwen/qwen3.5-122b-a10b",
+        "upstream": "qwen/qwen3.5-122b-a10b",
+        "family": "Qwen",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/qwen/qwen3.5-27b",
+        "upstream": "qwen/qwen3.5-27b",
+        "family": "Qwen",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/qwen/qwen3.5-35b-a3b",
+        "upstream": "qwen/qwen3.5-35b-a3b",
+        "family": "Qwen",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/qwen/qwen3.5-397b-a17b",
+        "upstream": "qwen/qwen3.5-397b-a17b",
+        "family": "Qwen",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/qwen/qwen3.5-9b",
+        "upstream": "qwen/qwen3.5-9b",
+        "family": "Qwen",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/qwen/qwen3.5-flash-02-23",
+        "upstream": "qwen/qwen3.5-flash-02-23",
+        "family": "Qwen",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/qwen/qwen3.5-plus-02-15",
+        "upstream": "qwen/qwen3.5-plus-02-15",
+        "family": "Qwen",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/qwen/qwen3.5-plus-20260420",
+        "upstream": "qwen/qwen3.5-plus-20260420",
+        "family": "Qwen",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/qwen/qwen3.6-27b",
+        "upstream": "qwen/qwen3.6-27b",
+        "family": "Qwen",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/qwen/qwen3.6-35b-a3b",
+        "upstream": "qwen/qwen3.6-35b-a3b",
+        "family": "Qwen",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/qwen/qwen3.6-flash",
+        "upstream": "qwen/qwen3.6-flash",
+        "family": "Qwen",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/qwen/qwen3.6-plus",
+        "upstream": "qwen/qwen3.6-plus",
+        "family": "Qwen",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/qwen/qwen3.7-flash",
+        "upstream": "qwen/qwen3.7-flash",
+        "family": "Qwen",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/qwen/qwen3.7-max",
+        "upstream": "qwen/qwen3.7-max",
+        "family": "Qwen",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/qwen/qwen3.7-plus",
+        "upstream": "qwen/qwen3.7-plus",
+        "family": "Qwen",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/qwen/qwen3.7-plus:batch",
+        "upstream": "qwen/qwen3.7-plus:batch",
+        "family": "Qwen",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/qwen/qwen3.8-2.4t-a95b",
+        "upstream": "qwen/qwen3.8-2.4t-a95b",
+        "family": "Qwen",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/qwen/qwen3.8-27b",
+        "upstream": "qwen/qwen3.8-27b",
+        "family": "Qwen",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/qwen/qwen3.8-27b:batch",
+        "upstream": "qwen/qwen3.8-27b:batch",
+        "family": "Qwen",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/qwen/qwen3.8-flash",
+        "upstream": "qwen/qwen3.8-flash",
+        "family": "Qwen",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/qwen/qwen3.8-max-0902",
+        "upstream": "qwen/qwen3.8-max-0902",
+        "family": "Qwen",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/qwen/qwen3.8-max-0902:batch",
+        "upstream": "qwen/qwen3.8-max-0902:batch",
+        "family": "Qwen",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/qwen/qwen3.8-max-prime",
+        "upstream": "qwen/qwen3.8-max-prime",
+        "family": "Qwen",
+        "provider": "openrouter"
+      },
+      {
+        "code": "openrouter/qwen/qwen3.8-omni-flash",
+        "upstream": "qwen/qwen3.8-omni-flash",
+        "family": "Qwen",
+        "provider": "openrouter"
+      },
+      {
+        "code": "qianwenai/qwen-1.8b-chat",
+        "upstream": "qwen-1.8b-chat",
+        "family": "Qwen",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/qwen-1.8b-longcontext-chat",
+        "upstream": "qwen-1.8b-longcontext-chat",
+        "family": "Qwen",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/qwen-14b-chat",
+        "upstream": "qwen-14b-chat",
+        "family": "Qwen",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/qwen-72b-chat",
+        "upstream": "qwen-72b-chat",
+        "family": "Qwen",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/qwen-7b-chat",
+        "upstream": "qwen-7b-chat",
+        "family": "Qwen",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/qwen-audio-3.0-asr-flash",
+        "upstream": "qwen-audio-3.0-asr-flash",
+        "family": "Qwen",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/qwen-audio-3.0-realtime-flash",
+        "upstream": "qwen-audio-3.0-realtime-flash",
+        "family": "Qwen",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/qwen-audio-3.0-realtime-plus",
+        "upstream": "qwen-audio-3.0-realtime-plus",
+        "family": "Qwen",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/qwen-audio-3.1-realtime-flash",
+        "upstream": "qwen-audio-3.1-realtime-flash",
+        "family": "Qwen",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/qwen-audio-3.1-realtime-plus",
+        "upstream": "qwen-audio-3.1-realtime-plus",
+        "family": "Qwen",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/qwen-deep-research-2025-12-15",
+        "upstream": "qwen-deep-research-2025-12-15",
+        "family": "Qwen",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/qwen-deep-search-planning",
+        "upstream": "qwen-deep-search-planning",
+        "family": "Qwen",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/qwen-flash",
+        "upstream": "qwen-flash",
+        "family": "Qwen",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/qwen-flash-character",
+        "upstream": "qwen-flash-character",
+        "family": "Qwen",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/qwen-flash-character-2026-02-26",
+        "upstream": "qwen-flash-character-2026-02-26",
+        "family": "Qwen",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/qwen-image-2.0",
+        "upstream": "qwen-image-2.0",
+        "family": "Qwen",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/qwen-image-2.0-2026-03-03",
+        "upstream": "qwen-image-2.0-2026-03-03",
+        "family": "Qwen",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/qwen-image-2.0-pro",
+        "upstream": "qwen-image-2.0-pro",
+        "family": "Qwen",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/qwen-image-2.0-pro-2026-03-03",
+        "upstream": "qwen-image-2.0-pro-2026-03-03",
+        "family": "Qwen",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/qwen-image-2.0-pro-2026-04-22",
+        "upstream": "qwen-image-2.0-pro-2026-04-22",
+        "family": "Qwen",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/qwen-image-2.0-pro-2026-06-22",
+        "upstream": "qwen-image-2.0-pro-2026-06-22",
+        "family": "Qwen",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/qwen-image-2.1-pro",
+        "upstream": "qwen-image-2.1-pro",
+        "family": "Qwen",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/qwen-image-3.0",
+        "upstream": "qwen-image-3.0",
+        "family": "Qwen",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/qwen-image-3.0-pro",
+        "upstream": "qwen-image-3.0-pro",
+        "family": "Qwen",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/qwen-long",
+        "upstream": "qwen-long",
+        "family": "Qwen",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/qwen-max",
+        "upstream": "qwen-max",
+        "family": "Qwen",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/qwen-max-0107",
+        "upstream": "qwen-max-0107",
+        "family": "Qwen",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/qwen-max-1201",
+        "upstream": "qwen-max-1201",
+        "family": "Qwen",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/qwen-max-longcontext",
+        "upstream": "qwen-max-longcontext",
+        "family": "Qwen",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/qwen-mt-flash",
+        "upstream": "qwen-mt-flash",
+        "family": "Qwen",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/qwen-mt-lite",
+        "upstream": "qwen-mt-lite",
+        "family": "Qwen",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/qwen-mt-plus",
+        "upstream": "qwen-mt-plus",
+        "family": "Qwen",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/qwen-mt-uni",
+        "upstream": "qwen-mt-uni",
+        "family": "Qwen",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/qwen-plus",
+        "upstream": "qwen-plus",
+        "family": "Qwen",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/qwen-plus-2025-01-25",
+        "upstream": "qwen-plus-2025-01-25",
+        "family": "Qwen",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/qwen-plus-2025-04-28",
+        "upstream": "qwen-plus-2025-04-28",
+        "family": "Qwen",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/qwen-plus-2025-07-14",
+        "upstream": "qwen-plus-2025-07-14",
+        "family": "Qwen",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/qwen-plus-2025-11-05",
+        "upstream": "qwen-plus-2025-11-05",
+        "family": "Qwen",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/qwen-plus-2025-12-01",
+        "upstream": "qwen-plus-2025-12-01",
+        "family": "Qwen",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/qwen-plus-latest",
+        "upstream": "qwen-plus-latest",
+        "family": "Qwen",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/qwen-turbo-0919",
+        "upstream": "qwen-turbo-0919",
+        "family": "Qwen",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/qwen-turbo-2024-11-01",
+        "upstream": "qwen-turbo-2024-11-01",
+        "family": "Qwen",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/qwen-vl-ocr",
+        "upstream": "qwen-vl-ocr",
+        "family": "Qwen",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/qwen-vl-ocr-2025-11-20",
+        "upstream": "qwen-vl-ocr-2025-11-20",
+        "family": "Qwen",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/qwen1.5-0.5b-chat",
+        "upstream": "qwen1.5-0.5b-chat",
+        "family": "Qwen",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/qwen1.5-1.8b-chat",
+        "upstream": "qwen1.5-1.8b-chat",
+        "family": "Qwen",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/qwen1.5-110b-chat",
+        "upstream": "qwen1.5-110b-chat",
+        "family": "Qwen",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/qwen1.5-14b-chat",
+        "upstream": "qwen1.5-14b-chat",
+        "family": "Qwen",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/qwen1.5-32b-chat",
+        "upstream": "qwen1.5-32b-chat",
+        "family": "Qwen",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/qwen1.5-72b-chat",
+        "upstream": "qwen1.5-72b-chat",
+        "family": "Qwen",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/qwen1.5-7b-chat",
+        "upstream": "qwen1.5-7b-chat",
+        "family": "Qwen",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/qwen2-0.5b-instruct",
+        "upstream": "qwen2-0.5b-instruct",
+        "family": "Qwen",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/qwen2-1.5b-instruct",
+        "upstream": "qwen2-1.5b-instruct",
+        "family": "Qwen",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/qwen2-57b-a14b-instruct",
+        "upstream": "qwen2-57b-a14b-instruct",
+        "family": "Qwen",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/qwen2-7b-instruct",
+        "upstream": "qwen2-7b-instruct",
+        "family": "Qwen",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/qwen2.5-0.5b-instruct",
+        "upstream": "qwen2.5-0.5b-instruct",
+        "family": "Qwen",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/qwen2.5-1.5b-instruct",
+        "upstream": "qwen2.5-1.5b-instruct",
+        "family": "Qwen",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/qwen2.5-math-1.5b-instruct",
+        "upstream": "qwen2.5-math-1.5b-instruct",
+        "family": "Qwen",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/qwen3-asr-flash-realtime",
+        "upstream": "qwen3-asr-flash-realtime",
+        "family": "Qwen",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/qwen3-coder-flash",
+        "upstream": "qwen3-coder-flash",
+        "family": "Qwen",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/qwen3-livetranslate-flash",
+        "upstream": "qwen3-livetranslate-flash",
+        "family": "Qwen",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/qwen3-livetranslate-flash-2025-12-01",
+        "upstream": "qwen3-livetranslate-flash-2025-12-01",
+        "family": "Qwen",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/qwen3-omni-flash",
+        "upstream": "qwen3-omni-flash",
+        "family": "Qwen",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/qwen3-omni-flash-realtime-2025-09-15",
+        "upstream": "qwen3-omni-flash-realtime-2025-09-15",
+        "family": "Qwen",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/qwen3-s2s-flash-realtime-2025-09-22",
+        "upstream": "qwen3-s2s-flash-realtime-2025-09-22",
+        "family": "Qwen",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/qwen3-tts-flash",
+        "upstream": "qwen3-tts-flash",
+        "family": "Qwen",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/qwen3-tts-flash-realtime",
+        "upstream": "qwen3-tts-flash-realtime",
+        "family": "Qwen",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/qwen3-vl-plus",
+        "upstream": "qwen3-vl-plus",
+        "family": "Qwen",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/qwen3.5-122b-a10b",
+        "upstream": "qwen3.5-122b-a10b",
+        "family": "Qwen",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/qwen3.5-27b",
+        "upstream": "qwen3.5-27b",
+        "family": "Qwen",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/qwen3.5-35b-a3b",
+        "upstream": "qwen3.5-35b-a3b",
+        "family": "Qwen",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/qwen3.5-397b-a17b",
+        "upstream": "qwen3.5-397b-a17b",
+        "family": "Qwen",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/qwen3.5-flash",
+        "upstream": "qwen3.5-flash",
+        "family": "Qwen",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/qwen3.5-flash-2026-02-23",
+        "upstream": "qwen3.5-flash-2026-02-23",
+        "family": "Qwen",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/qwen3.5-livetranslate-flash-realtime",
+        "upstream": "qwen3.5-livetranslate-flash-realtime",
+        "family": "Qwen",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/qwen3.5-livetranslate-flash-realtime-2026-05-19",
+        "upstream": "qwen3.5-livetranslate-flash-realtime-2026-05-19",
+        "family": "Qwen",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/qwen3.5-ocr",
+        "upstream": "qwen3.5-ocr",
+        "family": "Qwen",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/qwen3.5-omni-flash",
+        "upstream": "qwen3.5-omni-flash",
+        "family": "Qwen",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/qwen3.5-omni-flash-2026-03-15",
+        "upstream": "qwen3.5-omni-flash-2026-03-15",
+        "family": "Qwen",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/qwen3.5-omni-flash-realtime",
+        "upstream": "qwen3.5-omni-flash-realtime",
+        "family": "Qwen",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/qwen3.5-omni-flash-realtime-2026-03-15",
+        "upstream": "qwen3.5-omni-flash-realtime-2026-03-15",
+        "family": "Qwen",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/qwen3.5-omni-plus",
+        "upstream": "qwen3.5-omni-plus",
+        "family": "Qwen",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/qwen3.5-omni-plus-2026-03-15",
+        "upstream": "qwen3.5-omni-plus-2026-03-15",
+        "family": "Qwen",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/qwen3.5-omni-plus-realtime",
+        "upstream": "qwen3.5-omni-plus-realtime",
+        "family": "Qwen",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/qwen3.5-omni-plus-realtime-2026-03-15",
+        "upstream": "qwen3.5-omni-plus-realtime-2026-03-15",
+        "family": "Qwen",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/qwen3.5-plus",
+        "upstream": "qwen3.5-plus",
+        "family": "Qwen",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/qwen3.5-plus-2026-02-15",
+        "upstream": "qwen3.5-plus-2026-02-15",
+        "family": "Qwen",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/qwen3.5-plus-2026-04-20",
+        "upstream": "qwen3.5-plus-2026-04-20",
+        "family": "Qwen",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/qwen3.6-27b",
+        "upstream": "qwen3.6-27b",
+        "family": "Qwen",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/qwen3.6-35b-a3b",
+        "upstream": "qwen3.6-35b-a3b",
+        "family": "Qwen",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/qwen3.6-flash",
+        "upstream": "qwen3.6-flash",
+        "family": "Qwen",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/qwen3.6-flash-2026-04-16",
+        "upstream": "qwen3.6-flash-2026-04-16",
+        "family": "Qwen",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/qwen3.6-plus",
+        "upstream": "qwen3.6-plus",
+        "family": "Qwen",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/qwen3.6-plus-2026-04-02",
+        "upstream": "qwen3.6-plus-2026-04-02",
+        "family": "Qwen",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/qwen3.7-flash",
+        "upstream": "qwen3.7-flash",
+        "family": "Qwen",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/qwen3.7-flash-2026-07-15",
+        "upstream": "qwen3.7-flash-2026-07-15",
+        "family": "Qwen",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/qwen3.7-max",
+        "upstream": "qwen3.7-max",
+        "family": "Qwen",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/qwen3.7-max-2026-05-17",
+        "upstream": "qwen3.7-max-2026-05-17",
+        "family": "Qwen",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/qwen3.7-max-2026-05-20",
+        "upstream": "qwen3.7-max-2026-05-20",
+        "family": "Qwen",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/qwen3.7-max-2026-06-08",
+        "upstream": "qwen3.7-max-2026-06-08",
+        "family": "Qwen",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/qwen3.7-max-preview",
+        "upstream": "qwen3.7-max-preview",
+        "family": "Qwen",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/qwen3.7-plus",
+        "upstream": "qwen3.7-plus",
+        "family": "Qwen",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/qwen3.7-plus-2026-05-26",
+        "upstream": "qwen3.7-plus-2026-05-26",
+        "family": "Qwen",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/qwen3.7-text-embedding",
+        "upstream": "qwen3.7-text-embedding",
+        "family": "Qwen",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/qwen3.7-text-embedding-flash",
+        "upstream": "qwen3.7-text-embedding-flash",
+        "family": "Qwen",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/qwen3.7-text-rerank",
+        "upstream": "qwen3.7-text-rerank",
+        "family": "Qwen",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/qwen3.8-2.4t-a95b",
+        "upstream": "qwen3.8-2.4t-a95b",
+        "family": "Qwen",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/qwen3.8-27b",
+        "upstream": "qwen3.8-27b",
+        "family": "Qwen",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/qwen3.8-flash",
+        "upstream": "qwen3.8-flash",
+        "family": "Qwen",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/qwen3.8-livetranslate-flash-realtime",
+        "upstream": "qwen3.8-livetranslate-flash-realtime",
+        "family": "Qwen",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/qwen3.8-max",
+        "upstream": "qwen3.8-max",
+        "family": "Qwen",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/qwen3.8-max-0902",
+        "upstream": "qwen3.8-max-0902",
+        "family": "Qwen",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/qwen3.8-omni-flash",
+        "upstream": "qwen3.8-omni-flash",
+        "family": "Qwen",
+        "provider": "qianwenai"
+      },
+      {
+        "code": "qianwenai/qwen3.8-omni-flash-realtime",
+        "upstream": "qwen3.8-omni-flash-realtime",
+        "family": "Qwen",
+        "provider": "qianwenai"
+      }
+    ]
+  },
+  "stats": {
+    "startedAt": "2026-11-10T18:03:03.019Z",
+    "requests": 3318,
+    "failovers": 330,
+    "promptTokens": 455286577,
+    "cachedPromptTokens": 445786640,
+    "cacheTrackedPromptTokens": 455286577,
+    "completionTokens": 1925612,
+    "cost": 105.08026720000014,
+    "costBreakdown": {
+      "input": 15.69763082048988,
+      "cachedInput": 76.10256587784787,
+      "output": 13.280070501662351,
+      "cacheSaved": 684.9230929006267,
+      "estimated": true
+    },
+    "apis": {
+      "chat": {
+        "requests": 2843,
+        "promptTokens": 374035234,
+        "cachedPromptTokens": 365357072,
+        "cacheTrackedPromptTokens": 374035234,
+        "completionTokens": 1699582,
+        "cost": 95.31141540000013,
+        "costBreakdown": {
+          "input": 15.429305361858475,
+          "cachedInput": 67.44007056829271,
+          "output": 12.442039469848854,
+          "cacheSaved": 606.9606351146306,
+          "estimated": true
+        },
+        "lastModel": "qianwenai/deepseek-v4.1-flash-1017",
+        "lastUsedAt": "2026-11-12T14:18:54.470Z"
+      },
+      "completions": {
+        "requests": 0,
+        "promptTokens": 0,
+        "cachedPromptTokens": 0,
+        "cacheTrackedPromptTokens": 0,
+        "completionTokens": 0,
+        "cost": 0,
+        "costBreakdown": {
+          "input": 0,
+          "cachedInput": 0,
+          "output": 0,
+          "cacheSaved": 0,
+          "estimated": false
+        },
+        "lastModel": null,
+        "lastUsedAt": null
+      },
+      "responses": {
+        "requests": 0,
+        "promptTokens": 0,
+        "cachedPromptTokens": 0,
+        "cacheTrackedPromptTokens": 0,
+        "completionTokens": 0,
+        "cost": 0,
+        "costBreakdown": {
+          "input": 0,
+          "cachedInput": 0,
+          "output": 0,
+          "cacheSaved": 0,
+          "estimated": false
+        },
+        "lastModel": null,
+        "lastUsedAt": null
+      },
+      "embeddings": {
+        "requests": 0,
+        "promptTokens": 0,
+        "cachedPromptTokens": 0,
+        "cacheTrackedPromptTokens": 0,
+        "completionTokens": 0,
+        "cost": 0,
+        "costBreakdown": {
+          "input": 0,
+          "cachedInput": 0,
+          "output": 0,
+          "cacheSaved": 0,
+          "estimated": false
+        },
+        "lastModel": null,
+        "lastUsedAt": null
+      }
+    }
+  }
+}
