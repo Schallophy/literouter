@@ -26,7 +26,7 @@ literouter 不绑定任何厂商。默认提供商是阿里云百炼（DashScope
 
 ## 快速开始
 
-要求 **Go >= 1.27.4**。
+要求 **Go >= 1.21**。代码实际用到的最高标准库 API 是 `context.AfterFunc`（Go 1.21 引入），不存在需要更新工具链的语法或接口。
 
 ```bash
 go build -trimpath -ldflags "-s -w" -o literouter .
