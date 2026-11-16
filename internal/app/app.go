@@ -30,8 +30,10 @@ const version = httpapi.Version
 func Run() int {
 	loadDotEnv(".env")
 
-	configPath := envPath("LITEROUTER_CONFIG", "config.json")
-	dataDir := envPath("LITEROUTER_DATA_DIR", "data")
+	configPath, dataDir := resolvePaths()
+	// A deployment keeps its keys beside its config; the working directory's
+	// .env still wins, since loadDotEnv never overwrites what is set.
+	loadDotEnv(filepath.Join(filepath.Dir(configPath), ".env"))
 
 	loaded, err := config.LoadConfig(configPath)
 	if err != nil {
@@ -348,6 +350,7 @@ func banner(rt *gateway.Runtime) {
 		row("gateway", base+"/v1"),
 		row("admin", admin),
 		row("config", configLine),
+		row("data", rt.DataDir()),
 	}
 	fmt.Fprintln(os.Stdout, strings.Join(rows, "\n"))
 }
@@ -369,18 +372,6 @@ func colorEnabled() bool {
 	}
 	info, err := os.Stdout.Stat()
 	return err == nil && info.Mode()&os.ModeCharDevice != 0
-}
-
-func envPath(name, fallback string) string {
-	value := strings.TrimSpace(os.Getenv(name))
-	if value == "" {
-		value = fallback
-	}
-	absolute, err := filepath.Abs(value)
-	if err != nil {
-		return value
-	}
-	return absolute
 }
 
 func loadDotEnv(path string) {

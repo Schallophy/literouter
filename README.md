@@ -33,12 +33,18 @@ go build -trimpath -ldflags "-s -w" -o literouter .
 ./literouter                # 零配置就能起，缺 Key 时 /v1 返回 503 literouter.no_key
 ```
 
-首次启动会在当前目录生成 `config.json` 与 `data/`，然后：
+首次启动不会往当前目录写东西：配置和数据默认放在用户目录（遵循 XDG，Windows 也一样）：
 
 - 网关地址：`http://127.0.0.1:8788/v1`
 - 管理看板：`http://127.0.0.1:8788`
-- 配置文件：`./config.json`
-- 数据目录：`./data/`
+- 配置文件：`${XDG_CONFIG_HOME:-~/.config}/literouter/config.json`
+- 数据目录：`${XDG_DATA_HOME:-~/.local/share}/literouter/data`
+
+Windows 上就是 `C:\Users\<你>\.config\literouter\config.json` 与
+`C:\Users\<你>\.local\share\literouter\data`。想换地方用
+`LITEROUTER_CONFIG` / `LITEROUTER_DATA_DIR`，两者各自独立。
+如果工作目录里已经有一个 `config.json`（旧版本或便携部署留下的），它仍然优先，
+不会被悄悄搬到别处。
 
 要真正转发请求，**做两件事：添加 provider（Base URL + API Key），再把模型加入列表**。先添加 provider，二选一：
 
@@ -62,6 +68,10 @@ CGO_ENABLED=0 GOOS=windows GOARCH=amd64 \
 # Linux amd64
 CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
   go build -trimpath -ldflags "-s -w" -o dist/literouter-linux-amd64 .
+
+# Linux arm64（Termux / 树莓派）
+CGO_ENABLED=0 GOOS=linux GOARCH=arm64 \
+  go build -trimpath -ldflags "-s -w" -o dist/literouter-linux-arm64 .
 ```
 
 两个产物都是静态单文件（约 8.7 MiB，已剥离符号），看板与 tzdata 均在二进制内。运行时只需要 `config.json`（不存在会生成）与数据目录。
@@ -367,8 +377,8 @@ client.chat.completions.create(model="auto", messages=[{"role": "user", "content
 | `DASHSCOPE_API_KEY` | 默认的提供商 Key 变量（可用 `apiKeyEnv` 改名） |
 | `LITEROUTER_PORT` | 覆盖监听端口（旧名 `SWITCHYARD_PORT` 仍会读取，便于平滑迁移） |
 | `LITEROUTER_PROVIDER` | 覆盖**默认提供商**的 base URL（内存生效，不写回配置；旧名 `SWITCHYARD_PROVIDER` 仍会读取） |
-| `LITEROUTER_CONFIG` | 配置文件路径，默认 `./config.json` |
-| `LITEROUTER_DATA_DIR` | 数据目录，默认 `./data` |
+| `LITEROUTER_CONFIG` | 配置文件路径，默认 `${XDG_CONFIG_HOME:-~/.config}/literouter/config.json`（工作目录已有 `config.json` 时优先用它） |
+| `LITEROUTER_DATA_DIR` | 数据目录，默认 `${XDG_DATA_HOME:-~/.local/share}/literouter/data` |
 | `LITEROUTER_LOG_LEVEL` | `debug` / `info` / `warn` / `error` |
 | `LITEROUTER_CONFIG_WATCH` | 设为 `0` 关闭 `config.json` 文件监听（默认开启） |
 | `NO_COLOR` | 设置后禁用终端颜色 |
