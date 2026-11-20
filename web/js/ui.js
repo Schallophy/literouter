@@ -2,6 +2,17 @@ import { esc } from "./format.js";
 
 let menuNode = null;
 let menuCleanup = null;
+let modalDepth = 0;
+
+function lockModalScroll() {
+  modalDepth += 1;
+  if (modalDepth === 1) document.documentElement.classList.add("is-modal-open");
+}
+
+function unlockModalScroll() {
+  modalDepth = Math.max(0, modalDepth - 1);
+  if (modalDepth === 0) document.documentElement.classList.remove("is-modal-open");
+}
 
 export function toast(message, tone = "ok", title = "") {
   const host = document.getElementById("toasts");
@@ -43,9 +54,13 @@ export function openDialog({ title, body, footer = "", className = "", onMount }
     if (event.target === dialog) dialog.close();
   });
   dialog.querySelector("[data-close]")?.addEventListener("click", () => dialog.close());
-  dialog.addEventListener("close", () => dialog.remove(), { once: true });
+  dialog.addEventListener("close", () => {
+    unlockModalScroll();
+    dialog.remove();
+  }, { once: true });
 
   dialog.showModal();
+  lockModalScroll();
   onMount?.(dialog);
   return dialog;
 }

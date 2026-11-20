@@ -535,6 +535,13 @@ dialog::backdrop {
   background: var(--scrim);
 }
 
+/* 模态打开时锁住页面滚动：滚动条消失，对话框才能在视口里严格居中，
+   也避免背后的会话列表跟着滚动。 */
+html.is-modal-open,
+html.is-modal-open body {
+  overflow: hidden;
+}
+
 .dialog-head {
   display: flex;
   align-items: flex-start;

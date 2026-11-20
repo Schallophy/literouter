@@ -7,6 +7,7 @@ import * as eventsView from "./views/events.js";
 import * as liveView from "./views/live.js";
 import * as modelsView from "./views/models.js";
 import * as rankView from "./views/rank.js";
+import * as sessionsView from "./views/sessions.js";
 import * as settingsView from "./views/settings.js";
 import * as usageView from "./views/usage.js";
 
@@ -15,6 +16,7 @@ const MODULES = {
   rank: rankView,
   usage: usageView,
   live: liveView,
+  sessions: sessionsView,
   events: eventsView,
   settings: settingsView,
 };
@@ -24,6 +26,7 @@ const TITLES = {
   rank: "排行",
   usage: "用量",
   live: "输出",
+  sessions: "会话",
   events: "事件",
   settings: "设置",
 };

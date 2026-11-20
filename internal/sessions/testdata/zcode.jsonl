@@ -1,0 +1,1 @@
+{"completedAt":"2026-11-20T02:29:21.220Z","sessionId":"sess_demo","type":"model_io","request":{"body":{"messages":[{"role":"system","content":"# Environment\n - Primary working directory: C:\\Users\\demo\\projects\n"},{"role":"user","content":[{"type":"text","text":"酷狗概念版签到接口仓库排查"}]},{"role":"assistant","content":[{"type":"text","text":"先看仓库结构。"}]}]}}}

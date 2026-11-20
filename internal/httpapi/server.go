@@ -18,6 +18,7 @@ import (
 	"time"
 
 	"github.com/Schallophy/literouter/internal/runtime"
+	"github.com/Schallophy/literouter/internal/sessions"
 	"github.com/Schallophy/literouter/internal/util"
 	"github.com/Schallophy/literouter/web"
 )
@@ -123,16 +124,18 @@ type route struct {
 
 // Server owns the router, static files and shared middleware.
 type Server struct {
-	Runtime *runtime.Runtime
-	Logger  *util.Logger
-	routes  []route
+	Runtime  *runtime.Runtime
+	Logger   *util.Logger
+	Sessions *sessions.Detector
+	routes   []route
 }
 
 // NewServer builds the HTTP surface for a runtime.
 func NewServer(rt *runtime.Runtime, logger *util.Logger) *Server {
-	server := &Server{Runtime: rt, Logger: logger}
+	server := &Server{Runtime: rt, Logger: logger, Sessions: sessions.NewDetector()}
 	server.registerOpenAI()
 	server.registerAdmin()
+	server.registerSessions()
 	return server
 }
 

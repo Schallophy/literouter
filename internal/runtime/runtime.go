@@ -462,7 +462,11 @@ func (r *Runtime) MarkDead(modelCode string, failure model.NormalizedError) {
 		Model:   &modelCode,
 		Detail:  map[string]any{"status": failure.Status, "code": failure.Code, "message": failure.Message},
 	})
-	r.Logger.Warn(modelCode+" 不可用："+failure.Label, map[string]any{"code": failure.Code, "status": failure.Status})
+	fields := map[string]any{"code": failure.Code}
+	if failure.Status != nil {
+		fields["status"] = *failure.Status
+	}
+	r.Logger.Warn(modelCode+" 不可用："+failure.Label, fields)
 }
 
 // MarkInvalid persists a model the provider no longer serves.
@@ -508,7 +512,11 @@ func (r *Runtime) MarkThrottled(modelCode string, failure model.NormalizedError)
 
 // MarkSkipped re-arms a dead model that failed its automatic retry.
 func (r *Runtime) MarkSkipped(modelCode string, failure model.NormalizedError) {
-	r.Logger.Debug("attempt skipped", map[string]any{"model": modelCode, "kind": failure.Kind, "status": failure.Status})
+	skipFields := map[string]any{"model": modelCode, "kind": failure.Kind}
+	if failure.Status != nil {
+		skipFields["status"] = *failure.Status
+	}
+	r.Logger.Debug("attempt skipped", skipFields)
 	record := r.Store.Get(modelCode)
 	if record != nil && record.Health == model.HealthDead {
 		r.Store.SetHealth(modelCode, model.HealthDead, map[string]any{
@@ -847,7 +855,11 @@ func (r *Runtime) RecordOutcome(result core.FailoverResult, caller model.CallerI
 			"code":     result.Error.Code,
 		},
 	})
-	r.Logger.Warn("请求失败："+result.Error.Label, map[string]any{"attempts": len(result.Attempts), "status": result.Error.Status})
+	fields := map[string]any{"attempts": len(result.Attempts)}
+	if result.Error.Status != nil {
+		fields["status"] = *result.Error.Status
+	}
+	r.Logger.Warn("请求失败："+result.Error.Label, fields)
 }
 
 // MarkSuccess persists usage, cost and caller accounting.
