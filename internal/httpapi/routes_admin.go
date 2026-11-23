@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"math"
+	"net"
 	"sort"
 	"strconv"
 	"strings"
@@ -142,10 +143,18 @@ func (s *Server) handleOverview(ctx *Ctx) error {
 	}
 
 	host := cfg.Host
+	if s.PublicHost != "" {
+		host = s.PublicHost
+	}
+	port := cfg.Port
+	if s.PublicPort > 0 {
+		port = s.PublicPort
+	}
 	endpointHost := host
 	if host == "0.0.0.0" {
 		endpointHost = "127.0.0.1"
 	}
+	endpoint := "http://" + net.JoinHostPort(endpointHost, strconv.Itoa(port))
 
 	ctx.Send(200, map[string]any{
 		"app": map[string]any{
@@ -155,8 +164,8 @@ func (s *Server) handleOverview(ctx *Ctx) error {
 			"bootedAt":      rt.BootedAt().UTC().Format("2006-01-02T15:04:05.000Z"),
 			"uptimeSeconds": uptimeSeconds(rt),
 			"host":          host,
-			"port":          cfg.Port,
-			"endpoint":      fmt.Sprintf("http://%s:%d/v1", endpointHost, cfg.Port),
+			"port":          port,
+			"endpoint":      endpoint + "/v1",
 			"configPath":    rt.ConfigPath(),
 			"dataDir":       rt.DataDir(),
 		},

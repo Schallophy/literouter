@@ -5,6 +5,7 @@ package app
 import (
 	"context"
 	"encoding/json"
+	"flag"
 	"fmt"
 	"net"
 	"net/http"
@@ -26,8 +27,65 @@ import (
 
 const version = httpapi.Version
 
-// Run boots the gateway and returns the process exit code.
+// Run parses argv and returns the process exit code. The default action is the
+// background server: the gateway is a daily tool, not a demo you keep a terminal
+// open for. `literouter stop` closes it.
 func Run() int {
+	if len(os.Args) > 1 {
+		switch os.Args[1] {
+		case "serve", "ui":
+			return serve(os.Args[2:])
+		case "up", "start":
+			return upCmd(os.Args[2:])
+		case "status":
+			return statusCmd()
+		case "stop", "quit":
+			return stopCmd()
+		case "version", "--version", "-v":
+			fmt.Println("literouter", version)
+			return 0
+		case "help", "--help", "-h":
+			usage()
+			return 0
+		default:
+			if !strings.HasPrefix(os.Args[1], "-") {
+				fmt.Fprintf(os.Stderr, "literouter: 未知命令 %q\n\n", os.Args[1])
+				usage()
+				return 2
+			}
+		}
+	}
+	return upCmd(os.Args[1:])
+}
+
+// serve runs the gateway in the foreground. It also records the instance in
+// server.json so `literouter stop` can end it.
+func serve(args []string) int {
+	flags := flag.NewFlagSet("serve", flag.ContinueOnError)
+	port := flags.Int("port", 0, "监听端口（0 = 使用配置）")
+	open := flags.Bool("open", false, "启动后打开浏览器")
+	restart := flags.Bool("restart", false, "重启已运行的实例")
+	if err := flags.Parse(args); err != nil {
+		return 2
+	}
+
+	// Repeating the command must not pile up servers on fallback ports.
+	if running, ok := liveInstance(); ok {
+		if !*restart {
+			printRunning(running, "已经在运行")
+			if *open {
+				openBrowser(running.Address)
+			}
+			return 0
+		}
+		if err := stopInstance(running, 5*time.Second); err != nil {
+			fmt.Fprintln(os.Stderr, "literouter: "+err.Error())
+			return 1
+		}
+		waitStopped(running.Address, 5*time.Second)
+		clearState()
+	}
+
 	loadDotEnv(".env")
 
 	configPath, dataDir := resolvePaths()
@@ -55,6 +113,9 @@ func Run() int {
 
 	overrides := config.ApplyEnvOverrides(loaded.Config)
 	loaded.Config = overrides.Config
+	if *port > 0 {
+		loaded.Config.Port = *port
+	}
 	logFile := strings.TrimSpace(loaded.Config.Log.File)
 	if logFile == "" {
 		logFile = filepath.Join(dataDir, "literouter.log")
@@ -95,9 +156,9 @@ func Run() int {
 
 	handler := httpapi.NewServer(rt, logger)
 	cfg := rt.ConfigSnapshot()
-	listener, err := net.Listen("tcp", net.JoinHostPort(cfg.Host, strconv.Itoa(cfg.Port)))
+	listener, actualPort, err := listenFor(cfg.Host, cfg.Port)
 	if err != nil {
-		if strings.Contains(strings.ToLower(err.Error()), "in use") {
+		if isPortBusy(err) {
 			logger.Error(fmt.Sprintf("端口 %d 已被占用，请修改 config.json 中的 port", cfg.Port), nil)
 		} else {
 			logger.Error(err.Error(), nil)
@@ -105,6 +166,20 @@ func Run() int {
 		rt.Shutdown()
 		_ = logger.Flush()
 		return 1
+	}
+	if actualPort != cfg.Port {
+		logger.Warn(fmt.Sprintf("端口 %d 已被占用，改用 %d", cfg.Port, actualPort), nil)
+	}
+	displayHost := advertisedHost(cfg.Host)
+	address := fmt.Sprintf("http://%s", net.JoinHostPort(displayHost, strconv.Itoa(actualPort)))
+	handler.SetAddress(displayHost, actualPort)
+	token := newToken()
+	handler.Token = token
+	handler.Stop = func() {
+		select {
+		case shutdownRequests <- struct{}{}:
+		default:
+		}
 	}
 	server := &http.Server{Handler: handler}
 	serveErrors := make(chan error, 1)
@@ -114,7 +189,19 @@ func Run() int {
 		}
 	}()
 
-	banner(rt)
+	if err := writeState(serverState{
+		Address: address, Port: actualPort, PID: os.Getpid(), Version: version, Token: token,
+	}); err != nil {
+		logger.Warn("无法记录运行地址："+err.Error(), nil)
+	}
+	// Remove our record on exit, but only when it still points at this instance.
+	defer func() {
+		if current, ok := readState(); ok && current.Address == address {
+			clearState()
+		}
+	}()
+
+	banner(rt, address)
 	if loaded.Persisted {
 		logger.Info("配置已迁移为新格式，写回 "+configPath, nil)
 	}
@@ -141,6 +228,24 @@ func Run() int {
 	signals := make(chan os.Signal, 4)
 	notifySignals(signals)
 	shutdownDone := make(chan int, 2)
+	beginShutdown := func(name string) {
+		closing.Lock()
+		alreadyClosing := isClosing
+		isClosing = true
+		closing.Unlock()
+		if alreadyClosing {
+			logger.Warn(name+" 重复到达，立即退出", nil)
+			rt.Shutdown()
+			_ = logger.Flush()
+			shutdownDone <- 1
+			return
+		}
+		watcher.Stop()
+		logger.Info("收到 "+name+"，正在关闭", nil)
+		// Keep consuming signals while the drain runs so a second signal can
+		// force an immediate exit.
+		go func() { shutdownDone <- gracefulShutdown(server, rt, logger) }()
+	}
 	go func() {
 		for {
 			select {
@@ -150,22 +255,9 @@ func Run() int {
 					reloadConfig(rt, logger)
 					continue
 				}
-				closing.Lock()
-				alreadyClosing := isClosing
-				isClosing = true
-				closing.Unlock()
-				if alreadyClosing {
-					logger.Warn(name+" 重复到达，立即退出", nil)
-					rt.Shutdown()
-					_ = logger.Flush()
-					shutdownDone <- 1
-					return
-				}
-				watcher.Stop()
-				logger.Info("收到 "+name+"，正在关闭", nil)
-				// Keep consuming signals while the drain runs so a second signal
-				// can force an immediate exit.
-				go func() { shutdownDone <- gracefulShutdown(server, rt, logger) }()
+				beginShutdown(name)
+			case <-shutdownRequests:
+				beginShutdown("远程停止")
 			case err := <-serveErrors:
 				logger.Error("server error", map[string]any{"error": err.Error()})
 				watcher.Stop()
@@ -330,14 +422,9 @@ func (w *configWatcher) loop() {
 	}
 }
 
-func banner(rt *gateway.Runtime) {
+func banner(rt *gateway.Runtime, address string) {
 	cfg := rt.ConfigSnapshot()
-	host := cfg.Host
-	if host == "0.0.0.0" {
-		host = "127.0.0.1"
-	}
-	base := fmt.Sprintf("http://%s:%d", host, cfg.Port)
-	admin := base
+	admin := address
 	if !cfg.UI.Enabled {
 		admin = "已关闭（ui.enabled = false）"
 	}
@@ -347,12 +434,53 @@ func banner(rt *gateway.Runtime) {
 	}
 	rows := []string{
 		paint("38;5;179", "◈ literouter") + " " + paint("38;5;240", "v"+version),
-		row("gateway", base+"/v1"),
+		row("gateway", address+"/v1"),
 		row("admin", admin),
 		row("config", configLine),
 		row("data", rt.DataDir()),
+		row("stop", "literouter stop"),
 	}
 	fmt.Fprintln(os.Stdout, strings.Join(rows, "\n"))
+}
+
+// listenFor binds the configured port, or asks the OS for a free one when it is
+// already taken. A busy port must not keep the user away from the dashboard:
+// the recorded address carries the real port.
+func listenFor(host string, port int) (net.Listener, int, error) {
+	listener, err := net.Listen("tcp", net.JoinHostPort(host, strconv.Itoa(port)))
+	if err == nil {
+		return listener, portOf(listener.Addr()), nil
+	}
+	if !isPortBusy(err) {
+		return nil, 0, err
+	}
+	listener, fallbackErr := net.Listen("tcp", net.JoinHostPort(host, "0"))
+	if fallbackErr != nil {
+		return nil, 0, err
+	}
+	return listener, portOf(listener.Addr()), nil
+}
+
+func portOf(address net.Addr) int {
+	_, port, err := net.SplitHostPort(address.String())
+	if err != nil {
+		return 0
+	}
+	value, err := strconv.Atoi(port)
+	if err != nil {
+		return 0
+	}
+	return value
+}
+
+func advertisedHost(host string) string {
+	switch host {
+	case "", "0.0.0.0":
+		return "127.0.0.1"
+	case "::", "[::]":
+		return "::1"
+	}
+	return host
 }
 
 func row(label, value string) string {

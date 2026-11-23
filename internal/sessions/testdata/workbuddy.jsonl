@@ -1,6 +1,0 @@
-{"type":"session-meta","id":"m0","sessionId":"wb-demo","timestamp":"1794308904461","meta":{"codebuddy.ai/hostKind":"unopted"}}
-{"type":"message","id":"m1","timestamp":"1794308902542","role":"user","content":"[{\"type\":\"input_text\",\"text\":\"<system-reminder data-role=\\\"user-context\\\">noise</system-reminder>询问 RustDesk 是否支持手柄\"}]","cwd":"c:\\Users\\demo\\projects","sessionId":"wb-demo"}
-{"type":"message","id":"m2","timestamp":"1794308912542","role":"assistant","content":"[{\"type\":\"output_text\",\"text\":\"支持部分手柄，需要映射。\"}]","sessionId":"wb-demo"}
-{"type":"message","id":"c1","timestamp":"1794308922542","role":"user","providerData":{"compactType":"pre-message-auto","isCompacted":true,"isCompactInternal":true,"isSummary":false,"compactionKind":"auto","compactionTrigger":"pre_message_threshold"},"content":"[{\"type\":\"input_text\",\"text\":\"<cb_summary>\\nSummary of the conversation so far:\\n已确认 RustDesk 支持部分手柄。\\n</cb_summary>\"}]","cwd":"c:\\Users\\demo\\projects","sessionId":"wb-demo"}
-{"type":"message","id":"m3","timestamp":"1794308932542","role":"assistant","content":"[{\"type\":\"output_text\",\"text\":\"还需要配置映射。\"}]","sessionId":"wb-demo"}
-{"type":"ai-title","id":"t1","timestamp":1795137757760,"aiTitle":"询问 RustDesk 是否支持手柄","sessionId":"wb-demo","cwd":"c:\\Users\\demo\\projects"}

@@ -1,42 +1,69 @@
 import { api } from "../api.js";
 import { esc, fmtAgo, fmtDateTime, fmtInt } from "../format.js";
 import { renderMarkdown } from "../markdown.js";
-import { openDialog, toast } from "../ui.js";
+import { toast } from "../ui.js";
+
+const REASONS = [
+  ["", "按检测结果"],
+  ["quota", "额度用完"],
+  ["upstream", "上游报错"],
+  ["aborted", "被中断"],
+  ["switch", "主动换人"],
+  ["other", "其他原因"],
+];
+
+const choice = {
+  reason: "",
+  note: "",
+  summary: true,
+  messages: true,
+  todos: true,
+  full: false,
+  limit: 40000,
+};
 
 const local = {
-  sessions: [],
-  agents: [],
-  errors: [],
-  loaded: false,
-  loading: false,
-  error: null,
-  agent: "all",
-  copying: new Set(),
-  viewing: new Set(),
+  all: [],
+  stuckOnly: false,
+  query: "",
+  selected: null,
+  detail: null,
+  handoff: null,
+  seq: 0,
 };
 
 let rootEl = null;
 let abort = null;
 let mounted = false;
+let filterTimer = 0;
+let noteTimer = 0;
 
 export function mount(root) {
   rootEl = root;
   mounted = true;
-  local.sessions = [];
-  local.agents = [];
-  local.errors = [];
-  local.loaded = false;
-  local.loading = false;
-  local.error = null;
-  local.agent = "all";
-  local.copying.clear();
-  local.viewing.clear();
+  local.all = [];
+  local.stuckOnly = false;
+  local.query = "";
+  local.selected = null;
+  local.detail = null;
+  local.handoff = null;
+  local.seq = 0;
+  choice.reason = "";
+  choice.note = "";
+  choice.summary = true;
+  choice.messages = true;
+  choice.todos = true;
+  choice.full = false;
+  choice.limit = 40000;
 
   abort = new AbortController();
-  root.addEventListener("click", onClick, { signal: abort.signal });
+  const options = { signal: abort.signal };
+  root.addEventListener("click", onClick, options);
+  root.addEventListener("input", onInput, options);
+  root.addEventListener("change", onChange, options);
 
   paint();
-  load();
+  loadSessions();
   return { update, destroy };
 }
 
@@ -45,388 +72,620 @@ function destroy() {
   abort?.abort();
   abort = null;
   rootEl = null;
-  local.copying.clear();
-  local.viewing.clear();
+  window.clearTimeout(filterTimer);
+  window.clearTimeout(noteTimer);
 }
 
-async function load(refresh = false) {
-  if (!mounted || local.loading) return;
-  local.loading = true;
-  paint();
+function update() {}
 
-  try {
-    const data = await api.get(`/api/sessions${refresh ? "?refresh=1" : ""}`);
-    local.sessions = Array.isArray(data?.sessions) ? data.sessions : [];
-    local.agents = Array.isArray(data?.agents) ? data.agents : [];
-    local.errors = Array.isArray(data?.errors) ? data.errors : [];
-    local.error = null;
-  } catch (error) {
-    local.error = error.message;
-  } finally {
-    local.loading = false;
-    local.loaded = true;
-    paint();
-  }
+function $(selector) {
+  return rootEl?.querySelector(selector) ?? null;
 }
+
+function $$(selector) {
+  return [...(rootEl?.querySelectorAll(selector) ?? [])];
+}
+
+/* ---------- 页面骨架 ---------- */
 
 function paint() {
   if (!rootEl) return;
-
   rootEl.innerHTML = `
-    <div class="page-head">
-      <div>
-        <h1 class="page-title">会话</h1>
-        <p class="page-sub">汇总本机各编程助手的会话，按最近对话时间排序；复制时优先保留上次压缩摘要，并附上压缩后的完整对话</p>
+    <div class="sessions-view">
+      <div class="page-head">
+        <div>
+          <h1 class="page-title">会话交接</h1>
+          <p class="page-sub">卡住的排最前；左边挑会话，右边勾选要带走的上下文，复制给下一个 agent。扫描只在你打开或点「重新扫描」时进行。</p>
+        </div>
+        <div class="page-tools">
+          <span class="agents" id="session-agents"></span>
+          <span class="state-dot" id="session-scan-dot" data-state="warn"></span>
+          <span id="session-scan-state">扫描中</span>
+          <button class="btn" type="button" data-action="refresh">重新扫描</button>
+        </div>
       </div>
-      <div class="page-tools">
-        <button class="btn" type="button" data-action="refresh"${
-          local.loading ? " disabled" : ""
-        }>${local.loading ? "扫描中…" : "重新扫描"}</button>
+      <div class="workspace">
+        <aside class="rail" id="session-rail">
+          <div class="rail-head">
+            <input class="input rail-search" type="search" id="session-filter"
+              placeholder="筛选标题、目录、ID 或助手" aria-label="筛选会话" autocomplete="off">
+            <div class="rail-tools">
+              <button class="chip" type="button" data-action="stuck-only" aria-pressed="false">只看卡住的</button>
+              <span class="rail-count" id="session-rail-count"></span>
+            </div>
+          </div>
+          <ul class="rail-list" id="session-rail-list"></ul>
+          <div class="rail-note" id="session-rail-note" hidden></div>
+        </aside>
+        <section class="handoff" id="session-handoff" aria-live="polite">
+          <div class="empty">
+            <p class="empty-title">选一个会话</p>
+            <p>左边列出本机编码代理留下的会话。卡住的排在最前，选中后右边就是可以直接粘贴的交接文本。</p>
+          </div>
+        </section>
       </div>
     </div>
-
-    <div class="sessions-tools">
-      <div class="chips" id="session-filters">
-        <button class="chip" type="button" data-agent="all" aria-pressed="${
-          local.agent === "all"
-        }">全部</button>
-        ${local.agents
-          .map((agent) => {
-            const count = local.sessions.filter((item) => item.agent === agent.id).length;
-            return `<button class="chip" type="button" data-agent="${esc(agent.id)}" aria-pressed="${
-              local.agent === agent.id
-            }" title="${esc(agent.store || "")}"${agent.present ? "" : " disabled"}>${esc(
-              agent.label,
-            )}<span class="chip-count">${fmtInt(count)}</span></button>`;
-          })
-          .join("")}
-      </div>
-      <span class="muted-note" id="session-total">${local.loaded ? totalText() : ""}</span>
-    </div>
-
-    <div id="sessions-body">${bodyHtml()}</div>
   `;
 }
 
-function totalText() {
-  const count = visibleSessions().length;
-  return `${fmtInt(count)} 个会话`;
+/* ---------- 数据 ---------- */
+
+async function loadSessions({ refresh = false } = {}) {
+  if (!mounted) return;
+  const dot = $("#session-scan-dot");
+  const text = $("#session-scan-state");
+  if (dot) dot.dataset.state = "warn";
+  if (text) text.textContent = "扫描中";
+
+  try {
+    const data = await api.get(`/api/sessions${refresh ? "?refresh=1" : ""}`);
+    if (!mounted) return;
+    local.all = Array.isArray(data?.sessions) ? data.sessions : [];
+    paintAgents(Array.isArray(data?.agents) ? data.agents : []);
+    paintRail();
+
+    if (dot) dot.dataset.state = "ok";
+    if (text) text.textContent = local.all.length ? `${local.all.length} 个会话` : "没有会话";
+    const note = $("#session-rail-note");
+    if (note) {
+      note.hidden = !data?.errors?.length;
+      note.textContent = data?.errors?.length ? data.errors.join("；") : "";
+    }
+
+    // 首次进入直接打开「最该看的那条」：卡住的第一条，否则最近的一条。
+    if (!local.selected && local.all.length) {
+      select(local.all[0].agent, local.all[0].id);
+    }
+  } catch (error) {
+    if (!mounted) return;
+    if (dot) dot.dataset.state = "bad";
+    if (text) text.textContent = "扫描失败";
+    toast(error.message, "bad", "无法读取会话");
+  }
 }
 
-function paintBody() {
-  const body = rootEl?.querySelector("#sessions-body");
-  if (!body) return;
-  body.innerHTML = bodyHtml();
-  const total = rootEl?.querySelector("#session-total");
-  if (total) total.textContent = local.loaded ? totalText() : "";
+function paintAgents(agents) {
+  const host = $("#session-agents");
+  if (!host) return;
+  host.innerHTML = agents
+    .filter((agent) => agent.present || agent.id === "opencode")
+    .map(
+      (agent) =>
+        `<span class="agent-chip" data-absent="${agent.present ? "false" : "true"}" title="${esc(
+          agent.store,
+        )}">${esc(agent.label)}</span>`,
+    )
+    .join("");
 }
 
-function bodyHtml() {
-  if (!local.loaded) {
-    return `<div class="sk-stack" aria-busy="true" aria-label="载入中" style="margin-top:20px">
-      <div class="sk" style="height:44px"></div>
-      <div class="sk" style="height:44px"></div>
-      <div class="sk" style="height:44px"></div>
-    </div>`;
+function paintRail() {
+  const list = $("#session-rail-list");
+  const count = $("#session-rail-count");
+  if (!list) return;
+
+  const query = local.query.trim().toLowerCase();
+  const rows = local.all.filter((session) => {
+    if (local.stuckOnly && session.status?.state !== "stuck") return false;
+    if (!query) return true;
+    const label = (session.status?.label ?? "").toLowerCase();
+    // 也按助手名筛选：想「只看 qoder 的」是最常见的用法之一。
+    const agent = shortAgent(session.agent).toLowerCase();
+    return (
+      session.title.toLowerCase().includes(query) ||
+      (session.cwd ?? "").toLowerCase().includes(query) ||
+      session.id.toLowerCase().includes(query) ||
+      agent.includes(query) ||
+      label.includes(query)
+    );
+  });
+
+  if (count) {
+    count.textContent =
+      rows.length === local.all.length ? `${rows.length} 个` : `${rows.length} / ${local.all.length}`;
   }
 
-  if (local.error) {
-    return `<div class="notice" data-tone="bad" style="margin-top:20px">
-      <div>
-        <p class="notice-title">读取会话失败</p>
-        <p>${esc(local.error)}</p>
-        <p style="margin-top:8px"><button class="link-btn" type="button" data-action="retry">重试</button></p>
-      </div>
-    </div>`;
-  }
-
-  const rows = visibleSessions();
   if (!rows.length) {
-    const present = local.agents.filter((agent) => agent.present);
-    return `<div class="empty">
-      <p class="empty-title">没有找到会话</p>
-      <p>${
-        present.length
-          ? `已检测到 ${present.map((agent) => esc(agent.label)).join("、")}，但这些助手还没有留下可读的会话记录。`
-          : "没有检测到已安装的编程助手。装上 OpenCode、Qoder、WorkBuddy 或 ZCode 后再回来看看。"
-      }</p>
-    </div>`;
+    list.innerHTML = `<li class="rail-empty">没有符合条件的会话</li>`;
+    return;
   }
 
-  return `
-    ${errorsHtml()}
-    <div class="table-wrap">
-      <table class="table sessions-table">
-        <thead>
-          <tr>
-            <th>会话</th>
-            <th class="col-agent">助手</th>
-            <th class="col-updated">最近对话</th>
-            <th class="col-cwd">目录</th>
-            <th class="col-action"><span class="sr-only">操作</span></th>
-          </tr>
-        </thead>
-        <tbody>${rows.map(rowHtml).join("")}</tbody>
-      </table>
-    </div>
-  `;
-}
-
-function errorsHtml() {
-  if (!local.errors.length) return "";
-  return `<div class="notice" data-tone="hold" style="margin-bottom:16px">
-    <div>
-      <p class="notice-title">部分来源读取失败</p>
-      ${local.errors.map((message) => `<p>${esc(message)}</p>`).join("")}
-    </div>
-  </div>`;
-}
-
-function visibleSessions() {
-  const rows =
-    local.agent === "all"
-      ? local.sessions
-      : local.sessions.filter((item) => item.agent === local.agent);
-  return [...rows].sort((left, right) => timeOf(right) - timeOf(left));
-}
-
-function timeOf(session) {
-  const at = Date.parse(session?.updated || "");
-  return Number.isFinite(at) ? at : 0;
-}
-
-function agentLabel(agent) {
-  return local.agents.find((item) => item.id === agent)?.label || agent;
+  list.innerHTML = rows.map(rowHtml).join("");
+  highlightSelection();
 }
 
 function rowHtml(session) {
-  const copying = local.copying.has(key(session));
-  const updated = session.updated
-    ? `<time datetime="${esc(session.updated)}" title="${esc(fmtDateTime(session.updated))}">${esc(
-        fmtAgo(session.updated),
-      )}</time>`
-    : "<span class=\"muted-note\">未知</span>";
-  const cwd = session.cwd
-    ? `<span class="mono session-path" title="${esc(session.cwd)}">${esc(session.cwd)}</span>`
-    : "<span class=\"muted-note\">—</span>";
+  const stuck = session.status?.state === "stuck";
+  const active = session.status?.state === "active";
+  const label = session.status?.label || (active ? "进行中" : "");
+  const detail = stuck || active ? trimDetail(session.status?.detail) : "";
+  const tone = stuck ? "stop" : active ? "go" : "idle";
+  const meta = label || detail;
 
   return `
-    <tr>
-      <td data-label="会话">
-        <div class="session-title">${esc(session.title || session.id)}</div>
-        <div class="session-meta mono" title="${esc(session.id)}">${esc(session.id)}</div>
-      </td>
-      <td class="col-agent" data-label="助手"><span class="session-agent">${esc(agentLabel(session.agent))}</span></td>
-      <td class="col-updated" data-label="最近对话">${updated}</td>
-      <td class="col-cwd" data-label="目录">${cwd}</td>
-      <td class="col-action">
-        <div class="session-actions">
-          <button class="btn sm ghost" type="button" data-action="view" data-agent="${esc(
-            session.agent,
-          )}" data-id="${esc(session.id)}"${
-            local.viewing.has(key(session)) ? " disabled" : ""
-          }>${local.viewing.has(key(session)) ? "载入中…" : "查看"}</button>
-          <button class="btn sm" type="button" data-action="copy" data-agent="${esc(
-            session.agent,
-          )}" data-id="${esc(session.id)}"${copying ? " disabled" : ""}>${
-            copying ? "生成中…" : "复制交接"
-          }</button>
-        </div>
-      </td>
-    </tr>
-  `;
+    <li>
+      <button class="row" type="button"
+              data-agent="${esc(session.agent)}"
+              data-id="${esc(session.id)}"
+              data-stuck="${stuck}">
+        <span class="row-top">
+          <span class="row-agent">${esc(shortAgent(session.agent))}</span>
+          <span class="row-ago">${esc(fmtAgo(session.updated))}</span>
+        </span>
+        <span class="row-title">${esc(session.title)}</span>
+        ${
+          meta
+            ? `<span class="row-reason">
+                 ${label ? `<span class="badge" data-tone="${tone}">${esc(label)}</span>` : ""}
+                 ${detail ? `<span class="row-detail" title="${esc(detail)}">${esc(detail)}</span>` : ""}
+               </span>`
+            : ""
+        }
+        ${session.cwd ? `<span class="row-cwd">${esc(session.cwd)}</span>` : ""}
+      </button>
+    </li>`;
 }
 
-function key(session) {
-  return `${session.agent}\u0000${session.id}`;
-}
-
-function onClick(event) {
-  const chip = event.target.closest(".chip[data-agent]");
-  if (chip && !chip.disabled) {
-    local.agent = chip.dataset.agent;
-    for (const item of rootEl.querySelectorAll(".chip[data-agent]")) {
-      item.setAttribute("aria-pressed", String(item === chip));
-    }
-    paintBody();
-    return;
-  }
-
-  const target = event.target.closest("[data-action]");
-  if (!target || target.disabled) return;
-
-  const action = target.dataset.action;
-  if (action === "refresh") {
-    local.loading = false;
-    load(true);
-    return;
-  }
-  if (action === "retry") {
-    local.loaded = false;
-    local.error = null;
-    paint();
-    load();
-    return;
-  }
-  if (action === "copy") {
-    copy(target.dataset.agent, target.dataset.id, target);
-    return;
-  }
-  if (action === "view") {
-    view(target.dataset.agent, target.dataset.id, target);
+function shortAgent(agent) {
+  switch (agent) {
+    case "qoder-cn":
+      return "qoder cn";
+    case "workbuddy":
+      return "workbuddy";
+    default:
+      return agent;
   }
 }
 
-async function view(agent, id, button) {
-  const token = key({ agent, id });
-  if (local.viewing.has(token)) return;
-  local.viewing.add(token);
-  if (button) {
-    button.disabled = true;
-    button.textContent = "载入中…";
+function trimDetail(value) {
+  const text = String(value ?? "")
+    .replace(/\s+/g, " ")
+    .trim();
+  if (!text) return "";
+  return text.length > 76 ? `${text.slice(0, 76)}…` : text;
+}
+
+function highlightSelection() {
+  for (const row of $$(".row")) {
+    const on = row.dataset.agent === local.selected?.agent && row.dataset.id === local.selected?.id;
+    row.setAttribute("aria-current", on ? "true" : "false");
   }
+}
 
-  const dialog = openDialog({
-    title: "会话详情",
-    className: "session-dialog",
-    body: `<div class="sk-stack" aria-busy="true" aria-label="载入会话" style="padding:20px">
-      <div class="sk" style="height:26px"></div>
-      <div class="sk" style="height:120px"></div>
-      <div class="sk" style="height:120px"></div>
-    </div>`,
-    footer: `<button class="btn" type="button" data-copy disabled>复制交接</button>
-      <button class="btn primary" type="button" data-dismiss>关闭</button>`,
-  });
+/* ---------- 选中会话 ---------- */
 
-  const copyButton = dialog.querySelector("[data-copy]");
-  dialog.querySelector("[data-dismiss]")?.addEventListener("click", () => dialog.close());
-  copyButton?.addEventListener("click", () => copy(agent, id, copyButton));
+async function select(agent, id) {
+  if (local.selected?.agent === agent && local.selected?.id === id && local.detail) return;
+
+  local.selected = { agent, id };
+  local.detail = null;
+  local.handoff = null;
+  highlightSelection();
+
+  const ticket = ++local.seq;
+  const view = $("#session-handoff");
+  if (view) view.innerHTML = `<div class="panel"><div class="panel-loading">读取会话…</div></div>`;
 
   try {
     const detail = await api.get(
-      `/api/sessions/detail?agent=${encodeURIComponent(agent)}&id=${encodeURIComponent(id)}`,
+      `/api/session?agent=${encodeURIComponent(agent)}&id=${encodeURIComponent(id)}`,
     );
-    if (!dialog.isConnected) return;
-    const title = dialog.querySelector(".dialog-title");
-    if (title) title.textContent = detail?.title || detail?.id || "会话详情";
-    const body = dialog.querySelector(".dialog-body");
-    if (body) body.innerHTML = detailHtml(detail);
-    if (copyButton) copyButton.disabled = false;
+    if (ticket !== local.seq || !mounted) return;
+    local.detail = detail;
+
+    // 每换一个会话就把勾选重置成该会话的实际内容：没有摘要就不勾摘要，
+    // 待办和对话即使是空的也保留——「没有待办」本身就是要交接的信息。
+    choice.reason = "";
+    choice.note = "";
+    choice.summary = true;
+    choice.messages = true;
+    choice.todos = true;
+
+    paintPanel();
+    buildHandoff(ticket);
   } catch (error) {
-    if (!dialog.isConnected) return;
-    const body = dialog.querySelector(".dialog-body");
-    if (body) {
-      body.innerHTML = `<div class="notice" data-tone="bad">
-        <div>
-          <p class="notice-title">读取会话失败</p>
-          <p>${esc(error.message || "未知错误")}</p>
-        </div>
-      </div>`;
-    }
-  } finally {
-    local.viewing.delete(token);
-    if (button?.isConnected) {
-      button.disabled = false;
-      button.textContent = "查看";
+    if (ticket !== local.seq || !mounted) return;
+    if (view) {
+      view.innerHTML = `<div class="panel"><div class="panel-loading">读取失败：${esc(
+        error.message,
+      )}</div></div>`;
     }
   }
 }
 
-function detailHtml(detail) {
-  const messages = Array.isArray(detail?.messages) ? detail.messages : [];
-  const meta = [
-    `<span class="session-agent">${esc(agentLabel(detail?.agent || ""))}</span>`,
-    detail?.updated ? `<span>最近对话 ${esc(fmtDateTime(detail.updated))}</span>` : "",
-    detail?.cwd ? `<span class="mono">${esc(detail.cwd)}</span>` : "",
-    detail?.id ? `<span class="mono">${esc(detail.id)}</span>` : "",
-  ]
-    .filter(Boolean)
-    .join("");
+function paintPanel() {
+  const detail = local.detail;
+  const view = $("#session-handoff");
+  if (!detail || !view) return;
 
-  const summary = detail?.summary
-    ? `<details class="session-view-summary" open>
-        <summary>上次压缩摘要${
-          detail.summaryAt ? ` · ${esc(fmtDateTime(detail.summaryAt))}` : ""
-        }</summary>
-        <div class="session-msg-text">${renderMarkdown(detail.summary)}</div>
+  const status = detail.status ?? {};
+  const stuck = status.state === "stuck";
+  const active = status.state === "active";
+  const badgeTone = stuck ? "stop" : active ? "go" : "idle";
+  const badgeText = status.label || (active ? "进行中" : "已结束");
+
+  view.innerHTML = `
+    <div class="panel">
+      <div class="panel-head">
+        <h1 class="panel-title">${esc(detail.title)}</h1>
+        <div class="panel-meta">
+          <span class="badge" data-tone="${badgeTone}">${esc(badgeText)}</span>
+          <span>${esc(shortAgent(detail.agent))}</span>
+          <span class="mono">${esc(detail.id)}</span>
+          ${detail.cwd ? `<span class="mono">${esc(detail.cwd)}</span>` : ""}
+          ${detail.updated ? `<span>最后活动 ${esc(fmtAgo(detail.updated))}</span>` : ""}
+        </div>
+        ${alertHtml(status)}
+      </div>
+
+      <div class="controls">
+        <div class="control">
+          <span class="control-label">
+            为什么换人
+            <span class="control-hint">选「按检测结果」就用上面读到的原因</span>
+          </span>
+          <div class="reason-row" id="session-reason-row">
+            ${REASONS.map(
+              ([code, label]) =>
+                `<button class="chip" type="button" data-reason="${code}" aria-pressed="${
+                  choice.reason === code ? "true" : "false"
+                }">${label}</button>`,
+            ).join("")}
+          </div>
+          <span class="reason-note" id="session-reason-note"></span>
+        </div>
+
+        <div class="control">
+          <label class="control-label" for="session-note">
+            给接手方的一句话
+            <span class="control-hint">可选：你正在做什么、下一步想怎么走</span>
+          </label>
+          <textarea class="textarea note-input" id="session-note" rows="2"
+            placeholder="例如：接口已经跑通，还差把重试写进 worker。">${esc(choice.note)}</textarea>
+        </div>
+
+        <div class="control">
+          <span class="control-label">
+            带什么过去
+            <span class="control-hint">每块都标了真实字数，按需勾选</span>
+          </span>
+          <div class="parts" id="session-parts">
+            ${(detail.sections ?? []).map(partHtml).join("")}
+          </div>
+          <div class="extra">
+            <label class="check">
+              <input type="checkbox" id="session-full" ${choice.full ? "checked" : ""} />
+              带上压缩前的完整对话
+            </label>
+            <label class="limit-field">
+              对话上限
+              <input class="input mono" type="number" id="session-limit" min="0" step="1000" value="${choice.limit}" />
+              字
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="preview-head">
+        <span class="sec-title">交接文本</span>
+        <span class="preview-size" id="session-preview-size"></span>
+        <button class="btn primary" type="button" data-action="copy">复制</button>
+        <button class="btn" type="button" data-action="save">另存为 .md</button>
+      </div>
+      <div class="preview-body">
+        <textarea class="preview-text" id="session-preview" spellcheck="false" aria-label="交接文本"></textarea>
+      </div>
+      <div class="preview-foot" id="session-preview-foot"></div>
+
+      ${foldHtml(detail)}
+    </div>`;
+
+  renderReasonNote();
+}
+
+function alertHtml(status) {
+  if (status.state === "stuck") {
+    const detail = status.detail ? `<span>${esc(trimDetail(status.detail))}</span>` : "";
+    const at = status.at ? `<span> · ${esc(fmtDateTime(status.at))}</span>` : "";
+    return `
+      <div class="panel-alert" data-tone="stop">
+        <p><span class="alert-strong">${esc(status.label || "会话无法继续")}</span>
+        ${detail ? ` · ${detail}` : ""}${at}</p>
+      </div>`;
+  }
+  if (status.state === "active") {
+    return `
+      <div class="panel-alert" data-tone="go">
+        <p>这个会话看起来还在跑。如果是主动换人，现在就是干净的交接点。</p>
+      </div>`;
+  }
+  return `
+    <div class="panel-alert" data-tone="hold">
+      <p>这个会话是正常结束的。把它当交接点也可以，但失败原因需要你自己写。</p>
+    </div>`;
+}
+
+function partHtml(section) {
+  const on =
+    (section.key === "summary" && choice.summary) ||
+    (section.key === "messages" && choice.messages) ||
+    (section.key === "todos" && choice.todos);
+  // 三段都能勾：空的段落会在交接文本里写明「没有」，这本身就是信息。
+  const size = section.chars ? `${fmtInt(section.chars)} 字` : "空";
+  const count = section.count ? `<span class="part-note">${fmtInt(section.count)} 条</span>` : "";
+  const note = section.note ? `<span class="part-note">${esc(section.note)}</span>` : "";
+
+  return `
+    <label class="part" data-on="${on ? "true" : "false"}">
+      <input type="checkbox" data-part="${esc(section.key)}" ${on ? "checked" : ""} />
+      <span class="part-label">${esc(section.label)}</span>
+      ${count}
+      ${note}
+      <span class="part-size">${size}</span>
+    </label>`;
+}
+
+function foldHtml(detail) {
+  const summary = detail.summary
+    ? `<details class="fold">
+        <summary>上次压缩摘要 · ${fmtInt(detail.summary.length)} 字</summary>
+        <div class="fold-body"><div class="md">${renderMarkdown(detail.summary)}</div></div>
       </details>`
     : "";
 
-  const note = `共 ${fmtInt(messages.length)} 条消息。`;
+  const pending = (detail.todos ?? []).filter(
+    (todo) => todo.status !== "completed" && todo.status !== "cancelled",
+  );
+  const todos = pending.length
+    ? `<details class="fold">
+        <summary>未完成待办 · ${fmtInt(pending.length)} 条</summary>
+        <div class="fold-body"><ul class="todo-list">${pending
+          .map(
+            (todo) =>
+              `<li class="todo"><span class="todo-mark">□</span><span>${esc(todo.text)}</span></li>`,
+          )
+          .join("")}</ul></div>
+      </details>`
+    : "";
 
-  return `<div class="session-view">
-    <div class="session-view-meta">${meta}</div>
-    <p class="session-view-note">${note}</p>
-    ${summary}
-    <div class="session-view-messages">${
-      messages.length
-        ? messages.map(messageHtml).join("")
-        : `<p class="muted-note">没有可显示的消息。</p>`
-    }</div>
-  </div>`;
+  const turns = (detail.messages ?? [])
+    .map(
+      (turn) => `<div class="turn" data-role="${esc(turn.role)}">
+        <span class="turn-role">${esc(turn.role)}</span>
+        <div class="md">${renderMarkdown(turn.text)}</div>
+      </div>`,
+    )
+    .join("");
+
+  const note = detail.truncated
+    ? `<div class="fold-note">只显示最后 ${fmtInt(detail.messages.length)} 条；交接文本永远按完整记录生成。</div>`
+    : detail.beforeCompaction
+      ? `<div class="fold-note">压缩前的 ${fmtInt(detail.beforeCompaction)} 条已由摘要覆盖，这里只列摘要之后的对话。</div>`
+      : "";
+
+  const conversation = `<details class="fold">
+    <summary>对话原文 · ${fmtInt((detail.messages ?? []).length)} 条</summary>
+    <div class="fold-body">
+      ${note}
+      ${
+        turns ||
+        `<div class="fold-note">该会话没有可读的正文消息，可能只包含工具调用。</div>`
+      }
+    </div>
+  </details>`;
+
+  return summary + todos + conversation;
 }
 
-function messageHtml(item) {
-  const role = String(item?.role || "助手");
-  const label =
-    role === "用户" ? "" : `<div class="session-msg-role">${esc(role)}</div>`;
-  return `<div class="session-msg" data-role="${esc(role)}">
-    ${label}
-    <div class="session-msg-text">${renderMarkdown(item?.text || "")}</div>
-  </div>`;
+function renderReasonNote() {
+  const note = $("#session-reason-note");
+  if (!note) return;
+  const status = local.detail?.status;
+  if (!choice.reason) {
+    note.textContent = status?.label
+      ? `将写成：${status.label}`
+      : "该会话没有记录失败原因，交接文本会按「主动换人」写。";
+    return;
+  }
+  note.textContent = status?.label ? `检测到的是「${status.label}」` : "";
 }
 
-async function copy(agent, id, button) {
-  const token = `${agent}\u0000${id}`;
-  if (local.copying.has(token)) return;
-  local.copying.add(token);
-  button.disabled = true;
-  button.textContent = "生成中…";
+/* ---------- 交接文本 ---------- */
+
+async function buildHandoff(ticket = local.seq) {
+  const detail = local.detail;
+  if (!detail) return;
+
+  const preview = $("#session-preview");
+  const size = $("#session-preview-size");
+  const foot = $("#session-preview-foot");
+  const buttons = $$('[data-action="copy"], [data-action="save"]');
+
+  for (const button of buttons) button.disabled = true;
+  if (foot) foot.textContent = "生成中…";
 
   try {
-    const result = await api.get(
-      `/api/sessions/handoff?agent=${encodeURIComponent(agent)}&id=${encodeURIComponent(id)}`,
-    );
-    const text = String(result?.text || "");
-    if (!text.trim()) throw new Error("交接摘要为空");
-    await writeClipboard(text);
-    toast(
-      `已复制「${result.title || id}」的交接摘要，约 ${fmtInt(result.chars)} 字`,
-      "ok",
-      "交接摘要",
-    );
+    const result = await api.post("/api/handoff", {
+      agent: detail.agent,
+      id: detail.id,
+      reason: choice.reason,
+      note: choice.note,
+      summary: choice.summary,
+      messages: choice.messages,
+      todos: choice.todos,
+      full: choice.full,
+      limit: choice.limit,
+    });
+    if (ticket !== local.seq || !mounted) return;
+    local.handoff = result;
+    if (preview) preview.value = result.text;
+    if (size) size.textContent = `${fmtInt(result.chars)} 字`;
+    if (foot) foot.innerHTML = footHtml(result);
   } catch (error) {
-    toast(error.message || "复制失败", "bad", "交接摘要");
+    if (ticket !== local.seq || !mounted) return;
+    if (foot) foot.innerHTML = `<span class="warn">生成失败：${esc(error.message)}</span>`;
   } finally {
-    local.copying.delete(token);
-    if (rootEl && button.isConnected) {
-      button.disabled = false;
-      button.textContent = "复制交接";
+    if (ticket === local.seq) {
+      for (const button of buttons) button.disabled = false;
     }
   }
 }
 
-async function writeClipboard(text) {
-  if (navigator.clipboard?.writeText) {
-    try {
-      await navigator.clipboard.writeText(text);
+function footHtml(result) {
+  const parts = [];
+  if (result.clipped) {
+    parts.push(
+      `<span class="warn">对话已按 ${fmtInt(result.limit || 40000)} 字上限裁剪；调高上限或勾「完整对话」可补齐。</span>`,
+    );
+  }
+  parts.push("<span>文本可直接粘贴到下一个 agent 的对话框。</span>");
+  if (result.status?.state === "stuck" && result.status.detail) {
+    parts.push(`<span>原始报错：${esc(trimDetail(result.status.detail))}</span>`);
+  }
+  return parts.join("");
+}
+
+async function copyText() {
+  const preview = $("#session-preview");
+  const text = preview?.value ?? "";
+  if (!text.trim()) {
+    toast("交接文本还是空的", "warn");
+    return;
+  }
+
+  try {
+    await navigator.clipboard.writeText(text);
+    toast(`已复制 ${fmtInt(text.length)} 字`, "ok");
+    return;
+  } catch {
+    // 浏览器拒绝剪贴板时退回选中，让用户按 Ctrl+C。
+  }
+
+  try {
+    preview.focus();
+    preview.select();
+    if (document.execCommand?.("copy")) {
+      toast(`已复制 ${fmtInt(text.length)} 字`, "ok");
       return;
-    } catch {
-      // 内嵌浏览器可能拒绝异步剪贴板写入，退回选中复制。
     }
+  } catch {
+    // fallthrough
   }
-  const area = document.createElement("textarea");
-  area.value = text;
-  area.setAttribute("readonly", "");
-  area.style.position = "fixed";
-  area.style.opacity = "0";
-  document.body.append(area);
-  area.select();
-  const ok = document.execCommand("copy");
-  area.remove();
-  if (!ok) throw new Error("浏览器拒绝了剪贴板写入");
+  toast("浏览器拒绝了剪贴板访问，文本已选中，请按 Ctrl+C", "bad");
 }
 
-function update() {
-  // 会话页按需扫描，不跟随 overview 轮询刷新。
+function saveText() {
+  const preview = $("#session-preview");
+  const text = preview?.value ?? "";
+  if (!text.trim()) {
+    toast("交接文本还是空的", "warn");
+    return;
+  }
+
+  const detail = local.detail;
+  const name = `${detail.agent}-${detail.id}.md`;
+  const blob = new Blob([text], { type: "text/markdown;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = name;
+  link.click();
+  URL.revokeObjectURL(url);
+  toast(`已保存 ${name}`, "ok");
+}
+
+/* ---------- 事件 ---------- */
+
+function onClick(event) {
+  const action = event.target.closest("[data-action]");
+  if (action?.dataset.action === "refresh") {
+    loadSessions({ refresh: true });
+    return;
+  }
+  if (action?.dataset.action === "stuck-only") {
+    local.stuckOnly = !local.stuckOnly;
+    action.setAttribute("aria-pressed", local.stuckOnly ? "true" : "false");
+    paintRail();
+    return;
+  }
+  if (action?.dataset.action === "copy") {
+    copyText();
+    return;
+  }
+  if (action?.dataset.action === "save") {
+    saveText();
+    return;
+  }
+
+  const reason = event.target.closest("[data-reason]");
+  if (reason) {
+    choice.reason = reason.dataset.reason;
+    for (const chip of $$("#session-reason-row .chip")) {
+      chip.setAttribute("aria-pressed", chip === reason ? "true" : "false");
+    }
+    renderReasonNote();
+    buildHandoff();
+    return;
+  }
+
+  const row = event.target.closest(".row");
+  if (row) select(row.dataset.agent, row.dataset.id);
+}
+
+function onInput(event) {
+  if (event.target.id === "session-filter") {
+    local.query = event.target.value;
+    window.clearTimeout(filterTimer);
+    filterTimer = window.setTimeout(paintRail, 200);
+    return;
+  }
+  if (event.target.id === "session-note") {
+    choice.note = event.target.value;
+    window.clearTimeout(noteTimer);
+    noteTimer = window.setTimeout(() => buildHandoff(), 400);
+  }
+}
+
+function onChange(event) {
+  const part = event.target.dataset.part;
+  if (part) {
+    const checked = event.target.checked;
+    if (part === "summary") choice.summary = checked;
+    if (part === "messages") choice.messages = checked;
+    if (part === "todos") choice.todos = checked;
+    const label = event.target.closest(".part");
+    if (label) label.dataset.on = checked ? "true" : "false";
+    buildHandoff();
+    return;
+  }
+  if (event.target.id === "session-full") {
+    choice.full = event.target.checked;
+    buildHandoff();
+    return;
+  }
+  if (event.target.id === "session-limit") {
+    const value = Number(event.target.value);
+    choice.limit = Number.isFinite(value) && value >= 0 ? value : 40000;
+    event.target.value = choice.limit;
+    buildHandoff();
+  }
 }

@@ -1,0 +1,882 @@
+/* baton 交接台样式，作用域限定在 .sessions-view，避免与模型页的 .rail/.state-dot 冲突。 */
+
+/* baton · 交接台
+ *
+ * 一个目标：故障时刻一眼看出谁卡了，勾选带什么，复制走。
+ * 左侧列表按「卡住 → 最近」排序，右侧是可直接粘贴的交接文本。
+ */
+
+/* ---------- 顶栏 ---------- */
+
+.sessions-view .bar {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  height: var(--head-height);
+  padding: 0 24px;
+  background: var(--paper);
+  border-bottom: 1px solid var(--rule);
+}
+
+.sessions-view .brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  text-decoration: none;
+}
+
+.sessions-view .brand svg {
+  display: block;
+  color: var(--ink);
+}
+
+.sessions-view .bar-sub {
+  color: var(--ink-faint);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.sessions-view .bar-state {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+  flex-shrink: 0;
+  color: var(--ink-soft);
+  font-size: 12px;
+}
+
+.sessions-view .bar-state strong {
+  color: var(--ink);
+  font-weight: 500;
+}
+
+.sessions-view .agents {
+  display: inline-flex;
+  gap: 4px;
+  margin-right: 6px;
+}
+
+.sessions-view .agent-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 6px;
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  font-size: 11px;
+  line-height: 18px;
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+
+.sessions-view .agent-chip[data-absent="true"] {
+  color: var(--ink-faint);
+  border-style: dashed;
+  text-decoration: line-through;
+}
+
+.sessions-view .state-dot {
+  width: 7px;
+  height: 7px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--ink-faint);
+}
+
+.sessions-view .state-dot[data-state="ok"] {
+  background: var(--go);
+}
+
+.sessions-view .state-dot[data-state="bad"] {
+  background: var(--stop);
+}
+
+.sessions-view .state-dot[data-state="warn"] {
+  background: var(--hold);
+}
+
+/* ---------- 工作区 ---------- */
+
+.sessions-view .workspace {
+  display: grid;
+  grid-template-columns: minmax(280px, 380px) minmax(0, 1fr);
+  align-items: start;
+  width: 100%;
+  max-width: 1560px;
+  min-height: calc(100dvh - var(--head-height));
+  margin: 0 auto;
+  padding: 20px 24px 32px;
+  gap: 20px;
+}
+
+/* 独立滚动：列表长了也不把右侧的预览推走。 */
+.sessions-view .rail {
+  position: sticky;
+  top: calc(var(--head-height) + 20px);
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100dvh - var(--head-height) - 52px);
+  min-height: 240px;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  overflow: hidden;
+}
+
+.sessions-view .rail-head {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px;
+  border-bottom: 1px solid var(--rule-soft);
+}
+
+.sessions-view .rail-search {
+  height: 30px;
+  font-size: 12.5px;
+}
+
+.sessions-view .rail-tools {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sessions-view .rail-tools .chip {
+  height: 24px;
+  padding: 0 8px;
+  font-size: 11.5px;
+}
+
+.sessions-view .rail-count {
+  margin-left: auto;
+  color: var(--ink-faint);
+  font-size: 11.5px;
+  font-variant-numeric: tabular-nums;
+}
+
+.sessions-view .rail-list {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.sessions-view .rail-note {
+  padding: 10px 12px;
+  border-top: 1px solid var(--rule-soft);
+  color: var(--stop);
+  font-size: 11.5px;
+  overflow-wrap: anywhere;
+}
+
+.sessions-view .rail-empty {
+  padding: 28px 12px;
+  text-align: center;
+  color: var(--ink-faint);
+  font-size: 12px;
+}
+
+/* ---------- 会话行 ---------- */
+
+.sessions-view .row {
+  display: block;
+  width: 100%;
+  padding: 10px 12px 10px 14px;
+  border-bottom: 1px solid var(--rule-soft);
+  border-left: 3px solid transparent;
+  background: transparent;
+  text-align: left;
+  transition: background var(--fast) var(--ease), border-color var(--fast) var(--ease);
+}
+
+.sessions-view .row:hover {
+  background: var(--surface-hover);
+}
+
+.sessions-view .row[aria-current="true"] {
+  border-left-color: var(--ink);
+  background: var(--surface-hover);
+}
+
+.sessions-view .row[data-stuck="true"] {
+  border-left-color: var(--stop);
+}
+
+.sessions-view .row[data-stuck="true"][aria-current="true"] {
+  border-left-color: var(--stop);
+  background: var(--stop-soft);
+}
+
+.sessions-view .row-top {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.sessions-view .row-agent {
+  flex-shrink: 0;
+  color: var(--ink-soft);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.sessions-view .row-ago {
+  margin-left: auto;
+  flex-shrink: 0;
+  color: var(--ink-faint);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.sessions-view .row-title {
+  display: -webkit-box;
+  margin-top: 3px;
+  overflow: hidden;
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.35;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow-wrap: anywhere;
+}
+
+.sessions-view .row-reason {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+  margin-top: 5px;
+  min-width: 0;
+}
+
+.sessions-view .badge {
+  flex-shrink: 0;
+  padding: 0 5px;
+  border-radius: 2px;
+  font-size: 10.5px;
+  font-weight: 600;
+  line-height: 17px;
+  white-space: nowrap;
+}
+
+.sessions-view .badge[data-tone="stop"] {
+  background: var(--stop-soft);
+  color: var(--stop);
+}
+
+.sessions-view .badge[data-tone="hold"] {
+  background: var(--hold-soft);
+  color: var(--hold);
+}
+
+.sessions-view .badge[data-tone="go"] {
+  background: var(--go-soft);
+  color: var(--go);
+}
+
+.sessions-view .badge[data-tone="idle"] {
+  background: var(--surface-sunken);
+  color: var(--ink-faint);
+}
+
+.sessions-view .row-detail {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--ink-faint);
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sessions-view .row-cwd {
+  display: block;
+  margin-top: 3px;
+  overflow: hidden;
+  color: var(--ink-faint);
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ---------- 右侧交接面板 ---------- */
+
+.sessions-view .handoff {
+  min-width: 0;
+}
+
+.sessions-view .panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  overflow: hidden;
+}
+
+.sessions-view .panel-head {
+  padding: 16px 20px 14px;
+  border-bottom: 1px solid var(--rule-soft);
+}
+
+.sessions-view .panel-title {
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.35;
+  letter-spacing: -0.01em;
+  overflow-wrap: anywhere;
+}
+
+.sessions-view .panel-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 12px;
+  margin-top: 8px;
+  color: var(--ink-soft);
+  font-size: 12px;
+}
+
+.sessions-view .panel-meta .mono {
+  overflow-wrap: anywhere;
+}
+
+.sessions-view .panel-alert {
+  display: flex;
+  gap: 9px;
+  align-items: flex-start;
+  margin-top: 12px;
+  padding: 9px 12px;
+  border-left: 2px solid var(--stop);
+  background: var(--stop-soft);
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+
+.sessions-view .panel-alert[data-tone="hold"] {
+  border-left-color: var(--hold);
+  background: var(--hold-soft);
+}
+
+.sessions-view .panel-alert[data-tone="go"] {
+  border-left-color: var(--go);
+  background: var(--go-soft);
+}
+
+.sessions-view .panel-alert p {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.sessions-view .panel-alert .alert-strong {
+  font-weight: 600;
+}
+
+/* ---------- 控制区 ---------- */
+
+.sessions-view .controls {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--rule-soft);
+  background: var(--surface-sunken);
+}
+
+.sessions-view .control {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.sessions-view .control-label {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.sessions-view .control-hint {
+  color: var(--ink-faint);
+  font-size: 11.5px;
+  font-weight: 400;
+}
+
+.sessions-view .reason-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.sessions-view .reason-row .chip {
+  height: 27px;
+  font-size: 12px;
+}
+
+.sessions-view .reason-note {
+  color: var(--ink-faint);
+  font-size: 11.5px;
+}
+
+.sessions-view .note-input {
+  min-height: 60px;
+  font-size: 12.5px;
+}
+
+/* 勾选区：每块都给出真实字数和条数，先看成本再决定。 */
+.sessions-view .parts {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.sessions-view .part {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 7px 10px;
+  border: 1px solid var(--rule-soft);
+  border-radius: var(--radius);
+  background: var(--surface);
+  cursor: pointer;
+  transition: border-color var(--fast) var(--ease), background var(--fast) var(--ease);
+}
+
+.sessions-view .part:hover {
+  border-color: var(--rule);
+}
+
+.sessions-view .part[data-on="true"] {
+  border-color: var(--ink-faint);
+}
+
+.sessions-view .part:has(input:disabled) {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.sessions-view .part input {
+  appearance: none;
+  display: grid;
+  place-content: center;
+  width: 14px;
+  height: 14px;
+  margin: 0;
+  flex-shrink: 0;
+  align-self: center;
+  border: 1px solid var(--ink-faint);
+  border-radius: 3px;
+  background: var(--surface);
+}
+
+.sessions-view .part input:checked {
+  border-color: var(--ink);
+  background: var(--ink);
+}
+
+.sessions-view .part input:checked::after {
+  content: "";
+  width: 6px;
+  height: 4px;
+  border-left: 2px solid var(--paper);
+  border-bottom: 2px solid var(--paper);
+  transform: translateY(-1px) rotate(-45deg);
+}
+
+.sessions-view .part-label {
+  font-size: 12.5px;
+}
+
+.sessions-view .part-note {
+  color: var(--ink-faint);
+  font-size: 11px;
+  overflow-wrap: anywhere;
+}
+
+.sessions-view .part-size {
+  margin-left: auto;
+  flex-shrink: 0;
+  color: var(--ink-soft);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.sessions-view .extra {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+}
+
+.sessions-view .limit-field {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--ink-soft);
+  font-size: 11.5px;
+}
+
+.sessions-view .limit-field input {
+  width: 78px;
+  height: 26px;
+  padding: 0 7px;
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+}
+
+/* ---------- 预览 ---------- */
+
+.sessions-view .preview-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--rule-soft);
+}
+
+.sessions-view .preview-head .sec-title {
+  font-size: 12.5px;
+}
+
+.sessions-view .preview-size {
+  color: var(--ink-faint);
+  font-size: 11.5px;
+  font-variant-numeric: tabular-nums;
+}
+
+.sessions-view .preview-head .btn {
+  margin-left: auto;
+}
+
+.sessions-view .preview-head .btn + .btn {
+  margin-left: 0;
+}
+
+.sessions-view .preview-body {
+  position: relative;
+}
+
+.sessions-view .preview-text {
+  width: 100%;
+  min-height: 46vh;
+  max-height: 64vh;
+  padding: 16px 20px;
+  border: 0;
+  background: var(--surface);
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  line-height: 1.62;
+  resize: vertical;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  tab-size: 2;
+}
+
+.sessions-view .preview-text:focus {
+  outline: 2px solid var(--focus);
+  outline-offset: -2px;
+}
+
+.sessions-view .preview-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 14px;
+  padding: 11px 20px;
+  border-top: 1px solid var(--rule-soft);
+  background: var(--surface-sunken);
+  color: var(--ink-soft);
+  font-size: 11.5px;
+}
+
+.sessions-view .preview-foot .warn {
+  color: var(--hold);
+}
+
+/* ---------- 详情折叠区 ---------- */
+
+.sessions-view .fold {
+  margin: 0 20px 16px;
+  border: 1px solid var(--rule-soft);
+  border-radius: var(--radius);
+  background: var(--surface-sunken);
+}
+
+.sessions-view .fold summary {
+  padding: 9px 12px;
+  cursor: pointer;
+  color: var(--ink-soft);
+  font-size: 12px;
+  font-weight: 600;
+  user-select: none;
+}
+
+.sessions-view .fold summary::marker {
+  color: var(--ink-faint);
+}
+
+.sessions-view .fold-body {
+  max-height: 44vh;
+  padding: 0 12px 12px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.sessions-view .fold-note {
+  margin-bottom: 8px;
+  color: var(--ink-faint);
+  font-size: 11.5px;
+}
+
+/* 对话正文 */
+.sessions-view .turn {
+  max-width: 100%;
+  padding: 2px 0 2px 10px;
+  border-left: 2px solid var(--rule);
+  margin-bottom: 12px;
+}
+
+.sessions-view .turn[data-role="用户"] {
+  border-left-color: var(--ink-faint);
+}
+
+.sessions-view .turn[data-role="助手"] {
+  border-left-color: var(--go);
+}
+
+.sessions-view .turn-role {
+  margin-bottom: 3px;
+  color: var(--ink-soft);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.sessions-view .md {
+  font-size: 12.5px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.sessions-view .md > :first-child {
+  margin-top: 0;
+}
+
+.sessions-view .md > :last-child {
+  margin-bottom: 0;
+}
+
+.sessions-view .md p {
+  margin: 0 0 7px;
+}
+
+.sessions-view .md h1, .sessions-view .md h2, .sessions-view .md h3, .sessions-view .md h4, .sessions-view .md h5, .sessions-view .md h6 {
+  margin: 12px 0 5px;
+  font-size: 13px;
+  font-weight: 650;
+  line-height: 1.4;
+}
+
+.sessions-view .md h1 {
+  font-size: 15px;
+}
+
+.sessions-view .md ul, .sessions-view .md ol {
+  margin: 0 0 7px;
+  padding-left: 19px;
+}
+
+.sessions-view .md li {
+  margin: 2px 0;
+}
+
+.sessions-view .md li > p {
+  margin: 0 0 4px;
+}
+
+.sessions-view .md code, .sessions-view .md pre {
+  font-family: var(--font-mono);
+}
+
+.sessions-view .md code {
+  padding: 1px 4px;
+  border-radius: 3px;
+  background: var(--surface-hover);
+  font-size: 11.5px;
+}
+
+.sessions-view .md pre {
+  margin: 0 0 9px;
+  padding: 8px 10px;
+  border: 1px solid var(--rule-soft);
+  border-radius: var(--radius);
+  background: var(--surface-hover);
+  overflow-x: auto;
+}
+
+.sessions-view .md pre code {
+  padding: 0;
+  background: none;
+  font-size: 11.5px;
+  line-height: 1.55;
+  white-space: pre;
+}
+
+.sessions-view .md blockquote {
+  margin: 0 0 9px;
+  padding: 2px 0 2px 10px;
+  border-left: 2px solid var(--rule);
+  color: var(--ink-soft);
+}
+
+.sessions-view .md .md-table-wrap {
+  margin: 0 0 9px;
+  overflow-x: auto;
+}
+
+.sessions-view .md .md-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.sessions-view .md .md-table th, .sessions-view .md .md-table td {
+  padding: 4px 7px;
+  border: 1px solid var(--rule-soft);
+  text-align: left;
+  vertical-align: top;
+}
+
+.sessions-view .md .md-table th {
+  background: var(--surface-hover);
+  font-weight: 600;
+}
+
+.sessions-view .md a {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-color: var(--rule);
+  text-underline-offset: 2px;
+}
+
+.sessions-view .md a:hover {
+  color: var(--go);
+  text-decoration-color: currentColor;
+}
+
+.sessions-view .md hr {
+  margin: 10px 0;
+  border: 0;
+  border-top: 1px solid var(--rule-soft);
+}
+
+.sessions-view .todo-list {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-size: 12.5px;
+}
+
+.sessions-view .todo {
+  display: flex;
+  gap: 7px;
+  align-items: baseline;
+  overflow-wrap: anywhere;
+}
+
+.sessions-view .todo-mark {
+  flex-shrink: 0;
+  color: var(--hold);
+  font-family: var(--font-mono);
+}
+
+/* ---------- 加载与骨架 ---------- */
+
+.sessions-view .panel-loading {
+  padding: 40px 20px;
+  text-align: center;
+  color: var(--ink-soft);
+  font-size: 13px;
+}
+
+/* ---------- 窄屏 ---------- */
+
+@media (max-width: 900px) {
+  .sessions-view .workspace {
+    grid-template-columns: minmax(0, 1fr);
+    padding: 14px 14px 28px;
+    gap: 14px;
+  }
+
+  .sessions-view .rail {
+    position: static;
+    max-height: 46vh;
+  }
+
+  .sessions-view .preview-text {
+    min-height: 34vh;
+    max-height: none;
+  }
+
+  .sessions-view .bar {
+    gap: 10px;
+    padding: 0 14px;
+  }
+
+  .sessions-view .bar-sub, .sessions-view .agents {
+    display: none;
+  }
+
+  .sessions-view .panel-head, .sessions-view .controls, .sessions-view .preview-head, .sessions-view .preview-text, .sessions-view .preview-foot {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+
+  .sessions-view .fold {
+    margin-left: 14px;
+    margin-right: 14px;
+  }
+}
+
+
+/* ---------- 嵌入 literouter 外壳时的布局调整 ---------- */
+
+.sessions-view .page-tools {
+  color: var(--ink-soft);
+  font-size: 12px;
+}
+
+.sessions-view .workspace {
+  min-height: 480px;
+  max-width: none;
+  padding: 18px 0 0;
+}
+
+.sessions-view .rail {
+  top: calc(var(--head-height) + 16px);
+  max-height: calc(100dvh - var(--head-height) - 64px);
+}
+
+@media (max-width: 900px) {
+  .sessions-view .rail {
+    top: auto;
+  }
+  .sessions-view .page-tools {
+    flex-wrap: wrap;
+  }
+}

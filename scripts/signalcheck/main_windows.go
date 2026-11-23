@@ -42,10 +42,11 @@ func main() {
 	if *mode == "break" || *mode == "force" || *mode == "duplicate" {
 		flags |= createNewProcessGroup
 	}
-	command := exec.Command(*binary)
+	command := exec.Command(*binary, "serve")
 	command.Env = append(os.Environ(),
 		"LITEROUTER_CONFIG="+*config,
 		"LITEROUTER_DATA_DIR="+*dataDir,
+		"LITEROUTER_STATE="+*config+".state.json",
 	)
 	command.SysProcAttr = &syscall.SysProcAttr{CreationFlags: flags}
 	logFile, err := os.Create(*config + ".run.log")

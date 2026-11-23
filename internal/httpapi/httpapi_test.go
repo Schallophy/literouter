@@ -35,6 +35,7 @@ type harness struct {
 	cfg    model.GatewayConfig
 	base   string
 	path   string
+	api    *httpapi.Server
 	server *httptest.Server
 }
 
@@ -64,9 +65,10 @@ func newHarness(t *testing.T, mutate func(*model.GatewayConfig)) *harness {
 		t.Fatalf("runtime: %v", err)
 	}
 	t.Cleanup(rt.Shutdown)
-	server := httptest.NewServer(httpapi.NewServer(rt, util.NopLogger()))
+	api := httpapi.NewServer(rt, util.NopLogger())
+	server := httptest.NewServer(api)
 	t.Cleanup(server.Close)
-	return &harness{t: t, rt: rt, cfg: cfg, base: server.URL, path: path, server: server}
+	return &harness{t: t, rt: rt, cfg: cfg, base: server.URL, path: path, api: api, server: server}
 }
 
 func (h *harness) do(method, path string, body any, headers map[string]string) *http.Response {

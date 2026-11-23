@@ -1,19 +1,50 @@
-// Package sessions discovers the local session stores of coding agents
-// (OpenCode, Qoder, Qoder CN, WorkBuddy, ZCode) and builds handoff transcripts
-// from the last compaction summary plus the messages that followed it.
+// Package sessions discovers the local session stores of coding agents (OpenCode,
+// Qoder, Qoder CN, WorkBuddy, ZCode) and turns the session you were stuck in into
+// a handoff transcript for the next agent.
+//
+// The design goal is the escape hatch, not the archive: at the moment a session
+// dies (quota exhausted, upstream error, interrupted) you need (a) to see which
+// session broke and why without opening it, (b) to choose how much context to
+// carry, and (c) to paste something the next agent can actually continue from.
 package sessions
 
 import (
 	"errors"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
 	"unicode/utf8"
 )
 
-const cacheTTL = 8 * time.Second
+const cacheTTL = 5 * time.Second
+
+// MessageLimit bounds how many turns the viewer receives. The handoff builder
+// is not limited.
+const MessageLimit = 400
+
+// Status is why a session is (or is not) resumable.
+type Status struct {
+	// State is stuck, active or done.
+	State string `json:"state"`
+	// Code is a stable machine-readable reason: free-limit, auth, upstream,
+	// transport, interrupted, timeout, unknown.
+	Code string `json:"code,omitempty"`
+	// Label is the short human reason: 额度用完, 上游报错, 被中断…
+	Label string `json:"label,omitempty"`
+	// Detail is the provider's own message, when it left one.
+	Detail string `json:"detail,omitempty"`
+	// At is when the failure happened.
+	At string `json:"at,omitempty"`
+}
+
+// Stuck reports whether the session died rather than finished.
+func (s Status) Stuck() bool { return s.State == "stuck" }
+
+// Active reports whether the session is still working.
+func (s Status) Active() bool { return s.State == "active" }
 
 // Session is one conversation found in an agent's local store.
 type Session struct {
@@ -24,6 +55,7 @@ type Session struct {
 	Updated string `json:"updated"`
 	Created string `json:"created,omitempty"`
 	Source  string `json:"source"`
+	Status  Status `json:"status"`
 
 	kind string
 	file string
@@ -44,69 +76,81 @@ type ListResult struct {
 	Errors   []string  `json:"errors,omitempty"`
 }
 
-// HandoffResult is the payload of GET /api/sessions/handoff.
-type HandoffResult struct {
-	Agent string `json:"agent"`
-	ID    string `json:"id"`
-	Title string `json:"title"`
-	Text  string `json:"text"`
-	Chars int    `json:"chars"`
-}
-
-// DetailResult is the payload of GET /api/sessions/detail.
-type DetailResult struct {
-	Agent     string          `json:"agent"`
-	ID        string          `json:"id"`
-	Title     string          `json:"title"`
-	Cwd       string          `json:"cwd,omitempty"`
-	Updated   string          `json:"updated,omitempty"`
-	Summary   string          `json:"summary,omitempty"`
-	SummaryAt string          `json:"summaryAt,omitempty"`
-	Messages  []DetailMessage `json:"messages"`
-	Chars     int             `json:"chars"`
-}
-
-// DetailMessage is one readable turn in a session viewer.
-type DetailMessage struct {
+// Turn is one readable message.
+type Turn struct {
 	Role string `json:"role"`
 	Text string `json:"text"`
 }
 
-type message struct {
-	Role string
-	Text string
+// Todo is one entry of an agent's task list.
+type Todo struct {
+	Text   string `json:"text"`
+	Status string `json:"status"`
+}
+
+// Section describes one copyable block, so the UI can show its real size
+// before the user decides whether to carry it.
+type Section struct {
+	Key   string `json:"key"`
+	Label string `json:"label"`
+	Chars int    `json:"chars"`
+	Count int    `json:"count"`
+	Note  string `json:"note,omitempty"`
+}
+
+// DetailResult is the payload of GET /api/session.
+//
+// Messages holds only what followed the last compaction; BeforeCompaction is
+// how many turns the summary replaced.
+type DetailResult struct {
+	Agent            string    `json:"agent"`
+	ID               string    `json:"id"`
+	Title            string    `json:"title"`
+	Cwd              string    `json:"cwd,omitempty"`
+	Updated          string    `json:"updated,omitempty"`
+	Status           Status    `json:"status"`
+	Summary          string    `json:"summary,omitempty"`
+	SummaryAt        string    `json:"summaryAt,omitempty"`
+	Todos            []Todo    `json:"todos"`
+	Messages         []Turn    `json:"messages"`
+	BeforeCompaction int       `json:"beforeCompaction"`
+	TotalMessages    int       `json:"totalMessages"`
+	Truncated        bool      `json:"truncated,omitempty"`
+	Sections         []Section `json:"sections"`
+	Chars            int       `json:"chars"`
 }
 
 // transcript is the readable context of one session: the last compaction
-// summary an agent stored (when available) and the messages after it.
+// summary an agent stored (when available) and every message after it.
 type transcript struct {
 	Summary   string
 	SummaryAt string
-	Messages  []message
+	Messages  []Turn
+	// BeforeCompaction counts the turns the summary replaced.
+	BeforeCompaction int
+	Todos            []Todo
+	Status           Status
 }
 
 // Detector scans the local agent stores. It is safe for concurrent use.
 type Detector struct {
-	home        string
-	opencodeCLI string
-	roots       []string
+	home string
 
 	mu       sync.Mutex
 	cache    ListResult
 	cachedAt time.Time
 }
 
-// NewDetector resolves the local home, the OpenCode CLI and the project roots.
+// NewDetector resolves the local home.
 func NewDetector() *Detector {
 	home, _ := os.UserHomeDir()
-	return &Detector{
-		home:        home,
-		opencodeCLI: findOpencodeCLI(home),
-		roots:       opencodeRoots(home),
-	}
+	return &Detector{home: home}
 }
 
-// List returns every session found in the local agent stores, newest first.
+// Home exposes the resolved home directory for path shortening.
+func (d *Detector) Home() string { return d.home }
+
+// List returns every session found in the local agent stores, stuck first.
 func (d *Detector) List() ListResult {
 	d.mu.Lock()
 	defer d.mu.Unlock()
@@ -126,9 +170,9 @@ func (d *Detector) List() ListResult {
 
 	items, err := d.opencodeSessions()
 	merge(items, err, "OpenCode")
-	items, err = d.qoderSessions("qoder", joinHome(d.home, ".qoder", "projects"))
+	items, err = d.qoderSessions("qoder", "Qoder", joinHome(d.home, ".qoder", "projects"))
 	merge(items, err, "Qoder")
-	items, err = d.qoderSessions("qoder-cn", joinHome(d.home, ".qoder-cn", "projects"))
+	items, err = d.qoderSessions("qoder-cn", "Qoder CN", joinHome(d.home, ".qoder-cn", "projects"))
 	merge(items, err, "Qoder CN")
 	items, err = d.workbuddySessions(joinHome(d.home, ".workbuddy", "projects"))
 	merge(items, err, "WorkBuddy")
@@ -154,72 +198,103 @@ func (d *Detector) Refresh() ListResult {
 	return d.List()
 }
 
-// Handoff builds the handoff transcript for one session: the last compaction
-// summary plus every message the agent produced after it.
-func (d *Detector) Handoff(agent, id string) (HandoffResult, error) {
-	session, err := d.find(agent, id)
-	if err != nil {
-		return HandoffResult{}, err
-	}
-
-	data, err := d.readTranscript(*session, false)
-	if err != nil {
-		return HandoffResult{}, err
-	}
-
-	text := BuildHandoffTranscript(*session, data)
-	return HandoffResult{
-		Agent: session.Agent, ID: session.ID, Title: session.Title,
-		Text: text, Chars: utf8.RuneCountInString(text),
-	}, nil
-}
-
-// Detail returns the readable transcript for the viewer. Unlike Handoff it
-// keeps the conversation that came before the last compaction, so opening a
-// session shows the whole history instead of only the handoff context.
+// Detail returns the readable state of one session for the viewer.
 func (d *Detector) Detail(agent, id string) (DetailResult, error) {
 	session, err := d.find(agent, id)
 	if err != nil {
 		return DetailResult{}, err
 	}
 
-	data, err := d.readTranscript(*session, true)
+	data, err := d.readTranscript(*session, false)
 	if err != nil {
 		return DetailResult{}, err
 	}
 
 	result := DetailResult{
 		Agent: session.Agent, ID: session.ID, Title: session.Title,
-		Cwd: session.Cwd, Updated: session.Updated,
+		Cwd: session.Cwd, Updated: session.Updated, Status: data.Status,
 		Summary: data.Summary, SummaryAt: data.SummaryAt,
-		Messages: make([]DetailMessage, 0, len(data.Messages)),
+		Todos: data.Todos, BeforeCompaction: data.BeforeCompaction,
+		TotalMessages: len(data.Messages),
 	}
-	result.Chars = utf8.RuneCountInString(result.Summary)
-	for _, item := range data.Messages {
-		result.Messages = append(result.Messages, DetailMessage{Role: item.Role, Text: item.Text})
-		result.Chars += utf8.RuneCountInString(item.Text)
+	messages := data.Messages
+	if len(messages) > MessageLimit {
+		result.Truncated = true
+		messages = messages[len(messages)-MessageLimit:]
+	}
+	result.Messages = messages
+	result.Sections = buildSections(data)
+	for _, section := range result.Sections {
+		result.Chars += section.Chars
 	}
 	return result, nil
 }
 
+// HandoffOptions selects which blocks go into the transcript.
+type HandoffOptions struct {
+	// Note is the user's own "what I was doing / what comes next" sentence.
+	Note string
+	// Reason overrides the detected reason when the user picks another one.
+	Reason string
+	// Summary, Messages and Todos select the blocks; Full means the whole
+	// conversation rather than only what followed the last compaction.
+	Summary  bool
+	Messages bool
+	Todos    bool
+	Full     bool
+	// Limit clips the messages block to that many characters. Zero means no
+	// clipping.
+	Limit int
+}
+
+// HandoffResult is the payload of POST /api/handoff.
+type HandoffResult struct {
+	Agent    string    `json:"agent"`
+	ID       string    `json:"id"`
+	Title    string    `json:"title"`
+	Text     string    `json:"text"`
+	Chars    int       `json:"chars"`
+	Sections []Section `json:"sections"`
+	Status   Status    `json:"status"`
+	Clipped  bool      `json:"clipped,omitempty"`
+	Limit    int       `json:"limit,omitempty"`
+}
+
+// Handoff builds the handoff transcript for one session.
+func (d *Detector) Handoff(agent, id string, options HandoffOptions) (HandoffResult, error) {
+	session, err := d.find(agent, id)
+	if err != nil {
+		return HandoffResult{}, err
+	}
+	data, err := d.readTranscript(*session, options.Full)
+	if err != nil {
+		return HandoffResult{}, err
+	}
+
+	text, _, clipped := BuildHandoff(*session, data, options)
+	return HandoffResult{
+		Agent: session.Agent, ID: session.ID, Title: session.Title,
+		Text: text, Chars: utf8.RuneCountInString(text),
+		Sections: buildSections(data), Status: data.Status,
+		Clipped: clipped, Limit: options.Limit,
+	}, nil
+}
+
 func (d *Detector) readTranscript(session Session, full bool) (transcript, error) {
-	var data transcript
-	var err error
 	switch session.kind {
 	case "opencode":
-		data, err = d.opencodeTranscript(session, full)
+		return d.opencodeTranscript(session, full)
 	case "qoder":
-		data, err = qoderTranscript(session.file, full)
+		return qoderTranscript(session.file, full, session.Status)
 	case "workbuddy":
-		data, err = workbuddyTranscript(session.file, full)
+		return workbuddyTranscript(session.file, full, session.Status)
 	case "zcode":
-		data.Messages, err = zcodeTranscript(session.file, full)
+		return zcodeTranscript(session.file, full, session.Status)
 	case "zcode-db":
-		data, err = zcodeDBTranscript(session.file, session.ID, full)
+		return zcodeDBTranscript(session.file, session.ID, full, session.Status)
 	default:
-		err = errors.New("未知的会话来源")
+		return transcript{}, errors.New("未知的会话来源")
 	}
-	return data, err
 }
 
 func (d *Detector) find(agent, id string) (*Session, error) {
@@ -236,75 +311,73 @@ func (d *Detector) find(agent, id string) (*Session, error) {
 	return nil, os.ErrNotExist
 }
 
-// BuildHandoff renders a header, the compaction summary, every message after it
-// and a short instruction for the next agent.
-func BuildHandoff(session Session, messages []message) string {
-	return BuildHandoffTranscript(session, transcript{Messages: messages})
-}
-
-// BuildHandoffTranscript prefers the last compaction summary because the agent
-// already trimmed that text to fit a context window. Everything the agent said
-// after the compaction is included as-is: the compaction itself is what bounds
-// the context, so clipping it a second time would drop usable work.
-func BuildHandoffTranscript(session Session, data transcript) string {
-	summary := strings.TrimSpace(data.Summary)
-
-	const summaryHeading = "## 上次压缩摘要\n\n"
-	const messagesHeading = "## 压缩后的对话\n\n"
-	const recentHeading = "## 对话\n\n"
-
-	footer := "\n## 请接手\n\n以上是上一个会话的上下文。请在此基础上继续，不要重复已完成的工作；如果信息不足，先说明你需要的文件或确认点。\n"
-
-	var builder strings.Builder
-	builder.WriteString(handoffHeader(session, summary != "", data.SummaryAt))
-	if summary != "" {
-		builder.WriteString(summaryHeading)
-		builder.WriteString(summary)
-		builder.WriteString("\n\n")
-	}
-
-	switch {
-	case len(data.Messages) > 0:
-		if summary != "" {
-			builder.WriteString(messagesHeading)
-		} else {
-			builder.WriteString(recentHeading)
-		}
-	case summary != "":
-		builder.WriteString("（压缩后没有新的对话。）\n\n")
-	default:
-		builder.WriteString("（没有可用的对话文本；该会话可能只包含工具调用或附件。）\n")
-	}
-	for _, item := range data.Messages {
-		builder.WriteString(renderMessage(item))
-	}
-	builder.WriteString(footer)
-	return builder.String()
-}
-
-func handoffHeader(session Session, hasSummary bool, summaryAt string) string {
-	var builder strings.Builder
-	builder.WriteString("# 会话交接：" + nonEmpty(session.Title, session.ID) + "\n\n")
-	builder.WriteString("- 来源：" + agentLabel(session.Agent) + "（" + session.ID + "）\n")
-	if session.Cwd != "" {
-		builder.WriteString("- 工作目录：" + session.Cwd + "\n")
-	}
-	if session.Updated != "" {
-		builder.WriteString("- 最后更新：" + session.Updated + "\n")
-	}
-	if hasSummary {
-		if summaryAt != "" {
-			builder.WriteString("- 上次压缩：" + summaryAt + "\n")
-		}
-		builder.WriteString("- 说明：保留最近一次压缩摘要，并附上压缩后的全部对话。\n\n")
+func buildSections(data transcript) []Section {
+	sections := make([]Section, 0, 4)
+	summary := Section{Key: "summary", Label: "上次压缩摘要"}
+	if data.Summary != "" {
+		summary.Chars = utf8.RuneCountInString(data.Summary)
 	} else {
-		builder.WriteString("- 说明：该会话还没有压缩记录，以下为完整对话。\n\n")
+		summary.Note = "该会话没有压缩记录"
 	}
-	return builder.String()
+	sections = append(sections, summary)
+
+	messages := Section{
+		Key:   "messages",
+		Label: "对话",
+		Chars: turnsChars(data.Messages),
+		Count: len(data.Messages),
+	}
+	// 有压缩边界时才提示「压缩后的对话」，否则就是整段对话。
+	if data.BeforeCompaction > 0 {
+		messages.Label = "压缩后的对话"
+		messages.Note = beforeNote(data.BeforeCompaction)
+	}
+	sections = append(sections, messages)
+
+	// 待办块始终出现：没有待办时写明「没有」，比少一行更好解释。
+	todos := Section{Key: "todos", Label: "未完成待办"}
+	if pending := pendingTodos(data.Todos); len(pending) > 0 {
+		todos.Chars = todoChars(pending)
+		todos.Count = len(pending)
+	} else {
+		todos.Note = "没有未完成的待办"
+	}
+	sections = append(sections, todos)
+	return sections
 }
 
-func renderMessage(item message) string {
-	return "**" + item.Role + "**：" + item.Text + "\n\n"
+func beforeNote(count int) string {
+	if count <= 0 {
+		return ""
+	}
+	return "压缩前的 " + strconv.Itoa(count) + " 条已由摘要覆盖"
+}
+
+func turnsChars(turns []Turn) int {
+	total := 0
+	for _, turn := range turns {
+		total += utf8.RuneCountInString(turn.Text)
+	}
+	return total
+}
+
+func todoChars(todos []Todo) int {
+	total := 0
+	for _, todo := range todos {
+		total += utf8.RuneCountInString(todo.Text)
+	}
+	return total
+}
+
+func pendingTodos(todos []Todo) []Todo {
+	out := make([]Todo, 0, len(todos))
+	for _, todo := range todos {
+		if todo.Status == "completed" || todo.Status == "cancelled" {
+			continue
+		}
+		out = append(out, todo)
+	}
+	return out
 }
 
 func lookupSession(items []Session, agent, id string) *Session {
@@ -316,16 +389,25 @@ func lookupSession(items []Session, agent, id string) *Session {
 	return nil
 }
 
+// sortSessions puts stuck sessions first, then orders by recency.
 func sortSessions(items []Session) {
 	for index := 1; index < len(items); index++ {
 		for cursor := index; cursor > 0; cursor-- {
-			left, right := items[cursor-1], items[cursor]
-			if sessionTime(left).After(sessionTime(right)) || sessionTime(left).Equal(sessionTime(right)) {
+			// Swap only while the right-hand item belongs further up.
+			if !before(items[cursor], items[cursor-1]) {
 				break
 			}
 			items[cursor-1], items[cursor] = items[cursor], items[cursor-1]
 		}
 	}
+}
+
+// before reports whether left should be listed ahead of right.
+func before(left, right Session) bool {
+	if left.Status.Stuck() != right.Status.Stuck() {
+		return left.Status.Stuck()
+	}
+	return sessionTime(left).After(sessionTime(right))
 }
 
 func sessionTime(session Session) time.Time {
@@ -337,58 +419,6 @@ func sessionTime(session Session) time.Time {
 		return time.Time{}
 	}
 	return value
-}
-
-func appendTurn(list []message, role, text string, _ bool) []message {
-	return appendMessage(list, role, text)
-}
-
-func appendMessage(list []message, role, text string) []message {
-	text = cleanText(text)
-	if text == "" {
-		return list
-	}
-	return append(list, message{Role: role, Text: text})
-}
-
-func cleanSummary(value string) string {
-	value = strings.ReplaceAll(value, "\r\n", "\n")
-	value = strings.ReplaceAll(value, "\r", "\n")
-	return strings.TrimSpace(value)
-}
-
-func cleanText(value string) string {
-	value = strings.ReplaceAll(value, "\r\n", "\n")
-	value = strings.ReplaceAll(value, "\r", "\n")
-	if strings.Contains(value, "<system-reminder") {
-		value = systemReminderPattern.ReplaceAllString(value, "")
-	}
-	if strings.Contains(value, "<user_info") {
-		value = userInfoPattern.ReplaceAllString(value, "")
-	}
-	value = wrapperTagPattern.ReplaceAllString(value, "")
-	value = strings.TrimSpace(value)
-	for strings.Contains(value, "\n\n\n") {
-		value = strings.ReplaceAll(value, "\n\n\n", "\n\n")
-	}
-	return value
-}
-
-func truncateRunes(value string, limit int) string {
-	if limit <= 0 {
-		return "…"
-	}
-	runes := []rune(value)
-	if len(runes) <= limit {
-		return value
-	}
-	return strings.TrimSpace(string(runes[:limit])) + "…"
-}
-
-func titleFromText(value string, limit int) string {
-	value = cleanText(value)
-	value = strings.Join(strings.Fields(value), " ")
-	return truncateRunes(value, limit)
 }
 
 func agentLabel(agent string) string {
@@ -429,8 +459,6 @@ func fileExists(path string) bool {
 	info, err := os.Stat(path)
 	return err == nil && !info.IsDir()
 }
-
-func isFile(path string) bool { return fileExists(path) }
 
 func isDir(path string) bool {
 	if path == "" {

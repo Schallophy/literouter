@@ -2,7 +2,7 @@
 
 一个 OpenAI 兼容的本地网关：把多个提供商模型编成一条**优先级列表**，列表第一项是 auto 的默认起点。当当前模型因免费额度耗尽、失效、限流或无权限而无法服务时，网关在用户无感知的情况下切换到列表中的下一个模型。
 
-literouter 是 [switchyard](../switchyard) 的 Go 重写版，只使用标准库，编译为单个静态二进制，看板资源通过 `go:embed` 内嵌，运行时不需要 Node.js、`node_modules` 或磁盘上的 `src/ui`。配置格式、`state.json` / `events.jsonl` 格式与 `/v1`、`/api` 路由与参考实现兼容；命名与标识按 literouter 调整。
+literouter 是 [switchyard](../switchyard) 的 Go 重写版，只依赖 Go 标准库与纯 Go SQLite 驱动（`modernc.org/sqlite`），编译为单个静态二进制，看板资源通过 `go:embed` 内嵌，运行时不需要 Node.js、`node_modules` 或磁盘上的 `src/ui`。配置格式、`state.json` / `events.jsonl` 格式与 `/v1`、`/api` 路由与参考实现兼容；命名与标识按 literouter 调整。会话页的交接台移植自 [baton](../baton)。
 
 literouter 不绑定任何厂商。默认提供商是阿里云百炼（DashScope）的兼容模式，但任何遵循 OpenAI 协议的端点都可以接入；"免费额度用完即停"只是它识别的一类失败信号，而不是产品定位。
 
@@ -15,13 +15,15 @@ literouter 不绑定任何厂商。默认提供商是阿里云百炼（DashScope
 - **按能力选路**：每个模型可声明 `chat` / `responses` / `completions` / `embeddings` 能力；`/v1/chat/completions` 只在 chat 模型中选，`/v1/responses` 只在 responses 模型中选，不做协议转译。
 - **上下文保护**：模型列表共用一个上下文窗口（默认 256K），超出时默认在转发前返回 400，避免把注定失败的请求送到提供商。
 - **调用方统计**：按请求携带的 Bearer Token 自动归类，分别统计各客户端的请求、失败、切换与原始输入/输出 Token，展示缓存命中率、成本构成和同一调用方下的模型明细。
+- **会话交接**：汇总本机 OpenCode / Qoder / Qoder CN / WorkBuddy / ZCode 留下的会话，卡住的排最前；勾选上次压缩摘要、压缩后的对话和未完成待办，生成可直接粘贴给下一个 agent 的交接文本，支持按字数裁剪、复制与另存 `.md`。只读本机存储，不改动任何 agent 数据。
+- **日常两条命令**：`literouter` 后台启动（已在跑就只报地址），`literouter stop` 停止；想前台看日志用 `literouter serve`。
 - **健康状态机**：`unknown → alive / dead / invalid`，限流进入冷却而不污染健康状态；冷却期间暂时退出链路，到期自动重新入链；重启后状态持久化。
 - **模型排行**：在看板「排行」页按 Artificial Analysis 的 Intelligence Index 查看目录模型的能力排序；勾选多个模型后可以只看已选并按能力从高到低排列，逐行添加，不会自动加入模型列表。
-- **管理看板**：模型、排行、用量、输出、事件、设置页面，主题始终跟随系统深浅色，全部本地访问。
+- **管理看板**：模型、排行、用量、输出、会话、事件、设置页面，主题始终跟随系统深浅色，全部本地访问。
 - **两条等价的配置路径**：有看板的部署可以把模型列表、提供商、随机参数全部在界面上配置；`ui.enabled=false` 时看板彻底关闭，所有配置只在 `config.json` 里，能力不缩水。
 - **多提供商**：`providers` 可以配任意多个 OpenAI 兼容端点；每个模型绑定一个提供商（`提供商/模型名`），同名模型分属两个提供商时是两个独立模型，跨提供商的故障转移照常工作。
 - **Key 不是启动前提**：没有 Key 也能启动进程、打开看板、列出 `/v1/models`，缺 Key 只影响真正转发到那个提供商的请求。
-- **单二进制、零运行时依赖**：只依赖 Go 标准库；`CGO_ENABLED=0` 交叉编译，Windows 与 Linux 都产出单个可执行文件；IANA 时区数据通过 `time/tzdata` 随二进制分发，Windows 不需要另装 tzdata。
+- **单二进制、零运行时依赖**：只依赖 Go 标准库与纯 Go SQLite 驱动；`CGO_ENABLED=0` 交叉编译，Windows 与 Linux 都产出单个可执行文件；IANA 时区数据通过 `time/tzdata` 随二进制分发，Windows 不需要另装 tzdata。
 - **离线可用**：看板不引用任何 CDN，Geist / Geist Mono 的拉丁子集（约 91 KB，SIL OFL）随程序一起分发，UI 全部使用无衬线字体，中文走系统字体。
 - **可审计**：JSONL 事件日志、文件日志、原子写入的状态与配置。
 
@@ -31,7 +33,9 @@ literouter 不绑定任何厂商。默认提供商是阿里云百炼（DashScope
 
 ```bash
 go build -trimpath -ldflags "-s -w" -o literouter .
-./literouter                # 零配置就能起，缺 Key 时 /v1 返回 503 literouter.no_key
+./literouter                # 后台启动，打印地址后回到提示符
+./literouter stop           # 收工
+./literouter serve          # 想前台跑、看日志：Ctrl+C 退出
 ```
 
 首次启动不会往当前目录写东西：配置和数据默认放在用户目录（遵循 XDG，Windows 也一样）：
@@ -46,6 +50,28 @@ Windows 上就是 `C:\Users\<你>\.config\literouter\config.json` 与
 `LITEROUTER_CONFIG` / `LITEROUTER_DATA_DIR`，两者各自独立。
 如果工作目录里已经有一个 `config.json`（旧版本或便携部署留下的），它仍然优先，
 不会被悄悄搬到别处。
+
+### 日常怎么用
+
+只记两条：
+
+```bash
+literouter        # 后台起服务，打印地址，回车就回到提示符
+literouter stop   # 收工，关掉后台服务
+```
+
+它不会主动弹浏览器标签页——地址会打印出来，想看图点一下那个链接（或者 `literouter up --open` 让它顺手打开）。后台实例关掉终端窗口还在跑；再敲一次 `literouter` 会发现它已经在运行，只报地址，不会再起第二个服务。`literouter serve` 是前台模式，适合调试或交给 NSSM / systemd。
+
+后台实例把地址、进程号、版本和退出令牌记在 `${XDG_DATA_HOME:-~/.local/share}/literouter/server.json`（可用 `LITEROUTER_STATE` 改位置）。进程被杀掉后这条记录会失效，下次 `literouter` 自动识别并重新启动。配置里的端口被占用时会自动换一个空闲端口，实际地址以打印结果为准；`--port N` 可显式指定。
+
+```bash
+literouter            # 同 up：后台启动或复用
+literouter up --open  # 后台启动并打开看板
+literouter up --restart   # 换新版本后重启
+literouter status     # 看现在跑在哪个地址、哪个进程
+literouter stop       # 停掉后台实例
+literouter serve      # 前台运行（默认端口读配置，被占用时顺延）
+```
 
 要真正转发请求，**做两件事：添加 provider（Base URL + API Key），再把模型加入列表**。先添加 provider，二选一：
 
@@ -75,17 +101,27 @@ CGO_ENABLED=0 GOOS=linux GOARCH=arm64 \
   go build -trimpath -ldflags "-s -w" -o dist/literouter-linux-arm64 .
 ```
 
-两个产物都是静态单文件（约 8.7 MiB，已剥离符号），看板与 tzdata 均在二进制内。运行时只需要 `config.json`（不存在会生成）与数据目录。
+两个平台都是静态单文件（约 13 MiB，已剥离符号），看板与 tzdata 均在二进制内。运行时只需要 `config.json`（不存在会生成）与数据目录。
 
 ### 控制台输出
 
-启动时只打印接入地址、看板地址和配置文件路径，然后输出启动警告：
+`literouter` 后台启动成功后会打印一段摘要然后回到提示符：
+
+```text
+literouter 0.1.0 已在后台运行
+  界面  http://127.0.0.1:8788
+  停止  literouter stop
+```
+
+`literouter serve` 在前台运行并打印完整横幅：
 
 ```text
 ◈ literouter v0.1.0
   gateway  http://127.0.0.1:8788/v1
   admin    http://127.0.0.1:8788
   config   /path/to/config.json
+  data     /path/to/data
+  stop     literouter stop
 ```
 
 - 每个 API 请求不再打到控制台。访问日志只写入 `literouter.log`（JSON，含 `method` / `path` / `status` / `ms`）；想在终端看逐请求的一行日志，把 `LITEROUTER_LOG_LEVEL=debug`（或 `log.level`）设为 `debug`。
@@ -97,14 +133,14 @@ CGO_ENABLED=0 GOOS=linux GOARCH=arm64 \
 
 ### 长期运行
 
-网关是常驻服务，启动信息打印完就保持安静，不提示「按 Ctrl+C 退出」。停止交给信号和服务管理器：
+日常本机使用默认后台模式即可；如果要交给服务管理器或容器，运行 `literouter serve`，启动信息打印完就保持安静，停止交给信号和服务管理器：
 
-- `SIGINT`（终端 Ctrl+C）、`SIGTERM`（systemd / docker stop）和 Windows 的 `SIGBREAK` 都会优雅关闭：停止接收新连接、落盘用量与事件、写完「已关闭」日志后以 `0` 退出。
+- `SIGINT`（终端 Ctrl+C）、`SIGTERM`（systemd / docker stop）和 Windows 的 `SIGBREAK` 都会优雅关闭：停止接收新连接、落盘用量与事件、写完「已关闭」日志后以 `0` 退出。后台实例也可以随时用 `literouter stop` 结束。
 - 关闭最多等 5 秒，长连接拖住时会强制退出（退出码 `1`）；再按一次 Ctrl+C 也会立即强制退出（退出码 `1`）。
 - 推荐托管方式：
-  - Windows：用 [NSSM](https://nssm.cc/) 注册为服务，`nssm set literouter AppExit Default Restart`，崩溃或重启机器后自动拉起；
-  - Linux：systemd unit，设置 `Restart=always`、`Environment=LITEROUTER_CONFIG=/etc/literouter/config.json`；
-  - 容器：`restart: unless-stopped`，`STOPSIGNAL SIGTERM`，数据目录挂载到卷。
+  - Windows：用 [NSSM](https://nssm.cc/) 注册为服务，程序参数填 `serve`，`nssm set literouter AppExit Default Restart`；
+  - Linux：systemd unit，`ExecStart=/usr/local/bin/literouter serve`，设置 `Restart=always`、`Environment=LITEROUTER_CONFIG=/etc/literouter/config.json`；
+  - 容器：命令用 `["serve"]`，`restart: unless-stopped`，`STOPSIGNAL SIGTERM`，数据目录挂载到卷。
 - 探活：`GET /health` 返回 `status`、版本、uptime、当前模型、模型可用数、提供商/Key 数，可直接给负载均衡或监控使用：
 
   ```json
@@ -383,6 +419,7 @@ client.chat.completions.create(model="auto", messages=[{"role": "user", "content
 | `LITEROUTER_PROVIDER` | 覆盖**默认提供商**的 base URL（内存生效，不写回配置；旧名 `SWITCHYARD_PROVIDER` 仍会读取） |
 | `LITEROUTER_CONFIG` | 配置文件路径，默认 `${XDG_CONFIG_HOME:-~/.config}/literouter/config.json`（工作目录已有 `config.json` 时优先用它） |
 | `LITEROUTER_DATA_DIR` | 数据目录，默认 `${XDG_DATA_HOME:-~/.local/share}/literouter/data` |
+| `LITEROUTER_STATE` | 后台实例记录文件，默认 `${XDG_DATA_HOME:-~/.local/share}/literouter/server.json`；跑多个部署时用它隔离 |
 | `LITEROUTER_LOG_LEVEL` | `debug` / `info` / `warn` / `error` |
 | `LITEROUTER_CONFIG_WATCH` | 设为 `0` 关闭 `config.json` 文件监听（默认开启） |
 | `NO_COLOR` | 设置后禁用终端颜色 |
@@ -435,10 +472,25 @@ client.chat.completions.create(model="auto", messages=[{"role": "user", "content
 | 排行 | 按 Artificial Analysis 的 Intelligence Index 排序目录模型；多选后可只看已选并按能力从高到低排列，逐行添加；评分与勾选只在内存中，不写入配置 |
 | 用量 | 按调用方 API Key 汇总请求、失败、切换、原始输入/输出 Token 与缓存命中率；展示全局成本构成（输入/缓存输入/输出与缓存节省），可分别排序，展开后可查看调用方的成本构成和按模型的用量明细 |
 | 输出 | 实时查看最近经过网关的模型输出，每条标出实际承接的模型、提供商、协议（Chat / Completions / Responses / Embeddings）、流式与否、耗时与用量；只存在内存里，重启进程即清空 |
+| 会话 | 本机编码代理的交接台（baton 移植）：左侧会话列表按「卡住 → 最近」排序，卡住的带红色徽章与失败原因，仍在跑的显示「进行中」；右侧选择失败原因、填写给接手方的一句话、勾选压缩摘要 / 对话 / 待办，实时生成可直接粘贴的交接文本；支持只看卡住的、关键字筛选、按字数额度裁剪、复制与另存 `.md`。打开页面或点「重新扫描」时才读取，不做后台轮询 |
 | 事件 | 切换、失效、限流、恢复、配置变更，可按类型过滤、关键词搜索、暂停实时刷新 |
 | 设置 | 网关、提供商、定价、故障转移、服务、日志、数据、原始 JSON 的完整表单；「定价」分组可逐模型填写单价与峰谷时段、开关峰谷选路，「数据」分组可重置用量统计；底部保存栏统一提交 |
 
 旧地址会重定向到新页面：`#/overview`、`#/chain` → 模型，`#/callers` → 用量，`#/catalog` 打开「添加模型」面板。静态资源统一返回 `Cache-Control: no-store`。
+
+### 会话来源与状态判定
+
+会话页只读以下本机存储，不写、不改锁（SQLite 以 `mode=ro` 打开）：
+
+| 助手 | 位置 |
+| --- | --- |
+| OpenCode | `~/.local/share/opencode/opencode.db`（`session_v2` / `session_message` / `todo`） |
+| Qoder | `~/.qoder/projects/*/*.jsonl` |
+| Qoder CN | `~/.qoder-cn/projects/*/*.jsonl` |
+| WorkBuddy | `~/.workbuddy/**/*.jsonl` |
+| ZCode | `~/.zcode/cli/**` rollout 与 `~/.zcode/cli/db/db.sqlite` |
+
+状态只信 agent 自己留下的记录：`idle` 的 `outcome`（成功 / 失败 / 中断）是 agent 对上一轮的判定，但用户之后又发了消息就说明会话继续了；assistant 的 `finish="error"` 或 `error.type` 是真失败；没有 `finish` 且安静超过 8 分钟、`tool-calls` 静默超过 30 分钟判为被中断，否则显示「进行中」。交接文本取最后一次压缩的摘要，对话从它的 `seq` 之后开始；没有压缩记录的会话也会保留「上次压缩摘要」段并写明「没有压缩过」。
 
 ## 管理 API
 
@@ -447,6 +499,7 @@ client.chat.completions.create(model="auto", messages=[{"role": "user", "content
 | 方法 | 路径 | 说明 |
 | --- | --- | --- |
 | `GET` | `/health` | 存活检查：状态、版本、uptime、当前模型、模型与提供商统计 |
+| `GET` | `/api/meta` | 实例识别：`app`、版本、主目录与交接原因选项；`literouter` 用它判断后台实例是否可复用 |
 | `GET` | `/api/overview` | 看板所需的完整快照（含调用方统计） |
 | `GET` | `/api/capability` | 目录模型的能力排行：匹配 Artificial Analysis Intelligence Index，`?refresh=1` 跳过 10 分钟内存缓存；不落盘 |
 | `GET` | `/api/events` | 事件列表，支持 `?limit=` |
@@ -464,6 +517,10 @@ client.chat.completions.create(model="auto", messages=[{"role": "user", "content
 | `POST` | `/api/models/:code/apis` | 设置 API 能力：`{"apis":["chat","responses"]}` |
 | `POST` | `/api/catalog/refresh` | 拉取模型目录；不传参数刷新全部提供商，`{"provider":"openai"}` 只刷一个 |
 | `POST` | `/api/test` | 真实测试请求：`{"prompt":"..."}`，走 `auto` |
+| `GET` | `/api/sessions` | 本机会话列表与助手探测状态；`?refresh=1` 跳过 5 秒缓存重新扫描 |
+| `GET` | `/api/session` | 单个会话详情：`?agent=&id=`，含状态、压缩摘要、对话、待办与各块字数 |
+| `POST` | `/api/handoff` | 生成交接文本：`{"agent","id","note","reason","summary","messages","todos","full","limit"}` |
+| `POST` | `/api/shutdown` | 请求后台实例退出：只接受 `x-literouter-token`（来自 `server.json`），网页无法伪造 |
 
 网关接口的失败映射：`401` 认证失败、`400` 参数 / 上下文超限 / API 能力不匹配、`403` 无权限、`429` 限流（`Retry-After: 5`）、`502` 提供商异常 / 未知提供商（`literouter.provider_unknown`）、`503` 所有候选模型不可用（`Retry-After: 30`）或网关未配置提供商 Key（`literouter.no_key`，不是客户端的认证问题）。错误体兼容 OpenAI 格式，并附带 `attempts` 明细。
 
@@ -472,6 +529,8 @@ client.chat.completions.create(model="auto", messages=[{"role": "user", "content
 ## 安全
 
 - 管理 API 与看板默认只监听 `127.0.0.1`；`/api/*` 另有回环来源校验。
+- `/api/shutdown` 需要 `server.json` 里的随机退出令牌；看板页面无法跨站设置这个头，所以页面不能把自己所在的服务器关掉。
+- 会话页只读：SQLite 以只读模式打开，不改动任何 agent 的存储，也不替你发消息或切换 agent。
 - `ui.enabled=false` 时不再提供任何静态资源（`/` 直接 404），但管理 API 仍只对本机开放。
 - 设置 `gatewayToken` 后，`/v1/*` 使用常量时间比较校验 Bearer Token。
 - 提供商 Key 只在服务端读取，看板仅显示掩码；`/api/config` 返回的文本会清空 `apiKey`，日志中不写入密钥。
@@ -506,8 +565,8 @@ go test ./...              # 全部 Go 单元/契约测试
 # 终端 1：模拟提供商，端口 9911
 node ../switchyard/test/mock-provider.ts
 
-# 终端 2：本仓库二进制
-LITEROUTER_PROVIDER=http://127.0.0.1:9911/v1 DASHSCOPE_API_KEY=test ./literouter
+# 终端 2：本仓库二进制（前台运行，方便看日志）
+LITEROUTER_PROVIDER=http://127.0.0.1:9911/v1 DASHSCOPE_API_KEY=test ./literouter serve
 
 # 终端 3
 curl -s http://127.0.0.1:8788/v1/chat/completions \
@@ -524,12 +583,13 @@ A/B 差分脚本 `scripts/ab-diff.mjs` 会对同一配置下同时运行的 Node
 ```
 main.go                 进程入口，注册内嵌 tzdata
 internal/
-  app/                  启动、配置加载、热加载、信号与优雅退出
+  app/                  启动、后台实例（server.json）、配置加载、热加载、信号与优雅退出
   config/               配置 schema、校验、JSONC 预处理、旧格式迁移
   core/                 选路、失败分类、故障转移、定价、能力匹配
   model/                共享数据类型
   provider/             提供商流式/非流式客户端
   runtime/              编排：auto 链、健康状态、冷却、配置应用、事件
+  sessions/             各编码代理的探测器与交接文本生成（baton 移植）
   store/                状态持久化（RWMutex、原子写、防抖）
   stream/               SSE 提取、实时输出环、事件日志、Responses 续接
   httpapi/              HTTP 服务、OpenAI 与管理路由、静态资源
@@ -539,7 +599,7 @@ scripts/                A/B 差分与 Windows 信号验收辅助
 dist/                   交叉编译产物
 ```
 
-数据目录默认包含 `state.json`（已加入模型的状态与统计）、`events.jsonl`（事件流）、`literouter.log`（运行日志）。`state.json` 与 `events.jsonl` 的字段与参考实现兼容，可以直接复制旧数据目录继续累计。
+数据目录默认包含 `state.json`（已加入模型的状态与统计）、`events.jsonl`（事件流）、`literouter.log`（运行日志）。`state.json` 与 `events.jsonl` 的字段与参考实现兼容，可以直接复制旧数据目录继续累计。后台实例记录默认写在数据目录上一级的 `server.json`。
 
 ## 已知边界
 
@@ -551,6 +611,8 @@ dist/                   交叉编译产物
 - 调用方 Token 统计以提供商返回的 `usage` 为准；输入显示为原始 prompt Token（包含缓存命中），缓存命中率以提供商上报过缓存明细的请求为分母。提供商不返回 usage 时只统计请求次数，不估算 Token。
 - SSE 开始输出后不可回滚；极端情况下提供商中途断流只会结束当前响应。
 - 状态与事件是单机文件，不适用于多实例共享。
+- 会话页只在本机读取编码代理的存储，不写、不发消息、不替你决定换谁；交接文本里的 Markdown 标题会自动降级（代码块除外），避免和交接段落抢层级。
+- 后台实例只靠 `server.json` 协调：同一份状态文件对应一个实例；要并行跑多个部署，给每个部署设置不同的 `LITEROUTER_STATE`。
 - 看板保存会把 `config.json` 重写为规范化严格 JSON，手写的注释与字段顺序会丢失；想保留注释就只改文件、不开看板保存。
 - 列表里没有的模型原样透传，不参与故障转移；`auto` 只会在列表内切换。
 - 模型能力评分来自第三方 Artificial Analysis 排行榜，按模型名做保守匹配：会忽略日期、推理档位、`free` / `batch` / `preview`、`-it` / `-instruct`、`-highspeed` / `-ultraspeed`、单个 `.0` 版本和明确的尺寸后缀，也会去掉 AA slug 的 `nvidia-` / `tencent-` 厂商前缀；但不会跨大版本猜测，未评分的同名条目会阻止匹配到相邻版本。其余对不上的模型仍会显示但没有评分。评分只缓存在内存（10 分钟），不写入 `state.json` 或 `config.json`；排行页的勾选与排序也不会持久化，更不会自动加入模型列表。

@@ -71,7 +71,7 @@ func zcodeDBSessions(path string) ([]Session, error) {
 	return out, rows.Err()
 }
 
-func zcodeDBTranscript(path, sessionID string, full bool) (transcript, error) {
+func zcodeDBTranscript(path, sessionID string, full bool, status Status) (transcript, error) {
 	db, err := openZcodeDB(path)
 	if err != nil {
 		return transcript{}, err
@@ -82,11 +82,8 @@ func zcodeDBTranscript(path, sessionID string, full bool) (transcript, error) {
 	if err != nil {
 		return transcript{}, err
 	}
-	boundarySeq := int64(-1)
-	if !full {
-		boundarySeq = compactSeq
-	}
 	var data transcript
+	data.Status = status
 	if summary != "" {
 		data.Summary = summary
 		data.SummaryAt = formatMillis(compactAt)
@@ -94,6 +91,15 @@ func zcodeDBTranscript(path, sessionID string, full bool) (transcript, error) {
 
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
+
+	if todos, err := zcodeDBTodos(ctx, db, sessionID); err == nil {
+		data.Todos = todos
+	}
+
+	boundarySeq := int64(-1)
+	if !full {
+		boundarySeq = compactSeq
+	}
 	rows, err := db.QueryContext(ctx, `
 		SELECT m.id, m.data, p.data
 		FROM message m
@@ -110,7 +116,7 @@ func zcodeDBTranscript(path, sessionID string, full bool) (transcript, error) {
 	}
 	defer rows.Close()
 
-	var messages []message
+	var messages []Turn
 	var currentID, currentRole string
 	var parts []string
 	flush := func() {
@@ -122,7 +128,7 @@ func zcodeDBTranscript(path, sessionID string, full bool) (transcript, error) {
 		if currentRole == "user" {
 			role = "用户"
 		}
-		messages = appendTurn(messages, role, strings.Join(parts, "\n"), full)
+		messages = appendTurn(messages, role, strings.Join(parts, "\n"))
 		parts = nil
 	}
 
@@ -155,8 +161,27 @@ func zcodeDBTranscript(path, sessionID string, full bool) (transcript, error) {
 		return transcript{}, err
 	}
 	flush()
+	// The query already clipped at the compaction boundary; the summary is a
+	// separate block, so nothing was replaced inside Messages.
 	data.Messages = messages
 	return data, nil
+}
+
+func zcodeDBTodos(ctx context.Context, db *sql.DB, sessionID string) ([]Todo, error) {
+	rows, err := db.QueryContext(ctx, `SELECT COALESCE(content, ''), COALESCE(status, '') FROM todo WHERE session_id = ? ORDER BY position`, sessionID)
+	if err != nil {
+		return nil, nil
+	}
+	defer rows.Close()
+	var out []Todo
+	for rows.Next() {
+		var content, status string
+		if err := rows.Scan(&content, &status); err != nil {
+			return nil, err
+		}
+		out = append(out, Todo{Text: cleanText(content), Status: status})
+	}
+	return out, rows.Err()
 }
 
 // zcodeDBCompaction locates the last compaction ZCode wrote. ZCode marks the

@@ -38,6 +38,7 @@ var uiAssets = map[string]bool{
 	"/styles/shell.css":     true,
 	"/styles/components.css": true,
 	"/styles/views.css":     true,
+	"/styles/sessions.css":  true,
 }
 
 var mimeTypes = map[string]string{
@@ -127,7 +128,20 @@ type Server struct {
 	Runtime  *runtime.Runtime
 	Logger   *util.Logger
 	Sessions *sessions.Detector
-	routes   []route
+	// Token gates POST /api/shutdown; Stop asks the process to exit.
+	Token string
+	Stop  func()
+	// PublicHost and PublicPort are the address the listener actually got;
+	// they differ from the config when the configured port was busy.
+	PublicHost string
+	PublicPort int
+	routes     []route
+}
+
+// SetAddress records the real listener address for the dashboard.
+func (s *Server) SetAddress(host string, port int) {
+	s.PublicHost = host
+	s.PublicPort = port
 }
 
 // NewServer builds the HTTP surface for a runtime.
