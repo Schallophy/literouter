@@ -231,10 +231,12 @@ type ModelPricing struct {
 }
 
 // PricingConfig is the pricing catalogue. The "*" key is the fallback entry.
+// PreferOffPeak reorders auto candidates by their current time-of-day band.
 type PricingConfig struct {
-	Currency string                  `json:"currency"`
-	Unit     int64                   `json:"unit"`
-	Models   map[string]ModelPricing `json:"models"`
+	Currency      string                  `json:"currency"`
+	Unit          int64                   `json:"unit"`
+	PreferOffPeak bool                    `json:"preferOffPeak"`
+	Models        map[string]ModelPricing `json:"models"`
 }
 
 // ResponsesChainingConfig toggles platform-side response session reuse.

@@ -61,7 +61,7 @@ func DefaultConfig() model.GatewayConfig {
 		Providers:       providers,
 		DefaultProvider: providers[0].ID,
 		Failover:        model.FailoverConfig{MaxAttempts: 8, ThrottleCooldownMs: 60000},
-		Pricing:         model.PricingConfig{Currency: DefaultPricingCurrency, Unit: DefaultPricingUnit, Models: map[string]model.ModelPricing{}},
+		Pricing:         model.PricingConfig{Currency: DefaultPricingCurrency, Unit: DefaultPricingUnit, PreferOffPeak: true, Models: map[string]model.ModelPricing{}},
 		ResponsesChaining: model.ResponsesChainingConfig{
 			Enabled: false, TTLMinutes: 120, MaxSessions: 500,
 		},
@@ -589,7 +589,7 @@ func coversDay(tiers []model.PriceTier) bool {
 }
 
 func readPricing(source object, providers []model.ProviderConfig, bindings map[string]string, errors, migrations *[]string) model.PricingConfig {
-	pricing := model.PricingConfig{Currency: DefaultPricingCurrency, Unit: DefaultPricingUnit, Models: map[string]model.ModelPricing{}}
+	pricing := model.PricingConfig{Currency: DefaultPricingCurrency, Unit: DefaultPricingUnit, PreferOffPeak: true, Models: map[string]model.ModelPricing{}}
 	value, present := source["pricing"]
 	if !present {
 		return pricing
@@ -606,6 +606,7 @@ func readPricing(source object, providers []model.ProviderConfig, bindings map[s
 		pricing.Currency = currency
 	}
 	pricing.Unit = int64(readNumber(raw, "unit", float64(pricing.Unit), 1, 1_000_000_000, "pricing.unit", errors))
+	pricing.PreferOffPeak = readBool(raw, "preferOffPeak", true)
 
 	modelsRaw, hasModels := raw["models"]
 	if !hasModels {

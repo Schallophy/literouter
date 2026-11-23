@@ -163,7 +163,7 @@ func (s *Server) handleOverview(ctx *Ctx) error {
 		"key":             rt.KeyInfo(),
 		"providers":       providers,
 		"defaultProvider": cfg.DefaultProvider,
-		"pricing":         map[string]any{"currency": cfg.Pricing.Currency, "unit": cfg.Pricing.Unit},
+		"pricing":         map[string]any{"currency": cfg.Pricing.Currency, "unit": cfg.Pricing.Unit, "preferOffPeak": cfg.Pricing.PreferOffPeak},
 		"keys":            rt.ProviderKeyInfos(),
 		"ui":              cfg.UI,
 		"server":          cfg.Server,

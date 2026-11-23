@@ -481,7 +481,7 @@ function pricingPanel() {
     <section class="group">
       <div class="group-head">
         <h2>定价</h2>
-        <p>按模型填写单价与峰谷时段。用量页、模型页会按这里估算成本；每个模型可单独设置时区，时段必须完整覆盖一整天。</p>
+        <p>按模型填写单价与峰谷时段；每个模型可单独设置时区，时段必须完整覆盖一整天。用量页、模型页会按这里估算成本，开启峰谷选路后 auto 也会按当前时段调整尝试顺序。</p>
       </div>
       <div class="fields">
         <label class="field">
@@ -498,6 +498,15 @@ function pricingPanel() {
           }">
           <span class="field-hint">单价的 token 基数；1000000 = 每百万 token 的价格。</span>
         </label>
+        <div class="field wide">
+          <label class="check">
+            <input type="checkbox" data-path="pricing.preferOffPeak" ${
+              pricing.preferOffPeak !== false ? "checked" : ""
+            }>
+            <span>峰谷选路：谷时优先，峰时靠后</span>
+          </label>
+          <span class="field-hint">开启后 auto 请求把当前处于谷时价的模型排到前面、峰时价的排到最后；未定价或各时段同价的模型保持原顺序。每次请求按模型自己的时区判断当前档位。</span>
+        </div>
       </div>
       <div class="price-list">
         ${
@@ -607,6 +616,7 @@ function ensurePricing() {
   local.config.pricing.models ||= {};
   local.config.pricing.currency ||= "CNY";
   local.config.pricing.unit ||= 1_000_000;
+  local.config.pricing.preferOffPeak ??= true;
   return local.config.pricing;
 }
 
@@ -1280,7 +1290,7 @@ function failoverPanel() {
     <section class="group">
       <div class="group-head">
         <h2>故障转移</h2>
-        <p>auto 从列表第一个模型开始按顺序回退。失效的模型经过重试时间后会重新参与选路；无效模型不会自动恢复。</p>
+        <p>auto 从列表第一个模型开始按顺序回退；开启峰谷选路后，谷时价的模型会临时提前。失效的模型经过重试时间后会重新参与选路；无效模型不会自动恢复。</p>
       </div>
       <div class="fields">
         <div class="field">

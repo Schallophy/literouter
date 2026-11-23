@@ -376,6 +376,18 @@ func TestPricingDefaults(t *testing.T) {
 	if result.Config.Pricing.Currency != "CNY" || result.Config.Pricing.Unit != 1_000_000 || len(result.Config.Pricing.Models) != 0 {
 		t.Fatalf("bad defaults: %+v", result.Config.Pricing)
 	}
+	if !result.Config.Pricing.PreferOffPeak {
+		t.Fatal("preferOffPeak should default to true")
+	}
+}
+
+func TestPreferOffPeakCanBeDisabled(t *testing.T) {
+	raw := toMap(t, DefaultConfig())
+	raw["pricing"].(map[string]any)["preferOffPeak"] = false
+	result := Normalize(raw)
+	if !result.OK || result.Config.Pricing.PreferOffPeak {
+		t.Fatalf("got %+v %v", result.Config.Pricing, result.Errors)
+	}
 }
 
 func TestPricingTimezonePerModel(t *testing.T) {

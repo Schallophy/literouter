@@ -51,9 +51,16 @@ type Options struct {
 // SnapshotModel is a model record with routing metadata.
 type SnapshotModel struct {
 	model.ModelRecord
-	APIs     []model.ApiKind `json:"apis"`
-	Provider string          `json:"provider"`
-	Upstream string          `json:"upstream"`
+	APIs       []model.ApiKind `json:"apis"`
+	Provider   string          `json:"provider"`
+	Upstream   string          `json:"upstream"`
+	PriceLevel core.PriceLevel `json:"priceLevel,omitempty"`
+}
+
+// AutoSkip explains why a chain model is not attempted right now.
+type AutoSkip struct {
+	Code   string `json:"code"`
+	Reason string `json:"reason"`
 }
 
 // ChainSnapshot is what the dashboard's model page renders.
@@ -61,6 +68,9 @@ type ChainSnapshot struct {
 	Effective             *string         `json:"effective"`
 	Context               model.ContextConfig `json:"context"`
 	RetryDeadAfterMinutes int             `json:"retryDeadAfterMinutes"`
+	PreferOffPeak         bool            `json:"preferOffPeak"`
+	AutoOrder             []string        `json:"autoOrder"`
+	Skipped               []AutoSkip      `json:"skipped"`
 	Models                []SnapshotModel `json:"models"`
 	Alive                 int             `json:"alive"`
 	Dead                  int             `json:"dead"`
@@ -339,30 +349,51 @@ func (r *Runtime) ChainCodes() []string {
 	return append([]string(nil), cfg.Chain.Models...)
 }
 
-// EffectiveModel is what auto would hit right now.
-func (r *Runtime) EffectiveModel() *string {
-	cfg := r.ConfigSnapshot()
+// Reasons a chain model is left out of the current auto order.
+const (
+	AutoSkipInvalid = "invalid"
+	AutoSkipDead    = "dead"
+	AutoSkipCooling = "cooling"
+)
+
+// autoPlan reports the order auto would try right now plus the models left
+// out for health or cooldown reasons.
+func (r *Runtime) autoPlan(cfg model.GatewayConfig, now time.Time) ([]string, []AutoSkip) {
 	retryMs := int64(cfg.Chain.RetryDeadAfterMinutes) * 60_000
-	now := time.Now().UnixMilli()
+	nowMs := now.UnixMilli()
+	ready := make([]string, 0, len(cfg.Chain.Models))
+	skipped := make([]AutoSkip, 0)
 	for _, code := range cfg.Chain.Models {
 		record := r.Store.Get(code)
 		health := model.HealthUnknown
 		if record != nil {
 			health = record.Health
 		}
-		if health == model.HealthInvalid {
-			continue
+		switch {
+		case health == model.HealthInvalid:
+			skipped = append(skipped, AutoSkip{Code: code, Reason: AutoSkipInvalid})
+		case health == model.HealthDead && (record == nil || !core.IsDeadRetryDue(record, nowMs, retryMs)):
+			skipped = append(skipped, AutoSkip{Code: code, Reason: AutoSkipDead})
+		case record != nil && core.IsThrottled(record, nowMs):
+			skipped = append(skipped, AutoSkip{Code: code, Reason: AutoSkipCooling})
+		default:
+			ready = append(ready, code)
 		}
-		if health == model.HealthDead && (record == nil || !core.IsDeadRetryDue(record, now, retryMs)) {
-			continue
-		}
-		if record != nil && core.IsThrottled(record, now) {
-			continue
-		}
-		found := code
-		return &found
 	}
-	return nil
+	if cfg.Pricing.PreferOffPeak {
+		ready = core.OrderByTimePricing(ready, cfg.Pricing, now)
+	}
+	return ready, skipped
+}
+
+// EffectiveModel is what auto would hit right now.
+func (r *Runtime) EffectiveModel() *string {
+	ready, _ := r.autoPlan(r.ConfigSnapshot(), time.Now())
+	if len(ready) == 0 {
+		return nil
+	}
+	found := ready[0]
+	return &found
 }
 
 // LastOutput returns the last served model.
@@ -384,7 +415,10 @@ func (r *Runtime) setLastOutput(value OutputSnapshot) {
 
 // SnapshotModel builds one dashboard model row.
 func (r *Runtime) SnapshotModel(code string) SnapshotModel {
-	cfg := r.ConfigSnapshot()
+	return r.snapshotModelAt(r.ConfigSnapshot(), code, time.Now())
+}
+
+func (r *Runtime) snapshotModelAt(cfg model.GatewayConfig, code string, at time.Time) SnapshotModel {
 	record := r.Store.Get(code)
 	if record == nil {
 		record = &model.ModelRecord{Code: code, Family: "Other", Health: model.HealthUnknown, CostBreakdown: model.CostBreakdown{}}
@@ -403,21 +437,33 @@ func (r *Runtime) SnapshotModel(code string) SnapshotModel {
 	}
 	copied := *record
 	copied.Family = family
+	priceLevel := core.PriceLevelFlat
+	if cfg.Pricing.PreferOffPeak {
+		priceLevel = core.PriceLevelAt(cfg.Pricing, code, at)
+	}
 	return SnapshotModel{
 		ModelRecord: copied,
 		APIs:        core.ApisFor(cfg.ModelApis, code),
 		Provider:    providerID,
 		Upstream:    upstream,
+		PriceLevel:  priceLevel,
 	}
 }
 
 // ChainSnapshot builds the model page payload.
 func (r *Runtime) ChainSnapshot() ChainSnapshot {
 	cfg := r.ConfigSnapshot()
+	now := time.Now()
+	autoOrder, skipped := r.autoPlan(cfg, now)
+	var effective *string
+	if len(autoOrder) > 0 {
+		first := autoOrder[0]
+		effective = &first
+	}
 	models := make([]SnapshotModel, 0, len(cfg.Chain.Models))
 	alive, dead := 0, 0
 	for _, code := range cfg.Chain.Models {
-		snapshot := r.SnapshotModel(code)
+		snapshot := r.snapshotModelAt(cfg, code, now)
 		models = append(models, snapshot)
 		switch snapshot.Health {
 		case model.HealthAlive:
@@ -427,9 +473,12 @@ func (r *Runtime) ChainSnapshot() ChainSnapshot {
 		}
 	}
 	return ChainSnapshot{
-		Effective:             r.EffectiveModel(),
+		Effective:             effective,
 		Context:               cfg.Chain.Context,
 		RetryDeadAfterMinutes: cfg.Chain.RetryDeadAfterMinutes,
+		PreferOffPeak:         cfg.Pricing.PreferOffPeak,
+		AutoOrder:             autoOrder,
+		Skipped:               skipped,
 		Models:                models,
 		Alive:                 alive,
 		Dead:                  dead,
@@ -604,6 +653,9 @@ func (r *Runtime) RequestThrough(input RequestInput) RoutedResult {
 		candidates = make([]string, 0, len(selected))
 		for _, candidate := range selected {
 			candidates = append(candidates, candidate.Code)
+		}
+		if cfg.Pricing.PreferOffPeak {
+			candidates = core.OrderByTimePricing(candidates, cfg.Pricing, time.UnixMilli(now))
 		}
 	} else if route.Model != "" {
 		candidates = []string{route.Model}

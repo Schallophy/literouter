@@ -136,7 +136,9 @@ function paint() {
       <section class="rail-wrap" aria-labelledby="rail-title">
         <div class="sec-head">
           <h2 class="sec-title" id="rail-title">路由</h2>
-          <span class="sec-hint">从上到下依次回退</span>
+          <span class="sec-hint">${
+            chain.preferOffPeak ? "从上到下依次回退 · 峰谷会调整实际顺序" : "从上到下依次回退"
+          }</span>
           <div class="sec-tools rail-tools">${railTools()}</div>
         </div>
         <ol class="rail" id="rail">
@@ -230,7 +232,9 @@ function currencyOf(data) {
 
 function railTools() {
   if (!local.batch) {
-    return `<button class="btn ghost sm" type="button" data-action="batch">批量管理</button>`;
+    return `
+      <button class="btn ghost sm" type="button" data-action="auto-order">实际顺序</button>
+      <button class="btn ghost sm" type="button" data-action="batch">批量管理</button>`;
   }
 
   const count = local.selected.size;
@@ -261,7 +265,7 @@ function rowHtml(model, index, data) {
       <span class="rail-rank">${String(index + 1).padStart(2, "0")}</span>
       <span class="rail-track" aria-hidden="true"><i class="rail-node"></i></span>
       <button class="rail-main" type="button" data-action="detail" data-code="${esc(model.code)}">
-        <span class="rail-code">${esc(model.code)}</span>
+        <span class="rail-code">${priceBadge(model)}${esc(model.code)}</span>
         <span class="rail-meta">${esc(metaLine(model, data))}</span>
       </button>
       <span class="rail-status">
@@ -290,6 +294,16 @@ function metaLine(model, data) {
     `${fmtInt(model.requests)} 次请求`,
     `${fmtTokens(tokensOf(model))} tokens`,
   ].join(" · ");
+}
+
+function priceBadge(model) {
+  if (model.priceLevel === "valley") {
+    return `<span class="rail-tier" data-level="valley" title="当前处于该模型的谷时价，auto 会优先尝试">谷时</span>`;
+  }
+  if (model.priceLevel === "peak") {
+    return `<span class="rail-tier" data-level="peak" title="当前处于该模型的峰时价，auto 会最后尝试">峰时</span>`;
+  }
+  return "";
 }
 
 /** 模型 code 形如 `提供商/模型名`；取最长的提供商 id 前缀。 */
@@ -341,6 +355,7 @@ function policyHtml(data) {
     ],
     ["限流冷却", cooldown],
     ["最多尝试", failover ? `${failover.maxAttempts} 个模型` : "—"],
+    ["峰谷选路", chain.preferOffPeak ? "谷时靠前 · 峰时靠后" : "关闭"],
   ];
 
   return `
@@ -424,13 +439,14 @@ function emptyHtml() {
 function railSignature(data) {
   return [
     data.chain.effective,
+    data.chain.preferOffPeak ? "on" : "off",
     data.output?.model || "",
     local.batch ? "1" : "0",
     ...data.chain.models.map(
       (model) =>
-        `${model.code}:${model.health}:${coolingNow(model) ? "1" : "0"}:${model.throttledUntil || ""}:${
-          model.checkedAt || ""
-        }:${model.failures || 0}`,
+        `${model.code}:${model.health}:${model.priceLevel || ""}:${coolingNow(model) ? "1" : "0"}:${
+          model.throttledUntil || ""
+        }:${model.checkedAt || ""}:${model.failures || 0}`,
     ),
   ].join("|");
 }
@@ -555,6 +571,10 @@ function onClick(event) {
     case "test":
       event.preventDefault();
       openTest(viewCtx);
+      break;
+    case "auto-order":
+      event.preventDefault();
+      openAutoOrder();
       break;
     case "batch":
       local.batch = true;
@@ -1141,6 +1161,71 @@ function bindAdd(node, ctx) {
   });
 }
 
+/* ---------- actual auto order ---------- */
+
+function openAutoOrder() {
+  const data = store.data;
+  const chain = data?.chain;
+  if (!chain) return;
+
+  const models = new Map(chain.models.map((model) => [model.code, model]));
+  const positions = new Map(chain.models.map((model, index) => [model.code, index + 1]));
+  const order = chain.autoOrder || [];
+  const skipped = chain.skipped || [];
+  const ready = new Set(order);
+  const chainReadyOrder = chain.models.map((model) => model.code).filter((code) => ready.has(code));
+  const reordered = order.some((code, index) => chainReadyOrder[index] !== code);
+
+  const row = (code, rank, includeBadge, showMove) => {
+    const model = models.get(code);
+    const status = statusOf(model, chain);
+    const moved = showMove && reordered && positions.has(code) ? ` · 列表第 ${positions.get(code)} 位` : "";
+    return `
+      <li class="auto-order-row">
+        <span class="auto-rank">${rank}</span>
+        <span class="auto-main">
+          <span class="auto-code">${includeBadge && model ? priceBadge(model) : ""}${esc(code)}</span>
+          <span class="auto-note"><span class="status-text" data-tone="${status.tone}">${esc(
+            status.text,
+          )}</span>${esc(moved)} ${countdownHtml(status)}</span>
+        </span>
+      </li>`;
+  };
+
+  const readyRows = order
+    .map((code, index) => row(code, String(index + 1).padStart(2, "0"), true, true))
+    .join("");
+  const skippedRows = skipped.map((item) => row(item.code, "—", false, false)).join("");
+
+  openDialog({
+    title: "实际顺序",
+    body: `
+      <p class="field-hint">auto 此刻的尝试顺序，已排除失效、未到重试时间和限流冷却中的模型；具体请求还会跳过不支持当前端点的模型。</p>
+      ${
+        reordered
+          ? `<p class="field-hint">峰谷选路正在按当前时段调整：谷时价的模型临时提前，峰时价的模型靠后。</p>`
+          : ""
+      }
+      <ol class="auto-order">
+        ${readyRows || `<li class="auto-order-empty">没有可用模型</li>`}
+      </ol>
+      ${
+        skipped.length
+          ? `<p class="auto-order-title">本次跳过</p>
+             <ol class="auto-order">${skippedRows}</ol>`
+          : ""
+      }
+    `,
+    footer: `
+      <span class="dialog-note">只读视图，不会修改模型列表</span>
+      <button class="btn" type="button" data-act="close">关闭</button>
+    `,
+    onMount(node) {
+      node.querySelector('[data-act="close"]').addEventListener("click", () => node.close());
+    },
+  });
+}
+
 /* ---------- quick test ---------- */
 
 function openTest(ctx) {
@@ -1157,7 +1242,7 @@ function openTest(ctx) {
       <div class="test-result" id="test-result">${testResultHtml(local.test)}</div>
     `,
     footer: `
-      <span class="dialog-note">从列表第一个模型开始，失败时按列表回退</span>
+      <span class="dialog-note">从列表最上方开始，失败时按实际顺序回退</span>
       <button class="btn primary" type="button" data-act="run">发送</button>
     `,
     onMount(node) {

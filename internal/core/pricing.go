@@ -1,7 +1,9 @@
 package core
 
 import (
+	"math"
 	"regexp"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -33,13 +35,22 @@ func minutesInZone(at time.Time, timeZone string) int {
 // PriceTierAt selects the tier for a model at a given instant. The model's own
 // timezone decides the clock; a missing model entry falls back to "*".
 func PriceTierAt(pricing model.PricingConfig, modelCode string, at time.Time) (model.PriceTier, bool) {
+	entry, ok := pricingEntry(pricing, modelCode)
+	if !ok {
+		return model.PriceTier{}, false
+	}
+	return tierAt(entry, at)
+}
+
+func pricingEntry(pricing model.PricingConfig, modelCode string) (model.ModelPricing, bool) {
 	entry, ok := pricing.Models[modelCode]
 	if !ok {
 		entry, ok = pricing.Models["*"]
 	}
-	if !ok {
-		return model.PriceTier{}, false
-	}
+	return entry, ok
+}
+
+func tierAt(entry model.ModelPricing, at time.Time) (model.PriceTier, bool) {
 	zone := strings.TrimSpace(entry.Timezone)
 	if zone == "" {
 		zone = "UTC"
@@ -63,6 +74,84 @@ func PriceTierAt(pricing model.PricingConfig, modelCode string, at time.Time) (m
 		}
 	}
 	return model.PriceTier{}, false
+}
+
+// PriceLevel classifies the price band a model is in right now.
+type PriceLevel string
+
+const (
+	// PriceLevelFlat means no time-of-day price difference to act on.
+	PriceLevelFlat   PriceLevel = ""
+	PriceLevelValley PriceLevel = "valley"
+	PriceLevelPeak   PriceLevel = "peak"
+)
+
+func tierRate(tier model.PriceTier) float64 {
+	return tier.Input + tier.CachedInput + tier.Output
+}
+
+// PriceLevelAt compares the current tier with the cheapest tier of the same
+// entry, so each model is judged against its own prices.
+func PriceLevelAt(pricing model.PricingConfig, modelCode string, at time.Time) PriceLevel {
+	entry, ok := pricingEntry(pricing, modelCode)
+	if !ok || len(entry.Tiers) == 0 {
+		return PriceLevelFlat
+	}
+	tier, ok := tierAt(entry, at)
+	if !ok {
+		return PriceLevelFlat
+	}
+	cheapest, priciest := math.Inf(1), math.Inf(-1)
+	for _, candidate := range entry.Tiers {
+		rate := tierRate(candidate)
+		if rate < cheapest {
+			cheapest = rate
+		}
+		if rate > priciest {
+			priciest = rate
+		}
+	}
+	if priciest-cheapest < 1e-9 {
+		return PriceLevelFlat
+	}
+	if tierRate(tier) <= cheapest+1e-9 {
+		return PriceLevelValley
+	}
+	return PriceLevelPeak
+}
+
+func priceRank(level PriceLevel) int {
+	switch level {
+	case PriceLevelValley:
+		return 0
+	case PriceLevelPeak:
+		return 2
+	}
+	return 1
+}
+
+// OrderByTimePricing moves models currently in their valley band to the front
+// and models in a pricier band to the back. Relative order inside each group
+// is preserved, and models without a price difference stay in between.
+func OrderByTimePricing(codes []string, pricing model.PricingConfig, at time.Time) []string {
+	ordered := append([]string(nil), codes...)
+	if len(ordered) < 2 {
+		return ordered
+	}
+	ranks := make(map[string]int, len(ordered))
+	banded := false
+	for _, code := range ordered {
+		level := PriceLevelAt(pricing, code, at)
+		if level != PriceLevelFlat {
+			banded = true
+		}
+		ranks[code] = priceRank(level)
+	}
+	if !banded {
+		return ordered
+	}
+	sort.SliceStable(ordered, func(i, j int) bool { return ranks[ordered[i]] < ranks[ordered[j]] })
+	return ordered
 }
 
 // UsageCostParts splits a usage block into billed classes. Cached input uses

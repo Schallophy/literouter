@@ -1,6 +1,8 @@
 package core
 
 import (
+	"fmt"
+	"strings"
 	"testing"
 	"time"
 	_ "time/tzdata"
@@ -26,6 +28,98 @@ func contractPricing() model.PricingConfig {
 
 func shanghaiAt(hour, minute int) time.Time {
 	return time.Date(2026, 11, 11, hour-8, minute, 0, 0, time.UTC)
+}
+
+func TestPriceLevelContract(t *testing.T) {
+	pricing := contractPricing()
+
+	t.Run("classifies peak and valley against the model's own tiers", func(t *testing.T) {
+		if level := PriceLevelAt(pricing, "model", shanghaiAt(9, 0)); level != PriceLevelPeak {
+			t.Fatalf("09:00: %q", level)
+		}
+		if level := PriceLevelAt(pricing, "model", shanghaiAt(23, 0)); level != PriceLevelValley {
+			t.Fatalf("23:00: %q", level)
+		}
+	})
+
+	t.Run("models without a price difference are flat", func(t *testing.T) {
+		flat := model.PricingConfig{
+			Currency: "CNY", Unit: 1_000_000,
+			Models: map[string]model.ModelPricing{"model": {
+				Timezone: "Asia/Shanghai",
+				Tiers:    []model.PriceTier{{From: "00:00", To: "00:00", Input: 2, CachedInput: 0.2, Output: 8}},
+			}},
+		}
+		if level := PriceLevelAt(flat, "model", shanghaiAt(9, 0)); level != PriceLevelFlat {
+			t.Fatalf("single tier: %q", level)
+		}
+		same := contractPricing()
+		entry := same.Models["model"]
+		entry.Tiers[1].Input, entry.Tiers[1].CachedInput, entry.Tiers[1].Output = 2, 0.2, 8
+		same.Models["model"] = entry
+		if level := PriceLevelAt(same, "model", shanghaiAt(9, 0)); level != PriceLevelFlat {
+			t.Fatalf("equal tiers: %q", level)
+		}
+		if level := PriceLevelAt(model.PricingConfig{}, "model", shanghaiAt(9, 0)); level != PriceLevelFlat {
+			t.Fatalf("no entry: %q", level)
+		}
+	})
+
+	t.Run("the wildcard entry classifies unpriced models", func(t *testing.T) {
+		wildcard := model.PricingConfig{
+			Currency: "CNY", Unit: 1_000_000,
+			Models: map[string]model.ModelPricing{"*": pricing.Models["model"]},
+		}
+		if level := PriceLevelAt(wildcard, "other", shanghaiAt(23, 0)); level != PriceLevelValley {
+			t.Fatalf("got %q", level)
+		}
+	})
+
+	t.Run("orders valley first, peak last and keeps flat in between", func(t *testing.T) {
+		bands := model.PricingConfig{
+			Currency: "CNY", Unit: 1_000_000,
+			Models: map[string]model.ModelPricing{
+				"valley": {Timezone: "Asia/Shanghai", Tiers: []model.PriceTier{
+					{From: "00:00", To: "00:00", Input: 1, CachedInput: 0.1, Output: 4},
+					{From: "08:00", To: "22:00", Input: 9, CachedInput: 0.9, Output: 30},
+				}},
+				"peak": {Timezone: "Asia/Shanghai", Tiers: []model.PriceTier{
+					{From: "00:00", To: "00:00", Input: 9, CachedInput: 0.9, Output: 30},
+					{From: "08:00", To: "22:00", Input: 1, CachedInput: 0.1, Output: 4},
+				}},
+				"flat": {Timezone: "Asia/Shanghai", Tiers: []model.PriceTier{
+					{From: "00:00", To: "00:00", Input: 5, CachedInput: 0.5, Output: 20},
+				}},
+			},
+		}
+		codes := []string{"peakA", "valleyA", "flatA", "peakB", "valleyB", "flatB"}
+		// peakA/peakB share the peak entry, valley* and flat* likewise.
+		for _, code := range codes {
+			band := "flat"
+			if strings.HasPrefix(code, "peak") {
+				band = "peak"
+			} else if strings.HasPrefix(code, "valley") {
+				band = "valley"
+			}
+			bands.Models[code] = bands.Models[band]
+		}
+		got := OrderByTimePricing(codes, bands, shanghaiAt(9, 0))
+		want := []string{"valleyA", "valleyB", "flatA", "flatB", "peakA", "peakB"}
+		if fmt.Sprint(got) != fmt.Sprint(want) {
+			t.Fatalf("got %v want %v", got, want)
+		}
+		if fmt.Sprint(codes) != "[peakA valleyA flatA peakB valleyB flatB]" {
+			t.Fatalf("input mutated: %v", codes)
+		}
+	})
+
+	t.Run("leaves the order alone when nothing is banded", func(t *testing.T) {
+		codes := []string{"b", "a", "c"}
+		got := OrderByTimePricing(codes, model.PricingConfig{}, time.Now())
+		if fmt.Sprint(got) != "[b a c]" {
+			t.Fatalf("got %v", got)
+		}
+	})
 }
 
 func TestPricingContract(t *testing.T) {

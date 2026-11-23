@@ -127,6 +127,107 @@ func TestAutoAlwaysStartsFromFirstModel(t *testing.T) {
 	}
 }
 
+func TestAutoPrefersValleyPricedModel(t *testing.T) {
+	rt, _, _ := newRuntime(t, []string{"dashscope/peak", "dashscope/valley", "dashscope/flat"})
+	next := rt.ConfigSnapshot()
+	next.Pricing = model.PricingConfig{
+		Currency: "CNY", Unit: 1_000_000, PreferOffPeak: true,
+		Models: map[string]model.ModelPricing{
+			"dashscope/peak": {Timezone: "UTC", Tiers: []model.PriceTier{
+				{From: "00:00", To: "00:00", Input: 9, CachedInput: 0.9, Output: 30},
+				{From: "08:00", To: "22:00", Input: 1, CachedInput: 0.1, Output: 4},
+			}},
+			"dashscope/valley": {Timezone: "UTC", Tiers: []model.PriceTier{
+				{From: "00:00", To: "00:00", Input: 1, CachedInput: 0.1, Output: 4},
+				{From: "08:00", To: "22:00", Input: 9, CachedInput: 0.9, Output: 30},
+			}},
+			"dashscope/flat": {Timezone: "UTC", Tiers: []model.PriceTier{
+				{From: "00:00", To: "00:00", Input: 5, CachedInput: 0.5, Output: 20},
+			}},
+		},
+	}
+	if _, err := rt.ApplyConfig(next, false); err != nil {
+		t.Fatalf("apply: %v", err)
+	}
+	if value := rt.EffectiveModel(); value == nil || *value != "dashscope/valley" {
+		t.Fatalf("effective: %v", value)
+	}
+
+	var calls []string
+	rt.Client.SetTransport(roundTripFunc(func(request *http.Request) (*http.Response, error) {
+		calls = append(calls, requestModel(t, request))
+		return fakeResponse(200, `{"choices":[{"message":{"content":"ok"}}]}`), nil
+	}))
+	body := map[string]any{"messages": []any{map[string]any{"role": "user", "content": "hi"}}}
+	first := rt.RequestThrough(runtime.RequestInput{Path: "chat/completions", Model: "auto", Body: body, Context: context.Background()})
+	closeBody(t, first.Result.Response)
+	if len(calls) != 1 || calls[0] != "valley" {
+		t.Fatalf("calls: %v", calls)
+	}
+
+	next.Pricing.PreferOffPeak = false
+	if _, err := rt.ApplyConfig(next, false); err != nil {
+		t.Fatalf("apply off: %v", err)
+	}
+	if value := rt.EffectiveModel(); value == nil || *value != "dashscope/peak" {
+		t.Fatalf("effective after disabling: %v", value)
+	}
+	calls = nil
+	second := rt.RequestThrough(runtime.RequestInput{Path: "chat/completions", Model: "auto", Body: body, Context: context.Background()})
+	closeBody(t, second.Result.Response)
+	if len(calls) != 1 || calls[0] != "peak" {
+		t.Fatalf("calls after disabling: %v", calls)
+	}
+}
+
+func TestChainSnapshotReportsAutoOrderAndSkips(t *testing.T) {
+	rt, _, _ := newRuntime(t, []string{"dashscope/peak", "dashscope/valley", "dashscope/flat"})
+	next := rt.ConfigSnapshot()
+	next.Pricing = model.PricingConfig{
+		Currency: "CNY", Unit: 1_000_000, PreferOffPeak: true,
+		Models: map[string]model.ModelPricing{
+			"dashscope/peak": {Timezone: "UTC", Tiers: []model.PriceTier{
+				{From: "00:00", To: "00:00", Input: 9, CachedInput: 0.9, Output: 30},
+				{From: "08:00", To: "22:00", Input: 1, CachedInput: 0.1, Output: 4},
+			}},
+			"dashscope/valley": {Timezone: "UTC", Tiers: []model.PriceTier{
+				{From: "00:00", To: "00:00", Input: 1, CachedInput: 0.1, Output: 4},
+				{From: "08:00", To: "22:00", Input: 9, CachedInput: 0.9, Output: 30},
+			}},
+		},
+	}
+	if _, err := rt.ApplyConfig(next, false); err != nil {
+		t.Fatalf("apply: %v", err)
+	}
+
+	chain := rt.ChainSnapshot()
+	if fmt.Sprint(chain.AutoOrder) != "[dashscope/valley dashscope/flat dashscope/peak]" {
+		t.Fatalf("auto order: %v", chain.AutoOrder)
+	}
+	if chain.Effective == nil || *chain.Effective != "dashscope/valley" {
+		t.Fatalf("effective: %v", chain.Effective)
+	}
+	if len(chain.Models) != 3 || chain.Models[0].Code != "dashscope/peak" || chain.Models[1].Code != "dashscope/valley" {
+		t.Fatalf("chain order must stay as configured: %+v", chain.Models)
+	}
+
+	rt.Store.SetHealth("dashscope/flat", model.HealthInvalid, map[string]any{"reason": "模型不存在"})
+	rt.Store.SetHealth("dashscope/peak", model.HealthAlive, map[string]any{
+		"throttledUntil": time.Now().Add(time.Minute).UTC().Format("2006-01-02T15:04:05.000Z"),
+	})
+	chain = rt.ChainSnapshot()
+	if fmt.Sprint(chain.AutoOrder) != "[dashscope/valley]" {
+		t.Fatalf("auto order after skips: %v", chain.AutoOrder)
+	}
+	reasons := map[string]string{}
+	for _, item := range chain.Skipped {
+		reasons[item.Code] = item.Reason
+	}
+	if reasons["dashscope/flat"] != runtime.AutoSkipInvalid || reasons["dashscope/peak"] != runtime.AutoSkipCooling {
+		t.Fatalf("skipped: %+v", chain.Skipped)
+	}
+}
+
 func closeBody(t *testing.T, response *http.Response) {
 	t.Helper()
 	if response == nil || response.Body == nil {

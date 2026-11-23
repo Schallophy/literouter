@@ -1,6 +1,6 @@
 # literouter
 
-一个 OpenAI 兼容的本地网关：把多个提供商模型编成一条**优先级列表**，列表第一项就是 auto 的起点。当当前模型因免费额度耗尽、失效、限流或无权限而无法服务时，网关在用户无感知的情况下切换到列表中的下一个模型。
+一个 OpenAI 兼容的本地网关：把多个提供商模型编成一条**优先级列表**，列表第一项是 auto 的默认起点。当当前模型因免费额度耗尽、失效、限流或无权限而无法服务时，网关在用户无感知的情况下切换到列表中的下一个模型。
 
 literouter 是 [switchyard](../switchyard) 的 Go 重写版，只使用标准库，编译为单个静态二进制，看板资源通过 `go:embed` 内嵌，运行时不需要 Node.js、`node_modules` 或磁盘上的 `src/ui`。配置格式、`state.json` / `events.jsonl` 格式与 `/v1`、`/api` 路由与参考实现兼容；命名与标识按 literouter 调整。
 
@@ -9,8 +9,9 @@ literouter 不绑定任何厂商。默认提供商是阿里云百炼（DashScope
 ## 特性
 
 - **透明故障转移**：非流式与 SSE 流式请求都支持，响应头 `x-literouter-model` / `x-literouter-failovers` / `x-literouter-provider` 告知实际使用的模型、切换次数与提供商。
-- **单条模型列表**：所有候选模型放在一个列表里，拖动调整优先级；列表第一项就是 auto 的起点，额度耗尽时按顺序自动切到下一个。支持多选、全选与批量移出。
+- **单条模型列表**：所有候选模型放在一个列表里，拖动调整优先级；列表第一项是 auto 的默认起点（峰谷选路开启时，谷时价的模型会临时前置），额度耗尽时按实际顺序自动切到下一个。支持多选、全选与批量移出。
 - **免费额度优先**：把免费模型排在列表前面，额度耗尽（403）标记失效后自动转付费模型；失效模型在 `chain.retryDeadAfterMinutes`（默认 1 天）后自动重新参与选路，额度刷新当天又会从免费模型开始试，无需手动重置。
+- **峰谷价选路**：配好峰谷时段单价的模型，`auto` 会优先尝试当前处于谷时价的模型，把峰时价的模型排到最后；未定价或各时段同价的模型保持原顺序。每次请求按模型自己的时区判断，可在「设置 → 定价」或 `pricing.preferOffPeak` 关闭。
 - **按能力选路**：每个模型可声明 `chat` / `responses` / `completions` / `embeddings` 能力；`/v1/chat/completions` 只在 chat 模型中选，`/v1/responses` 只在 responses 模型中选，不做协议转译。
 - **上下文保护**：模型列表共用一个上下文窗口（默认 256K），超出时默认在转发前返回 400，避免把注定失败的请求送到提供商。
 - **调用方统计**：按请求携带的 Bearer Token 自动归类，分别统计各客户端的请求、失败、切换与原始输入/输出 Token，展示缓存命中率、成本构成和同一调用方下的模型明细。
@@ -53,7 +54,7 @@ cp .env.example .env       # 1. 填 DASHSCOPE_API_KEY=sk-...
                            # 2. 或在看板「设置 → 提供商」里填
 ```
 
-保存 provider 后默认**不会自动拉取目录**：到看板「模型」页点「添加模型」，先点「刷新目录」拉取上游模型列表，再在面板里按提供商或关键词筛选、勾选加入。也可以直接编辑 `config.json` 的 `chain.models`。把模型加入列表后，第一个模型就是 auto 的起点，`model: "auto"` 立即可用。新模型出现在目录里也不会自动加入，需要手动挑选。
+保存 provider 后默认**不会自动拉取目录**：到看板「模型」页点「添加模型」，先点「刷新目录」拉取上游模型列表，再在面板里按提供商或关键词筛选、勾选加入。也可以直接编辑 `config.json` 的 `chain.models`。把模型加入列表后，第一个模型就是 auto 的默认起点，`model: "auto"` 立即可用。新模型出现在目录里也不会自动加入，需要手动挑选。
 
 ### 构建产物
 
@@ -176,7 +177,7 @@ client.chat.completions.create(model="auto", messages=[{"role": "user", "content
 
 | 值 | 含义 |
 | --- | --- |
-| `auto` | 从列表第一个模型开始，失败后按列表顺序回退 |
+| `auto` | 从列表第一个模型开始（峰谷选路可能调整顺序），失败后按实际顺序回退 |
 | 列表里的模型（如 `qwen3.8-27b`） | 只发给这个模型，不做故障转移 |
 | 未登记的其他模型 | 原样透传，不做故障转移 |
 
@@ -197,12 +198,13 @@ client.chat.completions.create(model="auto", messages=[{"role": "user", "content
 
 ### 选路
 
-1. 解析 `model`：`auto` 从列表第一个模型开始；点名列表里的模型则只发给它；其他模型原样透传。
+1. 解析 `model`：`auto` 以列表第一个模型为默认起点；点名列表里的模型则只发给它；其他模型原样透传。
 2. `auto` 时按当前请求端点过滤：只保留在 `modelApis` 中声明了对应能力的模型。
 3. 按列表顺序过滤掉 `invalid`、尚未到重试时间的 `dead`（失效时间超过 `chain.retryDeadAfterMinutes` 后重新参与选路）以及仍在限流冷却中的模型。
-4. 剩余模型按列表顺序依次尝试，每次尝试最多 `failover.maxAttempts` 次；点名模型只尝试一次。冷却到期的模型会自动重新入链。
+4. 开启峰谷选路（`pricing.preferOffPeak`，默认开）时，再按各模型当前的价格档做稳定排序：正在谷时价的模型前置、峰时价的模型后置，未定价或各时段同价的模型留在中间；同一档内保持列表原顺序。点名模型和透传请求不受影响。
+5. 剩余模型按上述顺序依次尝试，每次尝试最多 `failover.maxAttempts` 次；点名模型只尝试一次。冷却到期的模型会自动重新入链。
 
-**怎么看当前实际在用哪个模型**：看板「模型」页的「当前输出」实时跟随最近一次真正产出响应的模型——包括 auto 故障转移后实际承接的模型，以及直连或透传请求点名的模型；还没有请求时（或重启后）显示 `chain.effective`，即 auto 此刻会命中的模型。如果最近输出和下一次 auto 的目标不同，标题下方会注明「auto 下一站 X」。列表第一个模型暂时不可用（包括冷却中）时，`effective` 会顺延到下一个可用模型，冷却结束后自动回到第一位。事件流里的「切换」事件记录 `qwen3.8-flash（额度耗尽）→ qwen3.8-27b（切换 1 次）` 这样的明细。API 侧另有响应头 `x-literouter-model` / `x-literouter-provider` / `x-literouter-failovers`。
+**怎么看当前实际在用哪个模型**：看板「模型」页的「当前输出」实时跟随最近一次真正产出响应的模型——包括 auto 故障转移后实际承接的模型，以及直连或透传请求点名的模型；还没有请求时（或重启后）显示 `chain.effective`，即 auto 此刻会命中的模型（已考虑峰谷选路，模型页用「谷时 / 峰时」标记当前档位）。点「路由」标题旁的「实际顺序」可以打开只读窗口，按尝试顺序列出全部候选，并单列本次跳过的模型及其重试 / 冷却倒计时；模型列表本身保持配置顺序，不受窗口影响。如果最近输出和下一次 auto 的目标不同，标题下方会注明「auto 下一站 X」。列表第一个模型暂时不可用（包括冷却中）时，`effective` 会顺延到下一个可用模型，冷却结束后自动回到第一位。事件流里的「切换」事件记录 `qwen3.8-flash（额度耗尽）→ qwen3.8-27b（切换 1 次）` 这样的明细。API 侧另有响应头 `x-literouter-model` / `x-literouter-provider` / `x-literouter-failovers`。
 
 ### API 能力
 
@@ -288,7 +290,7 @@ client.chat.completions.create(model="auto", messages=[{"role": "user", "content
   },
   "chain": {
     "models": [
-      "dashscope/qwen3.8-27b",               // 顺序即优先级，第一项就是 auto 起点
+      "dashscope/qwen3.8-27b",               // 顺序即优先级，第一项是 auto 默认起点
       "dashscope/kimi-k3.1-pro",
       "dashscope/qwen3.8-max-0902"
     ],
@@ -319,6 +321,7 @@ client.chat.completions.create(model="auto", messages=[{"role": "user", "content
   "pricing": {
     "currency": "CNY",            // 展示币种
     "unit": 1000000,              // 单价按每百万 token
+    "preferOffPeak": true,        // 谷时价的模型优先，峰时价的模型靠后（仅 auto）
     "models": {                   // 也可以在「设置 → 定价」里编辑
       "qianwenai/deepseek-v4.1-flash-1017": {
         "timezone": "Asia/Shanghai", // 该模型峰谷时段使用的 IANA 时区
@@ -349,7 +352,7 @@ client.chat.completions.create(model="auto", messages=[{"role": "user", "content
 | `log.file` | 日志文件路径，留空为 `<数据目录>/literouter.log` |
 | `log.maxBytes` | 单个日志文件上限（字节），默认 `2097152`（2 MB）；`0` 表示不轮转 |
 | `log.maxFiles` | 轮转后保留的旧文件数（`.1` … `.N`），默认 `3`；`0` 表示只保留当前文件 |
-| `chain.models` | 候选模型列表，顺序即优先级；第一项就是 `auto` 的起点，每项都绑定提供商，写成 `提供商/模型名` |
+| `chain.models` | 候选模型列表，顺序即优先级；第一项是 `auto` 的默认起点，每项都绑定提供商，写成 `提供商/模型名` |
 | `chain.context.window` | 模型列表共用的上下文窗口，默认 `256000` |
 | `chain.context.onOverflow` | `reject`（默认，超限返回 400）或 `passthrough`（交给提供商） |
 | `chain.retryDeadAfterMinutes` | `dead` 模型自动重新参与选路的间隔（分钟），默认 `1440`（1 天）；`0` 表示只能手动重置。`invalid` 模型不会自动重试 |
@@ -362,6 +365,7 @@ client.chat.completions.create(model="auto", messages=[{"role": "user", "content
 | `failover.throttleCooldownMs` | 限流冷却时长；冷却期间模型暂时退出选路，结束后自动回到候选序列 |
 | `pricing.currency` | 成本展示币种：`CNY` / `USD` / `EUR` / `GBP` / `JPY` / `KRW`，其他值按代码前缀显示 |
 | `pricing.unit` | 单价的 token 基数，默认 `1000000`（每百万 token） |
+| `pricing.preferOffPeak` | 峰谷选路，默认 `true`：`auto` 把当前处于谷时价的模型排到前面、峰时价的排到最后；`false` 恢复纯列表顺序。只影响 `auto` |
 | `pricing.models.<code>.timezone` | 该模型峰谷时段使用的 IANA 时区，例如 `Asia/Shanghai`、`UTC`；旧配置缺少该字段时按网关进程的本地时区补写 |
 | `pricing.models.<code>.tiers[]` | 分时段价格：`from` / `to`（按该模型的 `timezone` 解释的 `HH:MM`，`from == to` 表示全天）、`input`、`cachedInput`、`output`。时间段必须覆盖一整天；`"*"` 可作为所有模型的兜底 |
 | `responsesChaining.enabled` | 开启后 `/v1/responses` 会复用提供商的会话状态，只发送新增内容；默认关闭 |
@@ -395,6 +399,8 @@ client.chat.completions.create(model="auto", messages=[{"role": "user", "content
 
 单价在看板「设置 → 定价」里填写：选好货币和计价单位后，每个模型都能单独设置时区并添加时段（峰谷、跨零点都支持），也可以直接用「峰谷两段」按键生成 `08:00–22:00` 与 `22:00–08:00` 两档再改数值。「起」「止」相同表示全天。也可以直接编辑 `config.json` 的 `pricing`。时区选择器使用 IANA tzdb 的代表时区，同一时区只列一次；可按城市、国家、历史别名（如 `Asia/Calcutta`）或当前 UTC 偏移搜索，选中后统一写成代表性名称。
 
+同一份峰谷配置也参与选路：开启 `pricing.preferOffPeak` 时，`auto` 每次请求都按各模型自己的 `timezone` 判断当前档位——正在谷时价的模型前置、峰时价的模型后置，没有定价或各时段同价的模型维持原顺序。判断依据是该模型所有时段三项单价之和的相对高低，因此只配了单价的模型不会被无谓调序。
+
 三项 token 都来自提供商的 `usage`，只有单价是本地配置。几个边界：
 
 - 时间段按每个模型自己的 `timezone`（IANA 时区）解释，夏令时由随二进制分发的 tzdata 处理；必须完整覆盖 24 小时，否则保存配置时报错；
@@ -425,12 +431,12 @@ client.chat.completions.create(model="auto", messages=[{"role": "user", "content
 
 | 页面 | 内容 |
 | --- | --- |
-| 模型 | 当前输出与状态、请求/切换/Token 统计、路由轨道（拖动或 `Alt+↑/↓` 调整优先级）、置顶、重置状态、编辑 API 能力、批量移出、添加模型面板（悬浮居中，按提供商与关键词筛选全部目录模型，已加入的显示为禁用、刷新目录）、发送测试、链路策略摘要与最近事件 |
+| 模型 | 当前输出与状态、请求/切换/Token 统计、路由轨道（拖动或 `Alt+↑/↓` 调整优先级）、置顶、重置状态、编辑 API 能力、批量移出、添加模型面板（悬浮居中，按提供商与关键词筛选全部目录模型，已加入的显示为禁用、刷新目录）、发送测试、链路策略摘要与最近事件；峰谷选路开启时，处于谷时价 / 峰时价的模型分别带「谷时」「峰时」标记；「实际顺序」窗口只读展示 auto 此刻的尝试顺序与本次跳过的模型，模型列表本身不会被改动 |
 | 排行 | 按 Artificial Analysis 的 Intelligence Index 排序目录模型；多选后可只看已选并按能力从高到低排列，逐行添加；评分与勾选只在内存中，不写入配置 |
 | 用量 | 按调用方 API Key 汇总请求、失败、切换、原始输入/输出 Token 与缓存命中率；展示全局成本构成（输入/缓存输入/输出与缓存节省），可分别排序，展开后可查看调用方的成本构成和按模型的用量明细 |
 | 输出 | 实时查看最近经过网关的模型输出，每条标出实际承接的模型、提供商、协议（Chat / Completions / Responses / Embeddings）、流式与否、耗时与用量；只存在内存里，重启进程即清空 |
 | 事件 | 切换、失效、限流、恢复、配置变更，可按类型过滤、关键词搜索、暂停实时刷新 |
-| 设置 | 网关、提供商、定价、故障转移、服务、日志、数据、原始 JSON 的完整表单；「定价」分组可逐模型填写单价与峰谷时段，「数据」分组可重置用量统计；底部保存栏统一提交 |
+| 设置 | 网关、提供商、定价、故障转移、服务、日志、数据、原始 JSON 的完整表单；「定价」分组可逐模型填写单价与峰谷时段、开关峰谷选路，「数据」分组可重置用量统计；底部保存栏统一提交 |
 
 旧地址会重定向到新页面：`#/overview`、`#/chain` → 模型，`#/callers` → 用量，`#/catalog` 打开「添加模型」面板。静态资源统一返回 `Cache-Control: no-store`。
 
