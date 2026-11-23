@@ -9,7 +9,7 @@ literouter 不绑定任何厂商。默认提供商是阿里云百炼（DashScope
 ## 特性
 
 - **透明故障转移**：非流式与 SSE 流式请求都支持，响应头 `x-literouter-model` / `x-literouter-failovers` / `x-literouter-provider` 告知实际使用的模型、切换次数与提供商。
-- **单条模型列表**：所有候选模型放在一个列表里，拖动调整优先级；列表第一项是 auto 的默认起点（峰谷选路开启时，谷时价的模型会临时前置），额度耗尽时按实际顺序自动切到下一个。支持多选、全选与批量移出。
+- **单条模型列表**：所有候选模型放在一个列表里，拖动调整优先级；列表第一项是 auto 的默认起点（峰谷选路开启时，谷时价的模型会临时前置），额度耗尽时按实际顺序自动切到下一个。每行有独立的启用/停用开关：停用后 auto 不再尝试它，但点名请求仍可直达；支持多选、全选与批量移出。
 - **免费额度优先**：把免费模型排在列表前面，额度耗尽（403）标记失效后自动转付费模型；失效模型在 `chain.retryDeadAfterMinutes`（默认 1 天）后自动重新参与选路，额度刷新当天又会从免费模型开始试，无需手动重置。
 - **峰谷价选路**：配好峰谷时段单价的模型，`auto` 会优先尝试当前处于谷时价的模型，把峰时价的模型排到最后；未定价或各时段同价的模型保持原顺序。每次请求按模型自己的时区判断，可在「设置 → 定价」或 `pricing.preferOffPeak` 关闭。
 - **按能力选路**：每个模型可声明 `chat` / `responses` / `completions` / `embeddings` 能力；`/v1/chat/completions` 只在 chat 模型中选，`/v1/responses` 只在 responses 模型中选，不做协议转译。
@@ -236,7 +236,7 @@ client.chat.completions.create(model="auto", messages=[{"role": "user", "content
 
 1. 解析 `model`：`auto` 以列表第一个模型为默认起点；点名列表里的模型则只发给它；其他模型原样透传。
 2. `auto` 时按当前请求端点过滤：只保留在 `modelApis` 中声明了对应能力的模型。
-3. 按列表顺序过滤掉 `invalid`、尚未到重试时间的 `dead`（失效时间超过 `chain.retryDeadAfterMinutes` 后重新参与选路）以及仍在限流冷却中的模型。
+3. 按列表顺序过滤掉被行内开关停用的模型、`invalid`、尚未到重试时间的 `dead`（失效时间超过 `chain.retryDeadAfterMinutes` 后重新参与选路）以及仍在限流冷却中的模型。停用只影响 auto，点名该模型的请求仍原样转发。
 4. 开启峰谷选路（`pricing.preferOffPeak`，默认开）时，再按各模型当前的价格档做稳定排序：正在谷时价的模型前置、峰时价的模型后置，未定价或各时段同价的模型留在中间；同一档内保持列表原顺序。点名模型和透传请求不受影响。
 5. 剩余模型按上述顺序依次尝试，每次尝试最多 `failover.maxAttempts` 次；点名模型只尝试一次。冷却到期的模型会自动重新入链。
 
@@ -331,7 +331,8 @@ client.chat.completions.create(model="auto", messages=[{"role": "user", "content
       "dashscope/qwen3.8-max-0902"
     ],
     "context": { "window": 256000, "onOverflow": "reject" },
-    "retryDeadAfterMinutes": 1440  // 失效模型多少分钟后自动重试；0 = 仅手动重置
+    "retryDeadAfterMinutes": 1440,  // 失效模型多少分钟后自动重试；0 = 仅手动重置
+    "disabled": []                  // 行内开关停用的模型；auto 跳过，点名请求不受影响
   },
   "modelApis": {
     "dashscope/qwen3.8-max-0902": ["chat"],
@@ -392,6 +393,7 @@ client.chat.completions.create(model="auto", messages=[{"role": "user", "content
 | `chain.context.window` | 模型列表共用的上下文窗口，默认 `256000` |
 | `chain.context.onOverflow` | `reject`（默认，超限返回 400）或 `passthrough`（交给提供商） |
 | `chain.retryDeadAfterMinutes` | `dead` 模型自动重新参与选路的间隔（分钟），默认 `1440`（1 天）；`0` 表示只能手动重置。`invalid` 模型不会自动重试 |
+| `chain.disabled` | 被行内开关停用的模型 code 列表。停用只影响 `auto`：实际顺序里它们显示为「已停用」，点名请求仍可直达；移除模型时对应停用项自动清理 |
 | `modelApis` | 每个模型（`提供商/模型名`）支持的 API：`chat` / `responses` / `completions` / `embeddings`；未登记的模型默认 `["chat"]` |
 | `providers[]` | 提供商列表：`id`（小写字母数字）、`label`、`baseUrl`、`apiKeyEnv`、`apiKey`、`requestTimeoutMs`、`injectStreamUsage` |
 | `defaultProvider` | 仅用于透传请求（客户端点名了列表里没有的模型）与目录刷新的默认目标 |
@@ -468,7 +470,7 @@ client.chat.completions.create(model="auto", messages=[{"role": "user", "content
 
 | 页面 | 内容 |
 | --- | --- |
-| 模型 | 当前输出与状态、请求/切换/Token 统计、路由轨道（拖动或 `Alt+↑/↓` 调整优先级）、置顶、重置状态、编辑 API 能力、批量移出、添加模型面板（悬浮居中，按提供商与关键词筛选全部目录模型，已加入的显示为禁用、刷新目录）、发送测试、链路策略摘要与最近事件；峰谷选路开启时，处于谷时价 / 峰时价的模型分别带「谷时」「峰时」标记；正在流式输出的模型会在当前行的空白处滚动显示最新内容，滚动速度跟随实际出字速率；「实际顺序」窗口只读展示 auto 此刻的尝试顺序与本次跳过的模型，模型列表本身不会被改动 |
+| 模型 | 当前输出与状态、请求/切换/Token 统计、路由轨道（拖动或 `Alt+↑/↓` 调整优先级）、每行的启用/停用开关、置顶、重置状态、编辑 API 能力、批量移出、添加模型面板（悬浮居中，按提供商与关键词筛选全部目录模型，已加入的显示为禁用、刷新目录）、发送测试、链路策略摘要与最近事件；峰谷选路开启时，处于谷时价 / 峰时价的模型分别带「谷时」「峰时」标记；正在流式输出的模型会在当前行的空白处滚动显示最新内容，滚动速度跟随实际出字速率；「实际顺序」窗口只读展示 auto 此刻的尝试顺序与本次跳过的模型，模型列表本身不会被改动 |
 | 排行 | 按 Artificial Analysis 的 Intelligence Index 排序目录模型；多选后可只看已选并按能力从高到低排列，逐行添加；评分与勾选只在内存中，不写入配置 |
 | 用量 | 按调用方 API Key 汇总请求、失败、切换、原始输入/输出 Token 与缓存命中率；展示全局成本构成（输入/缓存输入/输出与缓存节省），可分别排序，展开后可查看调用方的成本构成和按模型的用量明细 |
 | 输出 | 实时查看最近经过网关的模型输出，每条标出实际承接的模型、提供商、协议（Chat / Completions / Responses / Embeddings）、流式与否、耗时与用量；只存在内存里，重启进程即清空 |
@@ -515,6 +517,7 @@ client.chat.completions.create(model="auto", messages=[{"role": "user", "content
 | `POST` | `/api/chain/models/remove` | 批量移出：`{"models":["a","b"]}`，返回 `removed` 与实际条数；一次落盘 |
 | `POST` | `/api/models/:code/revive` | 重置模型状态为待检测 |
 | `POST` | `/api/models/:code/apis` | 设置 API 能力：`{"apis":["chat","responses"]}` |
+| `POST` | `/api/models/:code/enabled` | 行内开关：`{"enabled":false}` 停用后 auto 跳过；`true` 恢复启用 |
 | `POST` | `/api/catalog/refresh` | 拉取模型目录；不传参数刷新全部提供商，`{"provider":"openai"}` 只刷一个 |
 | `POST` | `/api/test` | 真实测试请求：`{"prompt":"..."}`，走 `auto` |
 | `GET` | `/api/sessions` | 本机会话列表与助手探测状态；`?refresh=1` 跳过 5 秒缓存重新扫描 |

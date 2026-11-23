@@ -41,6 +41,7 @@ func (s *Server) registerAdmin() {
 	s.add("POST", "/api/usage/backfill-cost", s.handleBackfillCost)
 	s.add("POST", "/api/models/:code/revive", s.handleRevive)
 	s.add("POST", "/api/models/:code/apis", s.handleModelApis)
+	s.add("POST", "/api/models/:code/enabled", s.handleModelEnabled)
 	s.add("POST", "/api/chain/order", s.handleChainOrder)
 	s.add("POST", "/api/chain/models", s.handleChainAdd)
 	s.add("POST", "/api/chain/models/remove", s.handleChainRemove)
@@ -514,6 +515,29 @@ func (s *Server) handleRevive(ctx *Ctx) error {
 	}
 	s.Runtime.Revive(code)
 	ctx.Send(200, map[string]any{"ok": true, "model": s.Runtime.SnapshotModel(code)}, nil)
+	return nil
+}
+
+func (s *Server) handleModelEnabled(ctx *Ctx) error {
+	code := strings.TrimSpace(ctx.Params["code"])
+	if code == "" {
+		return &HttpError{Status: 400, Message: "缺少模型 code"}
+	}
+	body, ok := ctx.Body.(map[string]any)
+	if !ok {
+		return &HttpError{Status: 400, Message: "请求体必须是 JSON 对象"}
+	}
+	enabled, ok := body["enabled"].(bool)
+	if !ok {
+		return &HttpError{Status: 400, Message: "enabled 必须是布尔值"}
+	}
+	if err := s.Runtime.SetModelEnabled(code, enabled); err != nil {
+		return s.guardConfigError(ctx, err)
+	}
+	canonical, _ := s.Runtime.NormalizeModelCode(code)
+	ctx.Send(200, map[string]any{
+		"ok": true, "code": canonical, "enabled": enabled, "model": s.Runtime.SnapshotModel(canonical),
+	}, nil)
 	return nil
 }
 

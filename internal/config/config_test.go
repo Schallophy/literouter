@@ -76,6 +76,31 @@ func TestLegacyActiveOutsideListWarns(t *testing.T) {
 	}
 }
 
+func TestDisabledModelsNormalized(t *testing.T) {
+	raw := toMap(t, DefaultConfig())
+	raw["chain"].(map[string]any)["models"] = []any{"dashscope/a", "dashscope/b"}
+	raw["chain"].(map[string]any)["disabled"] = []any{"a", "dashscope/b", "dashscope/b", "ghost"}
+	result := Normalize(raw)
+	if !result.OK {
+		t.Fatalf("unexpected errors %v", result.Errors)
+	}
+	if got := strings.Join(result.Config.Chain.Disabled, ","); got != "dashscope/a,dashscope/b" {
+		t.Fatalf("disabled = %q", got)
+	}
+	if !hasSubstring(result.Warnings, "chain.disabled") {
+		t.Fatalf("missing warning: %v", result.Warnings)
+	}
+}
+
+func TestDisabledModelsRejectsNonArray(t *testing.T) {
+	raw := toMap(t, DefaultConfig())
+	raw["chain"].(map[string]any)["disabled"] = "a"
+	result := Normalize(raw)
+	if result.OK || !hasSubstring(result.Errors, "chain.disabled") {
+		t.Fatalf("got %v", result.Errors)
+	}
+}
+
 func TestInvalidPortAndURLRejected(t *testing.T) {
 	cfg := DefaultConfig()
 	cfg.Port = 99999

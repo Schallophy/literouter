@@ -448,10 +448,34 @@ func readChain(source object, providers []model.ProviderConfig, bindings map[str
 		*migrations = append(*migrations, fmt.Sprintf("已为 %d 个模型补全提供商标识", len(migrated)))
 	}
 
+	disabled := []string{}
+	if rawDisabled, present := raw["disabled"]; present && rawDisabled != nil {
+		if list, ok := rawDisabled.([]any); !ok {
+			*errors = append(*errors, "chain.disabled 必须是数组")
+		} else {
+			for _, entry := range list {
+				text, ok := entry.(string)
+				if !ok || strings.TrimSpace(text) == "" {
+					*warnings = append(*warnings, "chain.disabled 忽略了非法条目")
+					continue
+				}
+				code := normalize(text, false)
+				if !contains(models, code) {
+					*warnings = append(*warnings, fmt.Sprintf("chain.disabled 忽略了不在模型列表里的 %s", code))
+					continue
+				}
+				if !contains(disabled, code) {
+					disabled = append(disabled, code)
+				}
+			}
+		}
+	}
+
 	return model.ChainConfig{
 		Models:                models,
 		Context:               readContext(raw, "chain", errors),
 		RetryDeadAfterMinutes: int(readNumber(raw, "retryDeadAfterMinutes", DefaultRetryDeadMinutes, 0, 1_000_000, "chain.retryDeadAfterMinutes", errors)),
+		Disabled:              disabled,
 	}
 }
 

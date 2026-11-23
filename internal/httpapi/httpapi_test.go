@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"path/filepath"
 	"strings"
 	"sync"
@@ -457,5 +458,47 @@ func TestStaticCanBeDisabled(t *testing.T) {
 	data := decode(t, response)
 	if response.StatusCode != 404 || data["error"].(map[string]any)["code"] != "literouter.ui_disabled" {
 		t.Fatalf("ui disabled: %d %+v", response.StatusCode, data)
+	}
+}
+
+func TestModelEnabledToggle(t *testing.T) {
+	h := newHarness(t, nil)
+	path := "/api/models/" + url.PathEscape("dashscope/a") + "/enabled"
+
+	missing := h.do("POST", path, map[string]any{}, nil)
+	if missing.StatusCode != http.StatusBadRequest {
+		t.Fatalf("missing enabled: %d", missing.StatusCode)
+	}
+
+	disabled := h.do("POST", path, map[string]any{"enabled": false}, nil)
+	if disabled.StatusCode != http.StatusOK {
+		t.Fatalf("disable: %d %+v", disabled.StatusCode, decode(t, disabled))
+	}
+	overview := decode(t, h.do("GET", "/api/overview", nil, nil))
+	chain := overview["chain"].(map[string]any)
+	if chain["effective"] != "dashscope/b" {
+		t.Fatalf("effective after disable: %v", chain["effective"])
+	}
+	first := chain["models"].([]any)[0].(map[string]any)
+	if first["disabled"] != true {
+		t.Fatalf("model switch: %+v", first)
+	}
+	skipped := chain["skipped"].([]any)
+	if len(skipped) != 1 || skipped[0].(map[string]any)["reason"] != "disabled" {
+		t.Fatalf("skipped: %+v", skipped)
+	}
+
+	enabled := h.do("POST", path, map[string]any{"enabled": true}, nil)
+	if enabled.StatusCode != http.StatusOK {
+		t.Fatalf("enable: %d", enabled.StatusCode)
+	}
+	overview = decode(t, h.do("GET", "/api/overview", nil, nil))
+	if overview["chain"].(map[string]any)["effective"] != "dashscope/a" {
+		t.Fatalf("effective after enable: %v", overview["chain"])
+	}
+
+	unknown := h.do("POST", "/api/models/"+url.PathEscape("dashscope/zzz")+"/enabled", map[string]any{"enabled": false}, nil)
+	if unknown.StatusCode != http.StatusBadRequest {
+		t.Fatalf("unknown model: %d", unknown.StatusCode)
 	}
 }

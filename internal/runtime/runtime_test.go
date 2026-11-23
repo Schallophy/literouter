@@ -228,6 +228,64 @@ func TestChainSnapshotReportsAutoOrderAndSkips(t *testing.T) {
 	}
 }
 
+func TestDisabledModelLeavesAutoButStaysDirect(t *testing.T) {
+	rt, path, _ := newRuntime(t, []string{"dashscope/a", "dashscope/b"})
+	next := rt.ConfigSnapshot()
+	next.Chain.Disabled = []string{"dashscope/a"}
+	if _, err := rt.ApplyConfig(next, false); err != nil {
+		t.Fatalf("apply: %v", err)
+	}
+
+	if value := rt.EffectiveModel(); value == nil || *value != "dashscope/b" {
+		t.Fatalf("effective: %v", value)
+	}
+	chain := rt.ChainSnapshot()
+	if fmt.Sprint(chain.AutoOrder) != "[dashscope/b]" {
+		t.Fatalf("auto order: %v", chain.AutoOrder)
+	}
+	if len(chain.Skipped) != 1 || chain.Skipped[0].Code != "dashscope/a" || chain.Skipped[0].Reason != runtime.AutoSkipDisabled {
+		t.Fatalf("skipped: %+v", chain.Skipped)
+	}
+	if !chain.Models[0].Disabled || chain.Models[1].Disabled {
+		t.Fatalf("snapshot switches: %+v", chain.Models)
+	}
+
+	var calls []string
+	rt.Client.SetTransport(roundTripFunc(func(request *http.Request) (*http.Response, error) {
+		calls = append(calls, requestModel(t, request))
+		return fakeResponse(200, `{"choices":[{"message":{"content":"ok"}}]}`), nil
+	}))
+	body := map[string]any{"messages": []any{map[string]any{"role": "user", "content": "hi"}}}
+	auto := rt.RequestThrough(runtime.RequestInput{Path: "chat/completions", Model: "auto", Body: body, Context: context.Background()})
+	closeBody(t, auto.Result.Response)
+	if len(calls) != 1 || calls[0] != "b" {
+		t.Fatalf("auto calls: %v", calls)
+	}
+	calls = nil
+	direct := rt.RequestThrough(runtime.RequestInput{Path: "chat/completions", Model: "dashscope/a", Body: body, Context: context.Background()})
+	closeBody(t, direct.Result.Response)
+	if len(calls) != 1 || calls[0] != "a" {
+		t.Fatalf("direct calls: %v", calls)
+	}
+
+	if err := rt.SetModelEnabled("dashscope/b", false); err != nil {
+		t.Fatalf("disable b: %v", err)
+	}
+	if value := rt.EffectiveModel(); value != nil {
+		t.Fatalf("all disabled should leave no effective model, got %v", *value)
+	}
+	saved := readSavedConfig(t, path)
+	if fmt.Sprint(saved.Chain.Disabled) != "[dashscope/a dashscope/b]" {
+		t.Fatalf("saved disabled: %v", saved.Chain.Disabled)
+	}
+	if err := rt.SetModelEnabled("dashscope/a", true); err != nil {
+		t.Fatalf("enable a: %v", err)
+	}
+	if value := rt.EffectiveModel(); value == nil || *value != "dashscope/a" {
+		t.Fatalf("effective after enable: %v", value)
+	}
+}
+
 func closeBody(t *testing.T, response *http.Response) {
 	t.Helper()
 	if response == nil || response.Body == nil {

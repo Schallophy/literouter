@@ -264,7 +264,8 @@ function railTools() {
 }
 
 function rowHtml(model, index, data) {
-  const status = statusOf(model, data.chain);
+  const disabled = Boolean(model.disabled);
+  const status = disabled ? { tone: "idle", text: "已停用" } : statusOf(model, data.chain);
   const current = currentOutputCode(data) === model.code;
   const selected = local.selected.has(model.code);
   const batch = local.batch;
@@ -276,7 +277,7 @@ function rowHtml(model, index, data) {
     : `<span class="rail-grip" draggable="true" title="拖动调整优先级" aria-hidden="true"><span></span></span>`;
 
   return `
-    <li class="rail-row${current ? " is-current" : ""}" data-code="${esc(model.code)}" data-tone="${status.tone}">
+    <li class="rail-row${current ? " is-current" : ""}" data-code="${esc(model.code)}" data-tone="${status.tone}" data-disabled="${disabled}">
       ${grip}
       <span class="rail-rank">${String(index + 1).padStart(2, "0")}</span>
       <span class="rail-track" aria-hidden="true"><i class="rail-node"></i></span>
@@ -297,9 +298,14 @@ function rowHtml(model, index, data) {
         ${
           batch
             ? ""
-            : `<button class="icon-btn" type="button" data-action="row-menu" data-code="${esc(
-                model.code,
-              )}" aria-label="${esc(model.code)} 的操作菜单" aria-haspopup="menu">⋯</button>`
+            : `<label class="rail-switch" title="${disabled ? "启用：auto 重新尝试该模型" : "停用：auto 不再尝试该模型（点名请求不受影响）"}">
+                 <input type="checkbox" role="switch" data-action="toggle-model" data-code="${esc(model.code)}"
+                   ${disabled ? "" : "checked"} aria-label="${disabled ? "启用" : "停用"} ${esc(model.code)}">
+                 <span class="rail-switch-track" aria-hidden="true"></span>
+               </label>
+               <button class="icon-btn" type="button" data-action="row-menu" data-code="${esc(
+                 model.code,
+               )}" aria-label="${esc(model.code)} 的操作菜单" aria-haspopup="menu">⋯</button>`
         }
       </span>
     </li>
@@ -683,9 +689,9 @@ function railSignature(data) {
     local.batch ? "1" : "0",
     ...data.chain.models.map(
       (model) =>
-        `${model.code}:${model.health}:${model.priceLevel || ""}:${coolingNow(model) ? "1" : "0"}:${
-          model.throttledUntil || ""
-        }:${model.checkedAt || ""}:${model.failures || 0}`,
+        `${model.code}:${model.health}:${model.priceLevel || ""}:${model.disabled ? "1" : "0"}:${
+          coolingNow(model) ? "1" : "0"
+        }:${model.throttledUntil || ""}:${model.checkedAt || ""}:${model.failures || 0}`,
     ),
   ].join("|");
 }
@@ -852,12 +858,30 @@ function onClick(event) {
 
 function onChange(event) {
   const input = event.target;
+  if (input.dataset.action === "toggle-model") {
+    toggleModel(input.dataset.code, input.checked, input);
+    return;
+  }
   if (input.dataset.action !== "select-row") return;
 
   if (input.checked) local.selected.add(input.value);
   else local.selected.delete(input.value);
 
   refreshTools();
+}
+
+async function toggleModel(code, enabled, input) {
+  input.disabled = true;
+  try {
+    await api.post(`/api/models/${encodeURIComponent(code)}/enabled`, { enabled });
+    toast(enabled ? `${code} 已启用` : `${code} 已停用，auto 不再尝试`, "ok");
+    await viewCtx?.refresh();
+  } catch (error) {
+    input.checked = !enabled;
+    toast(error.message, "bad", enabled ? "启用失败" : "停用失败");
+  } finally {
+    input.disabled = false;
+  }
 }
 
 function refreshTools() {
@@ -1085,7 +1109,9 @@ function openDetail(code, ctx) {
   const model = data?.chain.models.find((item) => item.code === code);
   if (!model) return;
 
-  const status = statusOf(model, data.chain);
+  const status = model.disabled
+    ? { tone: "idle", text: "已停用" }
+    : statusOf(model, data.chain);
   const rows = [
     [
       "状态",
@@ -1417,9 +1443,10 @@ function openAutoOrder() {
   const chainReadyOrder = chain.models.map((model) => model.code).filter((code) => ready.has(code));
   const reordered = order.some((code, index) => chainReadyOrder[index] !== code);
 
-  const row = (code, rank, includeBadge, showMove) => {
+  const row = (code, rank, includeBadge, showMove, skipReason) => {
     const model = models.get(code);
-    const status = statusOf(model, chain);
+    const status =
+      skipReason === "disabled" ? { tone: "idle", text: "已停用" } : statusOf(model, chain);
     const moved = showMove && reordered && positions.has(code) ? ` · 列表第 ${positions.get(code)} 位` : "";
     return `
       <li class="auto-order-row">
@@ -1436,12 +1463,14 @@ function openAutoOrder() {
   const readyRows = order
     .map((code, index) => row(code, String(index + 1).padStart(2, "0"), true, true))
     .join("");
-  const skippedRows = skipped.map((item) => row(item.code, "—", false, false)).join("");
+  const skippedRows = skipped
+    .map((item) => row(item.code, "—", false, false, item.reason))
+    .join("");
 
   openDialog({
     title: "实际顺序",
     body: `
-      <p class="field-hint">auto 此刻的尝试顺序，已排除失效、未到重试时间和限流冷却中的模型；具体请求还会跳过不支持当前端点的模型。</p>
+      <p class="field-hint">auto 此刻的尝试顺序，已排除停用、失效、未到重试时间和限流冷却中的模型；具体请求还会跳过不支持当前端点的模型。</p>
       ${
         reordered
           ? `<p class="field-hint">峰谷选路正在按当前时段调整：谷时价的模型临时提前，峰时价的模型靠后。</p>`

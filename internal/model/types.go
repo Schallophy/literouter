@@ -159,6 +159,9 @@ type ChainConfig struct {
 	Models                 []string      `json:"models"`
 	Context                ContextConfig `json:"context"`
 	RetryDeadAfterMinutes  int           `json:"retryDeadAfterMinutes"`
+	// Disabled models keep their list position and stats, but auto never
+	// tries them. Explicit requests to the model still go through.
+	Disabled []string `json:"disabled,omitempty"`
 }
 
 // ServerConfig holds HTTP server limits.

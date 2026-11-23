@@ -55,6 +55,7 @@ type SnapshotModel struct {
 	Provider   string          `json:"provider"`
 	Upstream   string          `json:"upstream"`
 	PriceLevel core.PriceLevel `json:"priceLevel,omitempty"`
+	Disabled   bool            `json:"disabled"`
 }
 
 // AutoSkip explains why a chain model is not attempted right now.
@@ -351,19 +352,24 @@ func (r *Runtime) ChainCodes() []string {
 
 // Reasons a chain model is left out of the current auto order.
 const (
-	AutoSkipInvalid = "invalid"
-	AutoSkipDead    = "dead"
-	AutoSkipCooling = "cooling"
+	AutoSkipInvalid  = "invalid"
+	AutoSkipDead     = "dead"
+	AutoSkipCooling  = "cooling"
+	AutoSkipDisabled = "disabled"
 )
 
 // autoPlan reports the order auto would try right now plus the models left
-// out for health or cooldown reasons.
+// out for health, cooldown or an explicit per-model switch.
 func (r *Runtime) autoPlan(cfg model.GatewayConfig, now time.Time) ([]string, []AutoSkip) {
 	retryMs := int64(cfg.Chain.RetryDeadAfterMinutes) * 60_000
 	nowMs := now.UnixMilli()
 	ready := make([]string, 0, len(cfg.Chain.Models))
 	skipped := make([]AutoSkip, 0)
 	for _, code := range cfg.Chain.Models {
+		if isModelDisabled(cfg.Chain, code) {
+			skipped = append(skipped, AutoSkip{Code: code, Reason: AutoSkipDisabled})
+			continue
+		}
 		record := r.Store.Get(code)
 		health := model.HealthUnknown
 		if record != nil {
@@ -447,6 +453,7 @@ func (r *Runtime) snapshotModelAt(cfg model.GatewayConfig, code string, at time.
 		Provider:    providerID,
 		Upstream:    upstream,
 		PriceLevel:  priceLevel,
+		Disabled:    isModelDisabled(cfg.Chain, code),
 	}
 }
 
@@ -646,7 +653,7 @@ func (r *Runtime) RequestThrough(input RequestInput) RoutedResult {
 			GetRecord: r.Store.Get,
 			Now:       now,
 			Accepts: func(code string) bool {
-				return core.SupportsAPI(cfg.ModelApis, code, api)
+				return !isModelDisabled(cfg.Chain, code) && core.SupportsAPI(cfg.ModelApis, code, api)
 			},
 			RetryDeadAfterMs: int64(cfg.Chain.RetryDeadAfterMinutes) * 60_000,
 		})
@@ -1103,6 +1110,13 @@ func (r *Runtime) UpdateChainModels(models []string) error {
 	added := difference(next, previous)
 	removed := difference(previous, next)
 	cfg.Chain.Models = next
+	kept := make([]string, 0, len(cfg.Chain.Disabled))
+	for _, code := range cfg.Chain.Disabled {
+		if seen[code] {
+			kept = append(kept, code)
+		}
+	}
+	cfg.Chain.Disabled = kept
 	r.Store.Ensure(next)
 	r.Store.PruneModels(next)
 	if err := config.SaveConfig(r.configPath, cfg); err != nil {
@@ -1184,6 +1198,63 @@ func joinKinds(apis []model.ApiKind) string {
 		parts[index] = string(api)
 	}
 	return strings.Join(parts, " / ")
+}
+
+func isModelDisabled(chain model.ChainConfig, code string) bool {
+	for _, item := range chain.Disabled {
+		if item == code {
+			return true
+		}
+	}
+	return false
+}
+
+// SetModelEnabled toggles an auto-routing switch without touching the model's
+// list position, health or stats. Explicit requests to the model still go
+// through; only auto skips it.
+func (r *Runtime) SetModelEnabled(code string, enabled bool) error {
+	r.configMu.RLock()
+	cfg := r.config
+	r.configMu.RUnlock()
+	parsed, ok := core.SplitModelCode(strings.TrimSpace(code), cfg.Providers)
+	if !ok {
+		return &ConfigRuleError{Message: fmt.Sprintf("模型 %s 没有指定提供商，请写成「提供商/模型名」", code)}
+	}
+	canonical := core.JoinModelCode(parsed.Provider, parsed.Upstream)
+	inChain := false
+	for _, item := range cfg.Chain.Models {
+		if item == canonical {
+			inChain = true
+			break
+		}
+	}
+	if !inChain {
+		return &ConfigRuleError{Message: fmt.Sprintf("模型 %s 不在模型列表里", canonical)}
+	}
+
+	next := make([]string, 0, len(cfg.Chain.Disabled)+1)
+	for _, item := range cfg.Chain.Disabled {
+		if item != canonical {
+			next = append(next, item)
+		}
+	}
+	if !enabled {
+		next = append(next, canonical)
+	}
+	cfg.Chain.Disabled = next
+	if err := config.SaveConfig(r.configPath, cfg); err != nil {
+		return err
+	}
+	r.setConfig(cfg)
+	message := canonical + " 已启用，auto 会重新尝试"
+	if !enabled {
+		message = canonical + " 已停用，auto 不再尝试"
+	}
+	r.Events.Push(stream.EventInput{
+		Kind: stream.EventConfig, Level: stream.LevelInfo, Message: message,
+		Model: &canonical, Detail: map[string]any{"enabled": enabled},
+	})
+	return nil
 }
 
 // ApplyConfig swaps in a normalized configuration.
