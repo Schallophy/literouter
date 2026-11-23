@@ -52,6 +52,19 @@ const local = {
   add: { query: "", filter: "untracked", selected: new Set() },
 };
 
+const live = {
+  source: null,
+  sessions: new Map(),
+  tickers: new Map(),
+  frame: 0,
+  last: 0,
+};
+
+const TICKER_TAIL = 160;
+const TICKER_RATE_WINDOW = 500;
+const TICKER_MIN_SPAN = 150;
+const TICKER_MAX_SPEED = 6000;
+
 let rootEl = null;
 let viewCtx = null;
 let signature = "";
@@ -79,6 +92,7 @@ export function mount(root, ctx) {
   root.addEventListener("dragend", clearDrag, options);
 
   paint();
+  connectLive();
 
   if (ctx.route.openAdd) {
     replaceRoute("#/models");
@@ -89,6 +103,7 @@ export function mount(root, ctx) {
 }
 
 function destroy() {
+  disconnectLive();
   abort?.abort();
   abort = null;
   closeMenu();
@@ -160,6 +175,7 @@ function paint() {
   signature = railSignature(data);
   eventSignature = eventsSignature(data);
   configSignature = configSignatureNow();
+  syncTickers();
   tickCountdowns(rootEl);
 }
 
@@ -265,8 +281,11 @@ function rowHtml(model, index, data) {
       <span class="rail-rank">${String(index + 1).padStart(2, "0")}</span>
       <span class="rail-track" aria-hidden="true"><i class="rail-node"></i></span>
       <button class="rail-main" type="button" data-action="detail" data-code="${esc(model.code)}">
-        <span class="rail-code">${priceBadge(model)}${esc(model.code)}</span>
-        <span class="rail-meta">${esc(metaLine(model, data))}</span>
+        <span class="rail-text">
+          <span class="rail-code">${priceBadge(model)}${esc(model.code)}</span>
+          <span class="rail-meta">${esc(metaLine(model, data))}</span>
+        </span>
+        <span class="rail-ticker" data-ticker aria-hidden="true"><span class="rail-ticker-track" data-ticker-track></span></span>
       </button>
       <span class="rail-status">
         <span class="rail-status-text" data-tone="${status.tone}" data-status="${esc(model.code)}">${esc(
@@ -434,6 +453,226 @@ function emptyHtml() {
   `;
 }
 
+/* ---------- live output ticker ---------- */
+
+function connectLive() {
+  disconnectLive();
+  if (!rootEl) return;
+
+  let source;
+  try {
+    source = new EventSource("/api/live");
+  } catch {
+    return;
+  }
+  live.source = source;
+
+  const parse = (event) => {
+    try {
+      return JSON.parse(event.data);
+    } catch {
+      return null;
+    }
+  };
+
+  const remember = (session) => {
+    if (!session || typeof session.id !== "number" || session.status !== "streaming") return false;
+    live.sessions.set(session.id, {
+      model: session.model,
+      text: String(session.text || ""),
+    });
+    return true;
+  };
+
+  source.addEventListener("snapshot", (event) => {
+    const data = parse(event);
+    if (!Array.isArray(data?.sessions)) return;
+    live.sessions.clear();
+    for (const session of data.sessions) remember(session);
+    syncTickers();
+  });
+  source.addEventListener("start", (event) => {
+    if (remember(parse(event)?.session)) syncTickers();
+  });
+  source.addEventListener("delta", (event) => {
+    const data = parse(event);
+    if (!data || typeof data.id !== "number" || typeof data.text !== "string") return;
+    const session = live.sessions.get(data.id);
+    if (!session) return;
+    session.text += data.text;
+    syncTickers();
+  });
+  source.addEventListener("done", (event) => {
+    const session = parse(event)?.session;
+    if (!session || typeof session.id !== "number") return;
+    live.sessions.delete(session.id);
+    syncTickers();
+  });
+  source.addEventListener("clear", () => {
+    live.sessions.clear();
+    syncTickers();
+  });
+}
+
+function disconnectLive() {
+  live.source?.close();
+  live.source = null;
+  live.sessions.clear();
+  live.tickers.clear();
+  if (live.frame) window.cancelAnimationFrame(live.frame);
+  live.frame = 0;
+  live.last = 0;
+}
+
+function activeTextByModel() {
+  const latest = new Map();
+  for (const [id, session] of live.sessions) {
+    const current = latest.get(session.model);
+    if (!current || id > current.id) latest.set(session.model, { id, text: session.text });
+  }
+  return latest;
+}
+
+/** 把每个正在流式输出的模型的文字同步到对应行；不重绘整个列表。 */
+function syncTickers() {
+  if (!rootEl) return;
+  const active = activeTextByModel();
+
+  for (const [model, ticker] of live.tickers) {
+    if (active.has(model) && ticker.track.isConnected) continue;
+    ticker.root.closest(".rail-row")?.classList.remove("is-live");
+    ticker.track.replaceChildren();
+    live.tickers.delete(model);
+  }
+
+  for (const [model, session] of active) {
+    const row = rootEl.querySelector(`.rail-row[data-code="${escapeSelector(model)}"]`);
+    const root = row?.querySelector("[data-ticker]");
+    const track = row?.querySelector("[data-ticker-track]");
+    if (!row || !root || !track) continue;
+    row.classList.add("is-live");
+
+    let ticker = live.tickers.get(model);
+    if (!ticker || ticker.track !== track || ticker.sessionId !== session.id) {
+      ticker = { root, track, offset: null, velocity: 0, appended: [], sessionId: session.id, fed: 0 };
+      live.tickers.set(model, ticker);
+    }
+
+    if (reducedMotion()) {
+      renderTickerTail(ticker, session.text);
+      ticker.fed = session.text.length;
+      ticker.track.style.transform = "";
+      continue;
+    }
+
+    if (ticker.offset === null) {
+      renderTickerTail(ticker, session.text);
+      ticker.fed = session.text.length;
+      const first = ticker.track.firstElementChild;
+      ticker.offset = first ? root.clientWidth - first.__tickerWidth : root.clientWidth;
+    } else if (session.text.length > ticker.fed) {
+      const added = session.text.slice(ticker.fed);
+      ticker.fed = session.text.length;
+      appendTickerChunk(ticker, added);
+    }
+
+    ensureTickerFrame();
+  }
+}
+
+function renderTickerTail(ticker, text) {
+  ticker.track.replaceChildren();
+  ticker.appended = [];
+  const flat = flattenTickerText(text);
+  const tail = flat.length > TICKER_TAIL ? flat.slice(-TICKER_TAIL) : flat;
+  if (tail) {
+    const chunk = createTickerChunk(tail);
+    ticker.track.append(chunk);
+    measureTickerChunk(chunk);
+  }
+}
+
+function createTickerChunk(text) {
+  const chunk = document.createElement("span");
+  chunk.className = "rail-ticker-chunk";
+  chunk.textContent = text;
+  return chunk;
+}
+
+function measureTickerChunk(chunk) {
+  chunk.__tickerWidth = chunk.offsetWidth;
+  return chunk.__tickerWidth;
+}
+
+function appendTickerChunk(ticker, raw) {
+  const text = flattenTickerText(raw);
+  if (!text) return;
+  const chunk = createTickerChunk(text);
+  ticker.track.append(chunk);
+  const width = measureTickerChunk(chunk);
+  if (width > 0) {
+    ticker.appended.push({ at: performance.now(), width });
+  }
+}
+
+function flattenTickerText(value) {
+  return String(value || "").replace(/\s+/g, " ");
+}
+
+/** 以最近 0.5 秒实际到达文本的像素宽度推算滚动速度。 */
+function tickerRate(ticker, now) {
+  const cutoff = now - TICKER_RATE_WINDOW;
+  while (ticker.appended.length && ticker.appended[0].at < cutoff) ticker.appended.shift();
+  if (!ticker.appended.length) return 0;
+  const span = Math.min(TICKER_RATE_WINDOW, Math.max(TICKER_MIN_SPAN, now - ticker.appended[0].at));
+  let width = 0;
+  for (const chunk of ticker.appended) width += chunk.width;
+  return Math.min(TICKER_MAX_SPEED, width / (span / 1000));
+}
+
+function trimTicker(ticker) {
+  while (ticker.track.childElementCount > 0) {
+    const first = ticker.track.firstElementChild;
+    const width = first.__tickerWidth || 0;
+    if (ticker.offset + width > 0) return;
+    ticker.offset += width;
+    first.remove();
+  }
+}
+
+function ensureTickerFrame() {
+  if (live.frame || reducedMotion() || live.tickers.size === 0) return;
+  live.last = 0;
+  live.frame = window.requestAnimationFrame(tickTickers);
+}
+
+function tickTickers(now) {
+  live.frame = 0;
+  const elapsed = live.last ? Math.min(0.08, (now - live.last) / 1000) : 0;
+  live.last = now;
+  let running = false;
+  for (const [model, ticker] of live.tickers) {
+    if (!ticker.track.isConnected) {
+      live.tickers.delete(model);
+      continue;
+    }
+    running = true;
+    const target = tickerRate(ticker, now);
+    ticker.velocity += (target - ticker.velocity) * Math.min(1, elapsed * 8);
+    if (ticker.velocity < 1 && target === 0) ticker.velocity = 0;
+    if (ticker.offset === null) ticker.offset = ticker.root.clientWidth;
+    ticker.offset -= ticker.velocity * elapsed;
+    trimTicker(ticker);
+    ticker.track.style.transform = `translateX(${ticker.offset.toFixed(1)}px)`;
+  }
+  if (running) live.frame = window.requestAnimationFrame(tickTickers);
+  else live.last = 0;
+}
+
+function reducedMotion() {
+  return Boolean(window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches);
+}
+
 /* ---------- polling update ---------- */
 
 function railSignature(data) {
@@ -510,6 +749,7 @@ function update() {
           .querySelector(`.rail-row[data-code="${escapeSelector(focusedCode)}"] .rail-main`)
           ?.focus({ preventScroll: true });
       }
+      syncTickers();
     }
 
     const tools = rootEl.querySelector(".rail-tools");
@@ -630,6 +870,7 @@ function refreshBatch() {
   const rail = rootEl?.querySelector("#rail");
   if (rail) rail.innerHTML = store.data.chain.models.map((model, index) => rowHtml(model, index, store.data)).join("");
   refreshTools();
+  syncTickers();
 }
 
 function openRowMenu(anchor, code, ctx) {
