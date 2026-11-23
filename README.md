@@ -101,6 +101,8 @@ CGO_ENABLED=0 GOOS=linux GOARCH=arm64 \
   go build -trimpath -ldflags "-s -w" -o dist/literouter-linux-arm64 .
 ```
 
+Windows 上也可以直接运行仓库根目录的 `build.bat`（构建到当前目录）和 `install.bat`（`go install` 到 `$(go env GOBIN)`，未设置时为 `$(go env GOPATH)\bin`）。
+
 两个平台都是静态单文件（约 13 MiB，已剥离符号），看板与 tzdata 均在二进制内。运行时只需要 `config.json`（不存在会生成）与数据目录。
 
 ### 控制台输出
